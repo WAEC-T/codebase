@@ -1,0 +1,22 @@
+FROM ruby:3.3.0
+
+RUN apt update && apt upgrade -y
+
+ARG PORT=5001
+ARG APP_ENV=production
+ENV APP_ENV=$APP_ENV
+ENV PORT=$PORT
+
+RUN mkdir -p /minitwit-api
+WORKDIR /minitwit-api
+
+COPY Gemfile ./
+COPY Gemfile.lock ./
+
+RUN gem install bundler && bundle install
+
+COPY . ./
+
+EXPOSE $PORT
+
+CMD ["bundle", "exec", "ruby", "simapi/sim_api.rb"]
