@@ -29,6 +29,6 @@ CREATE TABLE IF NOT EXISTS latest(
 INSERT INTO latest (id, value) VALUES (1, -1);
 
 -- TODO: verify the indexes
-CREATE INDEX username_index ON user(username);
+CREATE INDEX username_index ON users(username);
 CREATE INDEX pub_date_index ON messages (pub_date);
 CREATE INDEX author_id_index ON messages (author_id);
