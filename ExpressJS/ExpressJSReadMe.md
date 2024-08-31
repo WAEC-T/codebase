@@ -10,6 +10,7 @@ postgresql
 ## How to run
 #### Local development
 1. Run 'npm install in root folder'
+2. Populate ./utils/.env 
 2. Navigate to /app for web-application-service or /API for the api-service
 3. To run web-app: 'npm start', 
 4. To run API: 'npm run start-api'
