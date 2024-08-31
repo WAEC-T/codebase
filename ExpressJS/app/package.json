@@ -3,7 +3,7 @@
     "version": "0.0.0",
     "private": true,
     "scripts": {
-      "start": "node ./src/bin/www",
+      "start": "node --env-file='../utils/.env' ./src/bin/www",
       "test": "mocha ./src/tests/*.test.js",
       "wdio": "wdio run ./src/ui_tests/conf/wdio.conf.js",
       "browserstack": "wdio run ./src/ui_tests/conf/browserstack.conf.js"
