@@ -105,7 +105,7 @@ get "/msgs" do
 
   return Message
       .unflagged
-      .order(created_at: :desc)
+      .order(pub_date: :desc)
       .first(count)
       .map(&:sim_format)
       .to_json
@@ -120,7 +120,7 @@ get "/msgs/:username" do |username|
 
   return user.messages
       .unflagged
-      .order(created_at: :desc)
+      .order(pub_date: :desc)
       .first(count)
       .map(&:sim_format)
       .to_json

@@ -5,11 +5,11 @@ class Latest < ActiveRecord::Base
 
   class << self
     def set(latest)
-      Latest.first.update!(value: latest)
+      Latest.first.update!(id: latest)
     end
 
     def get
-      Latest.first.value
+      Latest.first.id
     end
   end
 end

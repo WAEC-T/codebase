@@ -4,11 +4,18 @@ require "sinatra/activerecord"
 require "sinatra"
 require "sinatra/flash"
 require "newrelic_rpm"
+require 'dotenv'
+
+Dotenv.load(File.expand_path("../.env.local", __dir__))
+
 Dir["./models/*.rb"].each { |file| require file }
 
 PR_PAGE = 30
 
 DATABASE_URL = ENV.fetch("DATABASE_URL", nil)
+
+puts "Loaded DATABASE_URL: #{DATABASE_URL}"
+
 
 configure :production, :staging do
   db = URI.parse(DATABASE_URL)
@@ -25,32 +32,24 @@ configure :production, :staging do
   enable :sessions
 end
 
-configure :development do
-  set :database, { adapter: "postgresql", database: "minitwit_development" }
-  set :public_folder, "#{__dir__}/static"
-  ActiveRecord.verbose_query_logs = true
-  enable :sessions
-end
 
-configure :test do
+configure :development, :test do
   if DATABASE_URL
-    db = URI.parse(DATABASE_URL)
-    set :database, {
-      adapter: db.scheme,
-      host: db.host,
-      port: db.port,
-      database: db.path[1..],
-      user: db.user,
-      password: db.password,
-      encoding: "utf8",
-    }
+    set :database, DATABASE_URL
   else
-    set :database, { adapter: "postgresql", database: "minitwit_test" }
+    # Fall back to specific configurations for development and test environments
+    case settings.environment
+    when :development
+      set :database, { adapter: "postgresql", database: "waect" }
+      ActiveRecord.verbose_query_logs = true
+    when :test
+      set :database, { adapter: "postgresql", database: "minitwit_test" }
+      enable :logging
+      ActiveRecord::Base.logger = Logger.new($stdout)
+    end
   end
-  enable :sessions
-  enable :logging
-  ActiveRecord::Base.logger = Logger.new($stdout)
   set :public_folder, "#{__dir__}/static"
+  enable :sessions
 end
 
 helpers do
@@ -72,7 +71,7 @@ get "/" do
     .unflagged
     .authored_by(current_user.following + [current_user])
     .includes(:author)
-    .order(created_at: :desc)
+    .order(pub_date: :desc)
     .first(PR_PAGE)
 
   erb :timeline, layout: :layout
@@ -82,7 +81,7 @@ get "/public" do
   @messages = Message
     .unflagged
     .includes(:author)
-    .order(created_at: :desc)
+    .order(pub_date: :desc)
     .first(PR_PAGE)
 
   erb :timeline, layout: :layout
@@ -158,7 +157,7 @@ get "/:username" do
     .unflagged
     .authored_by(@profile_user)
     .includes(:author)
-    .order(created_at: :desc)
+    .order(pub_date: :desc)
     .first(PR_PAGE)
 
   erb :timeline, layout: :layout
