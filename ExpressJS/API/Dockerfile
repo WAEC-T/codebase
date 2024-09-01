@@ -3,10 +3,11 @@ FROM node:slim
 WORKDIR /express-docker
 
 COPY package.json ./
+COPY ../../.env.local ../
 
 RUN npm install
 
-COPY . .
+COPY ../API .
 
 # Exposing server port
 EXPOSE 5001

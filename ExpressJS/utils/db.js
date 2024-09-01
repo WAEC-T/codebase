@@ -2,21 +2,16 @@ const fs = require('fs');
 const { Pool } = require('pg');
 
 // Import the sequlize functionality
-const { Users, Messages, Followers } = require('./sequilize');
-const { Sequelize } = require('sequelize');
+const { Users } = require('./sequilize');
 
 
 // PostgreSQL
 let pool = new Pool();
 const SCHEMA_FILE_PATH = 'src/utils/schema_postgres.sql';
-const dbConnectionType = process.env.DB_CONNECTION_TYPE;
+const dbConnectionType = 'dev_db';
 if (dbConnectionType === 'dev_db') {
   pool = new Pool({
-    user: process.env.POSTGRES_USER,
-    host: process.env.POSTGRES_HOST,
-    database: process.env.POSTGRES_DB,
-    password: process.env.POSTGRES_PASSWORD,
-    port: process.env.POSTGRES_PORT,
+    connectionString: process.env.DATABASE_URL
   });
 
 } else if (dbConnectionType === 'prod') {
@@ -81,13 +76,13 @@ const execute = async (sql, params = []) => {
 };
 
 const get_user_id = async (username) => {
-    const user = await Users.findOne({
-        attributes: ['user_id'],
-        where: {
-          username: username
-        }
-      });
-    return user ? user.user_id : null;
+  const user = await Users.findOne({
+    attributes: ['user_id'],
+    where: {
+      username: username
+    }
+  });
+  return user ? user.user_id : null;
 };
 
 module.exports = { pool, init_DB, query, execute, get_user_id };

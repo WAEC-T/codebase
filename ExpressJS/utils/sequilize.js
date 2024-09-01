@@ -1,24 +1,22 @@
-require('dotenv').config({ path: './utils/dev.env' });
+require('dotenv').config({ path: '../.env.local' });
 const fs = require('fs');
-const { Sequelize, Op, Model, DataTypes } = require('sequelize');
+const { Sequelize, Op, DataTypes } = require('sequelize');
 
 
-const dbConnectionType = process.env.DB_CONNECTION_TYPE;
-console.log('POSTGRES_USER:', process.env.POSTGRES_USER);
-console.log('POSTGRES_PASSWORD:', process.env.POSTGRES_PASSWORD);
-console.log('POSTGRES_HOST:', process.env.POSTGRES_HOST);
-console.log('POSTGRES_PORT:', process.env.POSTGRES_PORT);
-console.log('DB_CONNECTION_TYPE:', process.env.DB_CONNECTION_TYPE);
+const dbConnectionType = 'dev_db';
+const databaseUrl = process.env.DATABASE_URL;
+if (!databaseUrl) {
+  throw new Error('DATABASE_URL environment variable is not defined');
+}
+
 
 let sequelize;
 if (dbConnectionType === 'dev_db') {
   sequelize = new Sequelize(
-    `postgres://${process.env.POSTGRES_USER}:${process.env.POSTGRES_PASSWORD}@${process.env.POSTGRES_HOST}:${process.env.POSTGRES_PORT}/waect`,
-    { // Sequlieze connection for postgres
+    databaseUrl,
+    { // Sequelize connection for postgres
       logging: console.log
-  });
-  console.log(`postgres://${process.env.POSTGRES_USER}:${process.env.POSTGRES_PASSWORD}@${process.env.POSTGRES_HOST}:${process.env.POSTGRES_PORT}/waect`)
-
+    });
 } else if (dbConnectionType === 'prod') {
 
   const ca_file = fs.readFileSync('/express-docker/secrets/ca-certificate.crt');
@@ -159,11 +157,11 @@ async function testDatabase() {
 
 const get_user_id = async (username) => {
   const user = await Users.findOne({
-      attributes: ['user_id'],
-      where: {
-        username: username
-      }
-    });
+    attributes: ['user_id'],
+    where: {
+      username: username
+    }
+  });
   return user ? user.user_id : null;
 };
 

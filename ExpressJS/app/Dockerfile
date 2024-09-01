@@ -4,11 +4,12 @@ WORKDIR /express-docker
 
 ENV RUN_TYPE=dev
 
-COPY package.json ./
+COPY ../package.json ./
+COPY ../../.env.local ../
 
 RUN npm install
 
-COPY . .
+COPY ../app .
 
 # Exposing server port
 EXPOSE 5000

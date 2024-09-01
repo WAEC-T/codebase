@@ -13,7 +13,6 @@ const MD5 = require('crypto-js/md5');
 
 // Import the sequlize functionality
 const { Users, Messages, Followers, get_user_id } = require('../../utils/sequilize');
-const { Sequelize } = require('sequelize');
 
 // Configuration
 const PER_PAGE = 30;
@@ -105,13 +104,13 @@ app.get('/', async (req, res) => {
       user[Users.user_id] = Users;
       return user;
     }, {});
-   messages.forEach(msg => {
+    messages.forEach(msg => {
       msg.user_id = usersMap[msg.author_id].user_id;
       msg.username = usersMap[msg.author_id].username;
       msg.email = usersMap[msg.author_id].email;
     });
 
-    res.render('timeline.ejs', { user: req.session.user, messages, title: 'My Timeline', flashes: req.flash('success'), endpoint: 'user_timline' });
+    res.render('timeline.ejs', { user: req.session.user, messages, title: 'My Timeline', flashes: req.flash('success'), endpoint: 'user_timeline' });
   } catch (error) {
     console.error('Error: ', error);
     res.status(500).send('Internal Server Error');
@@ -126,7 +125,7 @@ app.get('/public', async (req, res) => {
       limit: PER_PAGE,
       raw: true
     });
-
+    console.log("trying messages", messages);
     // Fetch user details to add to each message
     const user_ids = messages.map(msg => msg.author_id);
     const users = await Users.findAll({
@@ -137,10 +136,13 @@ app.get('/public', async (req, res) => {
       raw: true
     });
 
+    console.log("trying users", users);
+
     const usersMap = users.reduce((userMap, user) => {
       userMap[user.user_id] = user;
       return userMap;
     }, {});
+    console.log("trying usersMap", usersMap);
 
     // Add user details to each message
     messages.forEach(msg => {
@@ -148,13 +150,17 @@ app.get('/public', async (req, res) => {
       msg.email = usersMap[msg.author_id].email;
     });
 
+    console.log("trying messages 2", messages);
+
+    console.log('ok until here!!!!!!')
     // Render the timeline with all messages
-    res.render('timeline.ejs', { 
-      user: req.session.user, 
-      messages: messages, 
-      title: 'Public Timeline', 
-      flashes: req.flash('success'), 
-      endpoint: '' 
+    res.render('timeline.ejs', {
+      user: req.session.user,
+      messages: messages,
+      title: 'Public Timeline',
+      flashes: req.flash('success') || [],
+      endpoint: '',
+      error: null
     });
   } catch (error) {
     console.error('Error:', error);
@@ -325,7 +331,7 @@ app.get('/:username', async (req, res) => {
     res.render('timeline.ejs', {
       messages: messages,
       followed: followed,
-      user: req.session.user, 
+      user: req.session.user,
       profile_user: profile_user,
       title: profile_user.username + "'s Timeline",
       flashes: req.flash('success'),
