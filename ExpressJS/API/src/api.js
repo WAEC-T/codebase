@@ -1,7 +1,6 @@
 const createError = require('http-errors');
 const express = require('express');
 const fs = require('fs');
-const { pool, init_DB, query, execute } = require('../../utils/db');
 const bcrypt = require('bcrypt');
 
 // Configuration

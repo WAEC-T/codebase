@@ -3,11 +3,11 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "node ./app/src/bin/www",
+    "start": "node --env-file='../.env' ./app/src/bin/www",
     "test": "mocha ./src/tests/*.test.js",
     "wdio": "wdio run ./src/ui_tests/conf/wdio.conf.js",
     "browserstack": "wdio run ./src/ui_tests/conf/browserstack.conf.js",
-    "start-api": "node ./API/src/api.js"
+    "start-api": "node --env-file='../.env' ./API/src/api.js"
   },
   "dependencies": {
     "bcrypt": "^5.1.1",

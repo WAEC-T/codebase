@@ -13,7 +13,6 @@ const MD5 = require('crypto-js/md5');
 
 // Import the sequlize functionality
 const { Users, Messages, Followers, get_user_id } = require('../../utils/sequilize');
-const { Sequelize } = require('sequelize');
 
 // Configuration
 const PER_PAGE = 30;
