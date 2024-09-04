@@ -1,4 +1,3 @@
-require('dotenv').config({ path: './utils/dev.env' });
 const fs = require('fs');
 const { Sequelize, Op, Model, DataTypes } = require('sequelize');
 
