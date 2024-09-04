@@ -6,7 +6,7 @@ const dbConnectionType = process.env.DB_CONNECTION_TYPE;
 let sequelize;
 if (dbConnectionType === 'dev_db') {
   sequelize = new Sequelize('waect', 'user', 'pass', {
-    host: 'local_database',
+    host: 'localhost',
     post: 5432,
     dialect: 'postgres'
   });
