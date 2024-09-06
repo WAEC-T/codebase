@@ -107,7 +107,6 @@ app.get('/msgs/:username', async (req, res) => {
         }
     });
 
-
     // Refactored using Sequelize
     const messages = await Messages.findAll({
         attributes: ['message_id', 'author_id', 'text', 'pub_date'],
@@ -124,13 +123,13 @@ app.get('/msgs/:username', async (req, res) => {
         raw: true
     });
 
-    const filtered_msgs = messages.map(msg => ({
+/*     const filtered_msgs = messages.map(msg => ({
         content: msg.text,
         pub_date: msg.pub_date,
         user: msg['User.username']
-    }));
+    })); */
 
-    res.json(filtered_msgs);
+    res.json(messages);
 });
 
 // ------------ Route to post a Messages by a given user --------------
@@ -151,6 +150,9 @@ app.post('/msgs/:username', async (req, res) => {
             username: username
         }
     });
+
+    console.log("user: ", user);
+    
     const newMessage = await Messages.create({
         author_id: user.user_id,
         text: content,

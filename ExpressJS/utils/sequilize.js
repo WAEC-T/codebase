@@ -6,7 +6,7 @@ const dbConnectionType = process.env.DB_CONNECTION_TYPE;
 let sequelize;
 if (dbConnectionType === 'dev_db') {
   sequelize = new Sequelize('waect', 'user', 'pass', {
-    host: 'localhost',
+    host: '172.12.20.90', //Temporary solution: run 'ipconfig getifaddr en0' and use that IP
     post: 5432,
     dialect: 'postgres'
   });
