@@ -1,0 +1,83 @@
+is_global = true
+build_property.TargetFramework = net8.0
+build_property.TargetPlatformMinVersion = 
+build_property.UsingMicrosoftNETSdkWeb = true
+build_property.ProjectTypeGuids = 
+build_property.InvariantGlobalization = 
+build_property.PlatformNeutralAssembly = 
+build_property.EnforceExtendedAnalyzerRules = 
+build_property._SupportedPlatformList = Linux,macOS,Windows
+build_property.RootNamespace = ITU-minitwit
+build_property.RootNamespace = ITU-minitwit
+build_property.ProjectDir = /Users/simonharwick/Desktop/IT_University_Kopenhagen/02_Semesters/05_AS2425/Thesis/Codebase/codebase/c-sharp-razor/src/Minitwit.Web/
+build_property.EnableComHosting = 
+build_property.EnableGeneratedComInterfaceComImportInterop = 
+build_property.RazorLangVersion = 8.0
+build_property.SupportLocalizedComponentNames = 
+build_property.GenerateRazorMetadataSourceChecksumAttributes = 
+build_property.MSBuildProjectDirectory = /Users/simonharwick/Desktop/IT_University_Kopenhagen/02_Semesters/05_AS2425/Thesis/Codebase/codebase/c-sharp-razor/src/Minitwit.Web
+build_property._RazorSourceGeneratorDebug = 
+
+[/Users/simonharwick/Desktop/IT_University_Kopenhagen/02_Semesters/05_AS2425/Thesis/Codebase/codebase/c-sharp-razor/src/Minitwit.Web/Areas/Identity/Pages/Account/AboutMe.cshtml]
+build_metadata.AdditionalFiles.TargetPath = QXJlYXMvSWRlbnRpdHkvUGFnZXMvQWNjb3VudC9BYm91dE1lLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/simonharwick/Desktop/IT_University_Kopenhagen/02_Semesters/05_AS2425/Thesis/Codebase/codebase/c-sharp-razor/src/Minitwit.Web/Areas/Identity/Pages/Account/Login.cshtml]
+build_metadata.AdditionalFiles.TargetPath = QXJlYXMvSWRlbnRpdHkvUGFnZXMvQWNjb3VudC9Mb2dpbi5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/simonharwick/Desktop/IT_University_Kopenhagen/02_Semesters/05_AS2425/Thesis/Codebase/codebase/c-sharp-razor/src/Minitwit.Web/Areas/Identity/Pages/Account/Logout.cshtml]
+build_metadata.AdditionalFiles.TargetPath = QXJlYXMvSWRlbnRpdHkvUGFnZXMvQWNjb3VudC9Mb2dvdXQuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/simonharwick/Desktop/IT_University_Kopenhagen/02_Semesters/05_AS2425/Thesis/Codebase/codebase/c-sharp-razor/src/Minitwit.Web/Areas/Identity/Pages/Account/Register.cshtml]
+build_metadata.AdditionalFiles.TargetPath = QXJlYXMvSWRlbnRpdHkvUGFnZXMvQWNjb3VudC9SZWdpc3Rlci5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/simonharwick/Desktop/IT_University_Kopenhagen/02_Semesters/05_AS2425/Thesis/Codebase/codebase/c-sharp-razor/src/Minitwit.Web/Areas/Identity/Pages/Account/RegisterConfirmation.cshtml]
+build_metadata.AdditionalFiles.TargetPath = QXJlYXMvSWRlbnRpdHkvUGFnZXMvQWNjb3VudC9SZWdpc3RlckNvbmZpcm1hdGlvbi5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/simonharwick/Desktop/IT_University_Kopenhagen/02_Semesters/05_AS2425/Thesis/Codebase/codebase/c-sharp-razor/src/Minitwit.Web/Areas/Identity/Pages/Account/_ViewImports.cshtml]
+build_metadata.AdditionalFiles.TargetPath = QXJlYXMvSWRlbnRpdHkvUGFnZXMvQWNjb3VudC9fVmlld0ltcG9ydHMuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/simonharwick/Desktop/IT_University_Kopenhagen/02_Semesters/05_AS2425/Thesis/Codebase/codebase/c-sharp-razor/src/Minitwit.Web/Areas/Identity/Pages/_ValidationScriptsPartial.cshtml]
+build_metadata.AdditionalFiles.TargetPath = QXJlYXMvSWRlbnRpdHkvUGFnZXMvX1ZhbGlkYXRpb25TY3JpcHRzUGFydGlhbC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/simonharwick/Desktop/IT_University_Kopenhagen/02_Semesters/05_AS2425/Thesis/Codebase/codebase/c-sharp-razor/src/Minitwit.Web/Areas/Identity/Pages/_ViewImports.cshtml]
+build_metadata.AdditionalFiles.TargetPath = QXJlYXMvSWRlbnRpdHkvUGFnZXMvX1ZpZXdJbXBvcnRzLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/simonharwick/Desktop/IT_University_Kopenhagen/02_Semesters/05_AS2425/Thesis/Codebase/codebase/c-sharp-razor/src/Minitwit.Web/Areas/Identity/Pages/_ViewStart.cshtml]
+build_metadata.AdditionalFiles.TargetPath = QXJlYXMvSWRlbnRpdHkvUGFnZXMvX1ZpZXdTdGFydC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/simonharwick/Desktop/IT_University_Kopenhagen/02_Semesters/05_AS2425/Thesis/Codebase/codebase/c-sharp-razor/src/Minitwit.Web/Pages/Public.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXMvUHVibGljLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/simonharwick/Desktop/IT_University_Kopenhagen/02_Semesters/05_AS2425/Thesis/Codebase/codebase/c-sharp-razor/src/Minitwit.Web/Pages/Shared/_CheepBox.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXMvU2hhcmVkL19DaGVlcEJveC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/simonharwick/Desktop/IT_University_Kopenhagen/02_Semesters/05_AS2425/Thesis/Codebase/codebase/c-sharp-razor/src/Minitwit.Web/Pages/Shared/_CheepList.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXMvU2hhcmVkL19DaGVlcExpc3QuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/simonharwick/Desktop/IT_University_Kopenhagen/02_Semesters/05_AS2425/Thesis/Codebase/codebase/c-sharp-razor/src/Minitwit.Web/Pages/Shared/_Layout.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXMvU2hhcmVkL19MYXlvdXQuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/simonharwick/Desktop/IT_University_Kopenhagen/02_Semesters/05_AS2425/Thesis/Codebase/codebase/c-sharp-razor/src/Minitwit.Web/Pages/UserTimeline.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXMvVXNlclRpbWVsaW5lLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/simonharwick/Desktop/IT_University_Kopenhagen/02_Semesters/05_AS2425/Thesis/Codebase/codebase/c-sharp-razor/src/Minitwit.Web/Pages/_ViewImports.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXMvX1ZpZXdJbXBvcnRzLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/simonharwick/Desktop/IT_University_Kopenhagen/02_Semesters/05_AS2425/Thesis/Codebase/codebase/c-sharp-razor/src/Minitwit.Web/Pages/_ViewStart.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXMvX1ZpZXdTdGFydC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
