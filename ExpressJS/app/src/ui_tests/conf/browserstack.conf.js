@@ -35,7 +35,6 @@ const parallelConfig = {
         projectName: "MiniTwit",
         networkLogs: "true",
         consoleLogs: "info",
-        networkLogs: true,
       }
     },
     maxInstances: 10

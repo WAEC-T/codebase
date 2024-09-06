@@ -17,8 +17,6 @@ fs.unlink("./latest_processed_sim_action_id.txt", (err) => {
     }
 });
 
-//init_DB();
-
 // Create our little application :)
 const app = express();
 
@@ -152,8 +150,8 @@ app.post('/msgs/:username', async (req, res) => {
     });
 
     console.log("user: ", user);
-    
-    const newMessage = await Messages.create({
+
+    await Messages.create({
         author_id: user.user_id,
         text: content,
         pub_date: Math.floor(Date.now() / 1000),

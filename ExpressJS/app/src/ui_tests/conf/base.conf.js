@@ -9,7 +9,7 @@ exports.config = {
     logLevel: 'info',
     coloredLogs: true,
     screenshotPath: './errorShots/',
-    baseUrl: 'http://178.62.218.96:5000',
+    baseUrl: 'https://178.62.218.96:5000',
     waitforTimeout: 10000,
     connectionRetryTimeout: 120000,
     connectionRetryCount: 3,
