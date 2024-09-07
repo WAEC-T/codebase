@@ -129,8 +129,8 @@ end
 
 get "/logout" do
   session[:user_id] = nil
-
-  "You were logged out"
+  flash[:success] = "You were logged out"
+  redirect("/")
 end
 
 post "/add_message" do

@@ -18,8 +18,8 @@ CREATE TABLE IF NOT EXISTS messages (
   author_id INTEGER NOT NULL,
   text TEXT NOT NULL,
   pub_date TEXT,
-  flagged INTEGER
-  FOREIGN KEY (author_id) REFERENCES users (user_id),
+  flagged INTEGER,
+  FOREIGN KEY (author_id) REFERENCES users (user_id)
 );
 
 CREATE TABLE IF NOT EXISTS latest(
