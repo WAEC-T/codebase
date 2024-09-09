@@ -1,0 +1,15 @@
+services:
+  app:
+    build:
+      context: .
+      shm_size: "128m"
+    container_name: mini-x
+    networks:
+      - main
+    ports:
+      - "5000:5000"
+      - "5001:5001"
+    env_file:
+      - ../.env.local
+    # environment:
+    #   - DATABASE_URL=postgresql://user:pass@localhost:5432/waect
