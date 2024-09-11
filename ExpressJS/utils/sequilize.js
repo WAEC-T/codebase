@@ -3,13 +3,20 @@ const { Sequelize, Op, Model, DataTypes } = require('sequelize');
 
 const dbConnectionType = process.env.DB_CONNECTION_TYPE;
 
+const databaseUrl = process.env.DATABASE_URL;
+if (!databaseUrl) {
+  throw new Error('DATABASE_URL environment variable is not defined');
+}
+
+
 let sequelize;
 if (dbConnectionType === 'dev_db') {
-  sequelize = new Sequelize('waect', 'user', 'pass', {
-    host: '172.12.20.90', //Temporary solution: run 'ipconfig getifaddr en0' and use that IP
-    post: 5432,
-    dialect: 'postgres'
+
+  sequelize = new Sequelize(databaseUrl, 
+    { // Sequelize connection for postgres
+      logging: console.log
   });
+ 
 } else if (dbConnectionType === 'prod') {
 
   const ca_file = fs.readFileSync('/express-docker/secrets/ca-certificate.crt');
