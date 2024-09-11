@@ -4,7 +4,7 @@ namespace Minitwit.Core.Repository;
 
 public interface IFollowRepository
 {
-    public Task<Follow> CreateFollowAsync(Guid followingAuthorId, Guid followedAuthorId);
+    public Task<Follow> CreateFollowAsync(int followingAuthorId, int followedAuthorId);
     public Task DeleteFollowAsync(Follow follow);
-    public Task<bool> IsFollowingAsync(Guid followingUserId, Guid followedAuthorId);
+    public Task<bool> IsFollowingAsync(int followingUserId, int followedAuthorId);
 }

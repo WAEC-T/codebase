@@ -9,9 +9,9 @@ public interface ICheepService
 {
     public Task<ICollection<CheepViewModel>> GetCheepsAsync(int page);
     public Task<ICollection<CheepViewModel>> GetCheepsFromAuthor(string authorName, int page);
-    public Task<ICollection<CheepViewModel>> GetCheepsFromAuthorAsync(Guid authorId, int page);
+    public Task<ICollection<CheepViewModel>> GetCheepsFromAuthorAsync(int authorId, int page);
     public Task<ICollection<CheepViewModel>> GetCheepsFromAuthorAndFollowingAsync(
-        Guid authorId,
+        int authorId,
         int page
     );
 }
@@ -71,7 +71,7 @@ public class MinitwitService : ICheepService
         return cheeps;
     }
 
-    public async Task<ICollection<CheepViewModel>> GetCheepsFromAuthorAsync(Guid id, int page)
+    public async Task<ICollection<CheepViewModel>> GetCheepsFromAuthorAsync(int id, int page)
     {
         ICollection<Cheep> cheepDtos = await _authorRepository.GetCheepsByAuthor(id, page);
         ICollection<CheepViewModel> cheeps = new List<CheepViewModel>();
@@ -96,7 +96,7 @@ public class MinitwitService : ICheepService
     }
 
     public async Task<ICollection<CheepViewModel>> GetCheepsFromAuthorAndFollowingAsync(
-        Guid authorId,
+        int authorId,
         int page
     )
     {

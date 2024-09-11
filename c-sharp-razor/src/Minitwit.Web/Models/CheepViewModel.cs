@@ -3,7 +3,7 @@
 namespace Minitwit.Web.Models;
 
 public record CheepViewModel(
-    Guid CheepId,
+    int CheepId,
     UserModel User,
     string Message,
     string Timestamp,

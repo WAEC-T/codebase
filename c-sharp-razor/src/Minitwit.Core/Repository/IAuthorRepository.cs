@@ -7,33 +7,33 @@ public interface IAuthorRepository
     public void AddAuthorAsync(Author authorDto);
 
     public Task<ICollection<Author>> GetAllAuthorsAsync();
-    public Task<ICollection<Author>> GetAuthorsByIdAsync(IEnumerable<Guid> authors);
-    public Task<Author?> GetAuthorByIdAsync(Guid authorId);
+    public Task<ICollection<Author>> GetAuthorsByIdAsync(IEnumerable<int> authors);
+    public Task<Author?> GetAuthorByIdAsync(int authorId);
     public Task<Author> GetAuthorByNameAsync(string name);
     public Task<Author> GetAuthorByEmail(string email);
 
-    public Task<ICollection<Cheep>> GetCheepsByAuthorAsync(Guid id);
-    public Task<ICollection<Cheep>> GetCheepsByAuthor(Guid authorId, int page);
-    public Task<ICollection<Cheep>> GetCheepsByAuthorAndFollowing(Guid authorId, int page);
+    public Task<ICollection<Cheep>> GetCheepsByAuthorAsync(int id);
+    public Task<ICollection<Cheep>> GetCheepsByAuthor(int authorId, int page);
+    public Task<ICollection<Cheep>> GetCheepsByAuthorAndFollowing(int authorId, int page);
 
-    public Task<int> GetCheepCountByAuthorAsync(Guid authorId);
-    public Task<int> GetCheepCountByAuthorAndFollowing(Guid authorId);
+    public Task<int> GetCheepCountByAuthorAsync(int authorId);
+    public Task<int> GetCheepCountByAuthorAndFollowing(int authorId);
 
-    public Task<int> GetPageCountByAuthor(Guid authorId);
-    public Task<int> GetPageCountByAuthorAndFollowing(Guid authorId);
+    public Task<int> GetPageCountByAuthor(int authorId);
+    public Task<int> GetPageCountByAuthorAndFollowing(int authorId);
 
-    public Task<ICollection<Author>> GetFollowersByIdAsync(Guid authorId);
-    public Task<ICollection<Author>> GetFollowingByIdAsync(Guid authorId);
+    public Task<ICollection<Author>> GetFollowersByIdAsync(int authorId);
+    public Task<ICollection<Author>> GetFollowingByIdAsync(int authorId);
 
-    public Task AddFollowAsync(Guid followingAuthorId, Guid followedAuthorId);
-    public Task RemoveFollowAsync(Guid followingAuthorId, Guid followedAuthorId);
+    public Task AddFollowAsync(int followingAuthorId, int followedAuthorId);
+    public Task RemoveFollowAsync(int followingAuthorId, int followedAuthorId);
 
-    public Task DeleteCheepsByAuthorIdAsync(Guid authorId);
+    public Task DeleteCheepsByAuthorIdAsync(int authorId);
 
-    public Task RemoveAllFollowersByAuthorIdAsync(Guid id);
+    public Task RemoveAllFollowersByAuthorIdAsync(int id);
 
-    public Task RemoveUserByIdAsync(Guid id);
+    public Task RemoveUserByIdAsync(int id);
 
-    public Task RemoveReactionsByAuthorIdAsync(Guid id);
+    public Task RemoveReactionsByAuthorIdAsync(int id);
     public Task SaveContextAsync();
 }

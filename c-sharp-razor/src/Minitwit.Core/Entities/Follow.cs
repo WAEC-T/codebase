@@ -14,8 +14,8 @@ namespace Minitwit.Core.Entities;
 public class Follow
 {
     [Required]
-    public Guid FollowingAuthorId { get; set; }
+    public int FollowingAuthorId { get; set; }
 
     [Required]
-    public Guid FollowedAuthorId { get; set; }
+    public int FollowedAuthorId { get; set; }
 }

@@ -14,10 +14,10 @@ namespace Minitwit.Core.Entities;
 public class Cheep
 {
     [Required]
-    public Guid CheepId { get; set; }
+    public int CheepId { get; set; }
 
     [Required]
-    public Guid AuthorId { get; set; }
+    public int AuthorId { get; set; }
 
     [StringLength(160, MinimumLength = 5)]
     [Required]

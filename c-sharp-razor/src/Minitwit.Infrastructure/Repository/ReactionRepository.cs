@@ -8,9 +8,9 @@ public class ReactionRepository(MinitwitDbContext dbContext)
     : BaseRepository(dbContext),
         IReactionRepository
 {
-    public async Task AddReaction(ReactionType reaction, Guid cheepId, Guid authorId)
+    public async Task AddReaction(ReactionType reaction, int cheepId, int authorId)
     {
-        if (cheepId != Guid.Empty && authorId != Guid.Empty)
+        if (cheepId != 0 && authorId != 0)
         {
             Reaction entity = new Reaction()
             {
@@ -28,12 +28,12 @@ public class ReactionRepository(MinitwitDbContext dbContext)
         }
     }
 
-    public async Task<ICollection<Reaction>> GetReactionsFromCheepIdAsync(Guid id)
+    public async Task<ICollection<Reaction>> GetReactionsFromCheepIdAsync(int id)
     {
         return await db.Reactions.Where(r => r.CheepId == id).ToListAsync();
     }
 
-    public async Task RemoveReaction(ReactionType reaction, Guid cheepId, Guid authorId)
+    public async Task RemoveReaction(ReactionType reaction, int cheepId, int authorId)
     {
         Reaction? entity = await db.Reactions.FindAsync(cheepId, authorId);
         if (entity != null)
@@ -43,7 +43,7 @@ public class ReactionRepository(MinitwitDbContext dbContext)
         }
     }
 
-    public async Task<int> GetReactionCount(Guid cheepId, ReactionType reactionType)
+    public async Task<int> GetReactionCount(int cheepId, ReactionType reactionType)
     {
         Cheep? cheep = await db.Cheeps.FindAsync(cheepId);
         int count = 0;
@@ -60,7 +60,7 @@ public class ReactionRepository(MinitwitDbContext dbContext)
         return count;
     }
 
-    public async Task<bool> HasUserReactedAsync(Guid cheepId, Guid authorId)
+    public async Task<bool> HasUserReactedAsync(int cheepId, int authorId)
     {
         //check if the user has reacted to the cheep
         return await db.Reactions.AnyAsync(r => r.CheepId == cheepId && r.AuthorId == authorId);
