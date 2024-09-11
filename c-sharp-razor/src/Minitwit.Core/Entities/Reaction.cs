@@ -7,9 +7,9 @@
 /// </summary>
 public class Reaction
 {
-    public Guid CheepId { get; set; }
+    public int CheepId { get; set; }
 
-    public Guid AuthorId { get; set; }
+    public int AuthorId { get; set; }
 
     public ReactionType ReactionType { get; set; }
 }

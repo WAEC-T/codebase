@@ -194,7 +194,7 @@ public class ApiController : ControllerBase
             }
 
             Author author = await _authorRepository.GetAuthorByNameAsync(username);
-            Guid authorId = author.Id;
+            int authorId = author.Id;
             ICollection<Cheep> cheeps = await _cheepRepository.GetCheepsFromAuthorByCountAsync(
                 authorId,
                 no

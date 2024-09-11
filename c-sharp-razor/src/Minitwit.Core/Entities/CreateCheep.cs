@@ -1,7 +1,7 @@
 namespace Minitwit.Core.Entities;
 
-public record CreateCheep(Guid AuthorId, string Text)
+public record CreateCheep(int AuthorId, string Text)
 {
-    public readonly Guid AuthorId = AuthorId;
+    public readonly int AuthorId = AuthorId;
     public readonly string Text = Text;
 }

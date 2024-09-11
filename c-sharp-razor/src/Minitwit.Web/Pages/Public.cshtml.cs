@@ -84,7 +84,7 @@ public class PublicModel : PageModel
     }
 
     public async Task<IActionResult> OnPostReaction(
-        Guid cheepId,
+        int cheepId,
         ReactionType reactionType,
         int currentPage
     )
@@ -98,7 +98,7 @@ public class PublicModel : PageModel
     }
 
     public async Task<IActionResult> OnPostRemoveReaction(
-        Guid cheepId,
+        int cheepId,
         ReactionType reactionType,
         int currentPage
     )
@@ -111,7 +111,7 @@ public class PublicModel : PageModel
         return Page();
     }
 
-    public async Task<IActionResult> OnPostFollow(int currentPage, Guid Author2Follow)
+    public async Task<IActionResult> OnPostFollow(int currentPage, int Author2Follow)
     {
         Author? author = await _authorRepository.GetAuthorByIdAsync(
             _userManager.GetUserAsync(User).Result!.Id
@@ -127,7 +127,7 @@ public class PublicModel : PageModel
         return Page();
     }
 
-    public async Task<IActionResult> OnPostUnfollow(int currentPage, Guid Author2Unfollow)
+    public async Task<IActionResult> OnPostUnfollow(int currentPage, int Author2Unfollow)
     {
         Author? author = await _authorRepository.GetAuthorByIdAsync(
             _userManager.GetUserAsync(User).Result!.Id

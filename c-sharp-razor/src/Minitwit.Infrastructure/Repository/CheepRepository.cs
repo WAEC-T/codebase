@@ -32,7 +32,7 @@ public class CheepRepository : BaseRepository, ICheepRepository
         return cheeps;
     }
 
-    public async Task<ICollection<Cheep>> GetCheepsFromAuthorByCountAsync(Guid authorId, int count)
+    public async Task<ICollection<Cheep>> GetCheepsFromAuthorByCountAsync(int authorId, int count)
     {
         //Use EF to get the specified count of cheeps from an author from the database
         ICollection<Cheep> cheeps = await db
@@ -55,7 +55,7 @@ public class CheepRepository : BaseRepository, ICheepRepository
         return await GetCheepCountAsync() / PageSize + 1;
     }
 
-    public async Task DeleteCheepByIdAsync(Guid cheepId)
+    public async Task DeleteCheepByIdAsync(int cheepId)
     {
         //Delete the specified cheep from the database
         Cheep? cheep = await db.Cheeps.FindAsync(cheepId);
@@ -82,7 +82,7 @@ public class CheepRepository : BaseRepository, ICheepRepository
     {
         Cheep entity = new Cheep()
         {
-            CheepId = new Guid(),
+            CheepId = new int(),
             Text = cheep.Text,
             TimeStamp = DateTime.Now,
             AuthorId = cheep.AuthorId

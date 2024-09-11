@@ -9,7 +9,7 @@ public class FollowRepository : BaseRepository, IFollowRepository
     public FollowRepository(MinitwitDbContext minitwitDbContext)
         : base(minitwitDbContext) { }
 
-    public async Task<Follow> CreateFollowAsync(Guid followingAuthorId, Guid followedAuthorId)
+    public async Task<Follow> CreateFollowAsync(int followingAuthorId, int followedAuthorId)
     {
         Follow follow =
             new() { FollowingAuthorId = followingAuthorId, FollowedAuthorId = followedAuthorId };
@@ -24,9 +24,9 @@ public class FollowRepository : BaseRepository, IFollowRepository
         await db.SaveChangesAsync();
     }
 
-    public async Task<bool> IsFollowingAsync(Guid followingUserId, Guid followedUserId)
+    public async Task<bool> IsFollowingAsync(int followingUserId, int followedUserId)
     {
-        if (followingUserId == Guid.Empty || followedUserId == Guid.Empty)
+        if (followingUserId == 0|| followedUserId == 0)
             return false;
 
         bool isFollowing = await db.Follows.AnyAsync(f =>
@@ -36,7 +36,7 @@ public class FollowRepository : BaseRepository, IFollowRepository
         return isFollowing;
     }
 
-    public async Task<bool> HasFollowersAsync(Guid authorId)
+    public async Task<bool> HasFollowersAsync(int authorId)
     {
         return await db.Follows.AnyAsync(e => e.FollowedAuthorId == authorId);
     }

@@ -1,3 +1,4 @@
+using System.Configuration;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -11,7 +12,7 @@ namespace Minitwit.Infrastructure;
 ///  the database, without having the application directly interact with the database.
 /// </summary>
 
-public sealed class MinitwitDbContext : IdentityDbContext<Author, IdentityRole<Guid>, Guid>
+public sealed class MinitwitDbContext : IdentityDbContext<Author, IdentityRole<int>, int>
 {
     public DbSet<Cheep> Cheeps { get; set; } = null!;
 
@@ -45,64 +46,32 @@ public sealed class MinitwitDbContext : IdentityDbContext<Author, IdentityRole<G
     
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        // // Author entity
-        // modelBuilder.Entity<Author>(entity =>
-        // {
-        //     modelBuilder
-        //         .Entity<IdentityUserLogin<Guid>>()
-        //         .HasKey(p => new { p.LoginProvider, p.ProviderKey });
-        //     modelBuilder
-        //         .Entity<IdentityUserLogin<Guid>>()
-        //         .HasIndex(p => new { p.LoginProvider, p.ProviderKey })
-        //         .IsUnique();
-        //     modelBuilder.Entity<IdentityUserRole<Guid>>().HasKey(p => new { p.UserId, p.RoleId });
-        //     modelBuilder
-        //         .Entity<IdentityUserToken<Guid>>()
-        //         .HasKey(p => new
-        //         {
-        //             p.UserId,
-        //             p.LoginProvider,
-        //             p.Name
-        //         });
-        //
-        //     entity.Property(e => e.Id);
-        // });
-        //
-        // modelBuilder.Entity<Follow>(entity =>
-        // {
-        //     entity.HasKey(f => new { f.FollowingAuthorId, f.FollowedAuthorId });
-        // });
-        //
-        // // Cheep entity
-        // modelBuilder.Entity<Cheep>(entity =>
-        // {
-        //     entity.HasKey(e => e.CheepId);
-        //     entity.Property(e => e.AuthorId).IsRequired();
-        //     entity.Property(e => e.Text).IsRequired();
-        //     entity.Property(e => e.TimeStamp).IsRequired();
-        // });
-        //
-        // modelBuilder.Entity<Reaction>().Property(m => m.ReactionType).HasConversion<string>();
-        //
-        // modelBuilder.Entity<Reaction>(entity =>
-        // {
-        //     entity.HasKey(r => new { r.CheepId, r.AuthorId });
-        // });
-        //
-        // modelBuilder.Entity<IdentityUserLogin<Guid>>().HasKey(e => e.UserId);
-        // modelBuilder.Entity<IdentityUserRole<Guid>>().HasKey(e => e.RoleId);
-        // modelBuilder.Entity<IdentityUserToken<Guid>>().HasKey(e => e.UserId);
-
         base.OnModelCreating(modelBuilder); // Ensure the base configuration is applied
 
+
+        modelBuilder.Entity<Author>()
+            .Ignore(u => u.AccessFailedCount)
+            .Ignore(u => u.EmailConfirmed)
+            .Ignore(u => u.LockoutEnabled)
+            .Ignore(u => u.LockoutEnd)
+            .Ignore(u => u.PhoneNumber)
+            .Ignore(u => u.PhoneNumberConfirmed)
+            .Ignore(u => u.SecurityStamp)
+            .Ignore(u => u.TwoFactorEnabled);
+        
         // Configure Author entity
         modelBuilder.Entity<Author>(entity =>
         {
             entity.ToTable("users");
             entity.HasKey(a => a.Id);
             entity.Property(a => a.Id).HasColumnName("user_id");
-            entity.Property(a => a.UserName).HasColumnName("user_name").HasMaxLength(50).IsRequired();;
+            entity.Property(a => a.UserName).HasColumnName("username").HasMaxLength(50).IsRequired();
+            entity.Property(a => a.NormalizedUserName).HasColumnName("normalized_username").HasMaxLength(50).IsRequired();
             entity.Property(a => a.Email).HasColumnName("email").HasMaxLength(50).IsRequired();
+            entity.Property(a => a.PasswordHash).HasColumnName("pw_hash").HasMaxLength(256).IsRequired();
+            
+            entity.Ignore(a => a.NormalizedEmail);
+            entity.Ignore(a => a.ConcurrencyStamp);
         });
 
         // Configure Follow entity
@@ -144,11 +113,6 @@ public sealed class MinitwitDbContext : IdentityDbContext<Author, IdentityRole<G
             entity.Property(r => r.AuthorId).HasColumnName("author_id");
             entity.Property(r => r.ReactionType).HasColumnName("reaction_type");
         });
-
-        // Ensure indexes
-        modelBuilder.Entity<Author>()
-            .HasIndex(a => a.UserName)
-            .IsUnique();
 
         modelBuilder.Entity<Cheep>()
             .HasIndex(c => c.TimeStamp);

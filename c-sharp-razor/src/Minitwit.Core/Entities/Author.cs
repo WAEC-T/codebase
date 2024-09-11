@@ -11,9 +11,8 @@ namespace Minitwit.Core.Entities;
 /// and follow other users.
 /// </summary>
 
-
 [Index(nameof(Id), IsUnique = true)]
-public class Author : IdentityUser<Guid>
+public class Author : IdentityUser<int>
 {
     [StringLength(50)]
     [Required]
@@ -22,4 +21,5 @@ public class Author : IdentityUser<Guid>
     [StringLength(50)]
     [Required]
     public override required string Email { get; set; }
+    
 }

@@ -8,7 +8,7 @@ public interface ICheepRepository
 
     public Task<ICollection<Cheep>> GetCheepsByCountAsync(int count);
 
-    public Task<ICollection<Cheep>> GetCheepsFromAuthorByCountAsync(Guid authorId, int count);
+    public Task<ICollection<Cheep>> GetCheepsFromAuthorByCountAsync(int authorId, int count);
 
     public Task AddCheepAsync(Cheep cheepDto);
     public Task<Cheep> AddCreateCheepAsync(CreateCheep cheep);

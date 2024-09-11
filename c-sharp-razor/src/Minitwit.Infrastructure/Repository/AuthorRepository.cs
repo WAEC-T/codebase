@@ -28,12 +28,12 @@ public class AuthorRepository : BaseRepository, IAuthorRepository
         return await db.Users.ToListAsync();
     }
 
-    public async Task<ICollection<Author>> GetAuthorsByIdAsync(IEnumerable<Guid> authorIds)
+    public async Task<ICollection<Author>> GetAuthorsByIdAsync(IEnumerable<int> authorIds)
     {
         return await db.Users.Where(a => authorIds.Contains(a.Id)).AsNoTracking().ToListAsync();
     }
 
-    public async Task<Author?> GetAuthorByIdAsync(Guid authorId)
+    public async Task<Author?> GetAuthorByIdAsync(int authorId)
     {
         Author? author = await db.Users.FirstOrDefaultAsync(a => a.Id == authorId);
         return author!;
@@ -52,12 +52,12 @@ public class AuthorRepository : BaseRepository, IAuthorRepository
     }
 
     // ----- Get Cheeps By Author and Page Methods ----- //
-    public async Task<ICollection<Cheep>> GetCheepsByAuthorAsync(Guid id)
+    public async Task<ICollection<Cheep>> GetCheepsByAuthorAsync(int id)
     {
         return await db.Cheeps.Where(e => e.AuthorId == id).ToListAsync();
     }
 
-    public async Task<ICollection<Cheep>> GetCheepsByAuthor(Guid id, int page)
+    public async Task<ICollection<Cheep>> GetCheepsByAuthor(int id, int page)
     {
         var cheeps = await GetCheepsByAuthorAsync(id);
 
@@ -85,7 +85,7 @@ public class AuthorRepository : BaseRepository, IAuthorRepository
         return cheeps.OrderByDescending(c => c.TimeStamp).ToList();
     }
 
-    public async Task<ICollection<Cheep>> GetCheepsByAuthorAndFollowingAsync(Guid id)
+    public async Task<ICollection<Cheep>> GetCheepsByAuthorAndFollowingAsync(int id)
     {
         ICollection<Cheep> cheeps = new List<Cheep>(await GetCheepsByAuthorAsync(id));
 
@@ -97,7 +97,7 @@ public class AuthorRepository : BaseRepository, IAuthorRepository
         return cheeps;
     }
 
-    public async Task<ICollection<Cheep>> GetCheepsByAuthorAndFollowing(Guid id, int page)
+    public async Task<ICollection<Cheep>> GetCheepsByAuthorAndFollowing(int id, int page)
     {
         Author? author = await GetAuthorByIdAsync(id);
         //Get cheeps from the author, and append cheeps from followers to that list
@@ -137,7 +137,7 @@ public class AuthorRepository : BaseRepository, IAuthorRepository
     }
 
     // ----- Get Cheeps By Author Methods ----- //
-    public async Task<int> GetCheepCountByAuthorAsync(Guid authorId)
+    public async Task<int> GetCheepCountByAuthorAsync(int authorId)
     {
         ICollection<Cheep> cheeps = await GetCheepsByAuthorAsync(authorId);
         //Check that author has cheeps
@@ -147,28 +147,28 @@ public class AuthorRepository : BaseRepository, IAuthorRepository
         return cheeps.Count;
     }
 
-    public async Task<int> GetCheepCountByAuthorAndFollowing(Guid authorId)
+    public async Task<int> GetCheepCountByAuthorAndFollowing(int authorId)
     {
         ICollection<Cheep> cheeps = await GetCheepsByAuthorAndFollowingAsync(authorId);
         return cheeps.Count;
     }
 
     // ----- Get Page Count Methods ----- //
-    public async Task<int> GetPageCountByAuthor(Guid authorId)
+    public async Task<int> GetPageCountByAuthor(int authorId)
     {
         return await GetCheepCountByAuthorAsync(authorId) / PageSize + 1;
     }
 
-    public async Task<int> GetPageCountByAuthorAndFollowing(Guid authorId)
+    public async Task<int> GetPageCountByAuthorAndFollowing(int authorId)
     {
         return await GetCheepCountByAuthorAndFollowing(authorId) / PageSize + 1;
     }
 
     // ----- Get Followers and Following Methods ----- //
-    public async Task<ICollection<Author>> GetFollowersByIdAsync(Guid id)
+    public async Task<ICollection<Author>> GetFollowersByIdAsync(int id)
     {
         // Query to retrieve the IDs of authors followed by the specified author
-        List<Guid> followedAuthorIds = await db
+        List<int> followedAuthorIds = await db
             .Follows.Where(f => f.FollowedAuthorId == id)
             .Select(f => f.FollowingAuthorId)
             .ToListAsync();
@@ -181,7 +181,7 @@ public class AuthorRepository : BaseRepository, IAuthorRepository
         return followedAuthors;
     }
 
-    public async Task<ICollection<Author>> GetFollowingByIdAsync(Guid id)
+    public async Task<ICollection<Author>> GetFollowingByIdAsync(int id)
     {
         // Query to retrieve the IDs of authors followed by the specified author
         var followingAuthorIds = await db
@@ -197,19 +197,19 @@ public class AuthorRepository : BaseRepository, IAuthorRepository
         return followingAuthors;
     }
 
-    public async Task<bool> AuthorExists(Guid id)
+    public async Task<bool> AuthorExists(int id)
     {
         Author author = await GetAuthorByIdAsync(id);
-        return author.Id != Guid.Empty;
+        return author.Id != null;
     }
 
     // ----- Add/Remove Follow Methods ----- //
-    public async Task AddFollowAsync(Guid followingAuthorId, Guid followedAuthorId)
+    public async Task AddFollowAsync(int followingAuthorId, int followedAuthorId)
     {
         await _followRepository.CreateFollowAsync(followingAuthorId, followedAuthorId);
     }
 
-    public async Task RemoveFollowAsync(Guid followingAuthorId, Guid followedAuthorId)
+    public async Task RemoveFollowAsync(int followingAuthorId, int followedAuthorId)
     {
         Follow follow = await db.Follows.FirstOrDefaultAsync(e =>
             e.FollowedAuthorId == followedAuthorId && e.FollowingAuthorId == followingAuthorId
@@ -226,7 +226,7 @@ public class AuthorRepository : BaseRepository, IAuthorRepository
     }
 
     // ----- Delete Author Data Methods ----- //
-    public async Task DeleteCheepsByAuthorIdAsync(Guid id)
+    public async Task DeleteCheepsByAuthorIdAsync(int id)
     {
         var cheeps = await GetCheepsByAuthorAsync(id);
 
@@ -246,7 +246,7 @@ public class AuthorRepository : BaseRepository, IAuthorRepository
         await db.SaveChangesAsync();
     }
 
-    public async Task RemoveAllFollowersByAuthorIdAsync(Guid id)
+    public async Task RemoveAllFollowersByAuthorIdAsync(int id)
     {
         Author? user = await GetAuthorByIdAsync(id);
         if (user == null)
@@ -260,7 +260,7 @@ public class AuthorRepository : BaseRepository, IAuthorRepository
         db.Follows.RemoveRange(follows);
     }
 
-    public async Task RemoveUserByIdAsync(Guid id)
+    public async Task RemoveUserByIdAsync(int id)
     {
         Author? user = await GetAuthorByIdAsync(id);
         if (user == null)
@@ -270,7 +270,7 @@ public class AuthorRepository : BaseRepository, IAuthorRepository
         await db.SaveChangesAsync();
     }
 
-    public async Task RemoveReactionsByAuthorIdAsync(Guid id)
+    public async Task RemoveReactionsByAuthorIdAsync(int id)
     {
         Author? user = await GetAuthorByIdAsync(id);
         if (user == null)
