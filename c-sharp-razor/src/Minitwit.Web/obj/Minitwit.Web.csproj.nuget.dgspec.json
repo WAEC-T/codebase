@@ -144,10 +144,6 @@
             "Npgsql.EntityFrameworkCore.PostgreSQL": {
               "target": "Package",
               "version": "[8.0.2, )"
-            },
-            "prometheus-net.AspNetCore": {
-              "target": "Package",
-              "version": "[8.2.1, )"
             }
           },
           "imports": [
@@ -249,10 +245,6 @@
             "OpenTelemetry.Extensions.Hosting": {
               "target": "Package",
               "version": "[1.7.0, )"
-            },
-            "prometheus-net.AspNetCore": {
-              "target": "Package",
-              "version": "[8.2.1, )"
             }
           },
           "imports": [

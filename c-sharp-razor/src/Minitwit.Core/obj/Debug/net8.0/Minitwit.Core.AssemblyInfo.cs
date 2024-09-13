@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Minitwit.Core")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+a5adadfcf0ee3809a61fead2cf5bb704f6a06ec9")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+4954145d4c5bb5ee8b13297ddfb0ee9c5effeaea")]
 [assembly: System.Reflection.AssemblyProductAttribute("Minitwit.Core")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Minitwit.Core")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
