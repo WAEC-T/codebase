@@ -5,7 +5,6 @@ using Minitwit.Core.Repository;
 using Minitwit.Infrastructure;
 using Minitwit.Infrastructure.Repository;
 using Minitwit.Web;
-using Prometheus;
 
 /// <summary>
 /// This file is the entry point of the application.
@@ -99,7 +98,6 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
-app.UseMetricServer(); // Prometheus metrics endpoint
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();

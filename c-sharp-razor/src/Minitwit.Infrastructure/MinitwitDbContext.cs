@@ -46,10 +46,8 @@ public sealed class MinitwitDbContext : IdentityDbContext<Author, IdentityRole<i
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {   
         
-        
         base.OnModelCreating(modelBuilder); // Ensure the base configuration is applied
         
-
         modelBuilder.Entity<Author>()
             .Ignore(u => u.AccessFailedCount)
             .Ignore(u => u.EmailConfirmed)
