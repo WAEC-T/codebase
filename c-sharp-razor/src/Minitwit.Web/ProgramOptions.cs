@@ -98,7 +98,7 @@ public class ProgramOptions
             {
                 Console.WriteLine($"Connection failed: {ex.Message}");
             }
-            
+
             builder.Services.AddDbContext<MinitwitDbContext>(options =>
             {
                 options.UseNpgsql(connectionString);

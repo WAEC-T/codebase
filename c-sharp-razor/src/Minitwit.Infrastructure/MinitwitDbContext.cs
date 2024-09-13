@@ -17,17 +17,17 @@ public sealed class MinitwitDbContext : IdentityDbContext<Author, IdentityRole<i
     public DbSet<Cheep> Cheeps { get; set; } = null!;
 
     public DbSet<Follow> Follows { get; set; } = null!;
-    
+
     public MinitwitDbContext(DbContextOptions<MinitwitDbContext> dbContextOptions)
         : base(dbContextOptions)
     {
         ChangeTracker.LazyLoadingEnabled = false;
     }
-    
+
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         if (!optionsBuilder.IsConfigured)
-        {   
+        {
             // Get PostgreSQL environment variables
             string username = Environment.GetEnvironmentVariable("POSTGRES_USER") ?? "user";
             string password = Environment.GetEnvironmentVariable("POSTGRES_PASSWORD") ?? "pass";
@@ -38,16 +38,16 @@ public sealed class MinitwitDbContext : IdentityDbContext<Author, IdentityRole<i
             // Construct PostgreSQL connection string
             var connectionString = $"Host={host};Port={port};Database={database};Username={username};Password={password}";
             Console.WriteLine($"Connecting to PostgreSQL with connection string: {connectionString}");
-            optionsBuilder.UseNpgsql(connectionString, 
+            optionsBuilder.UseNpgsql(connectionString,
                 b => b.MigrationsAssembly("Minitwit.Infrastructure"));
         }
     }
-    
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
-    {   
-        
+    {
+
         base.OnModelCreating(modelBuilder); // Ensure the base configuration is applied
-        
+
         modelBuilder.Entity<Author>()
             .Ignore(u => u.AccessFailedCount)
             .Ignore(u => u.EmailConfirmed)
@@ -57,7 +57,7 @@ public sealed class MinitwitDbContext : IdentityDbContext<Author, IdentityRole<i
             .Ignore(u => u.PhoneNumberConfirmed)
             .Ignore(u => u.SecurityStamp)
             .Ignore(u => u.TwoFactorEnabled);
-        
+
         modelBuilder.Entity<Author>(entity =>
         {
             entity.ToTable("users");
@@ -70,33 +70,33 @@ public sealed class MinitwitDbContext : IdentityDbContext<Author, IdentityRole<i
                 .HasColumnName("normalized_username")
                 .HasMaxLength(50).IsRequired();
             entity.Property(a => a.ConcurrencyStamp) //  changes to a user's profile or sensitive data (e.g., passwords) are safe 
-                .HasColumnName("concurrency_stamp") 
+                .HasColumnName("concurrency_stamp")
                 .IsConcurrencyToken();
             entity.Property(a => a.SecurityStamp) // cookies or refresh tokens
                 .HasColumnName("security_stamp")
                 .IsConcurrencyToken();
-            
+
             entity.Ignore(a => a.NormalizedEmail);
         });
-        
+
         modelBuilder.Entity<Follow>(entity =>
         {
             entity.ToTable("followers");
             entity.HasKey(f => new { f.FollowingAuthorId, f.FollowedAuthorId });
-            
+
             // Mapping columns
             entity.Property(f => f.FollowedAuthorId).HasColumnName("who_id");
             entity.Property(f => f.FollowingAuthorId).HasColumnName("whom_id");
-            
+
             entity.HasOne<Author>().WithMany().HasForeignKey(f => f.FollowingAuthorId);
             entity.HasOne<Author>().WithMany().HasForeignKey(f => f.FollowedAuthorId);
         });
-        
+
         modelBuilder.Entity<Cheep>(entity =>
         {
             entity.ToTable("messages");
             entity.HasKey(e => e.CheepId);
-            
+
             entity.Property(e => e.CheepId).HasColumnName("message_id");
             entity.Property(e => e.AuthorId).HasColumnName("author_id");
             entity.Property(e => e.Text).HasColumnName("text").IsRequired();

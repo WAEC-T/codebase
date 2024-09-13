@@ -26,7 +26,7 @@ public class FollowRepository : BaseRepository, IFollowRepository
 
     public async Task<bool> IsFollowingAsync(int followingUserId, int followedUserId)
     {
-        if (followingUserId == 0|| followedUserId == 0)
+        if (followingUserId == 0 || followedUserId == 0)
             return false;
 
         bool isFollowing = await db.Follows.AnyAsync(f =>
