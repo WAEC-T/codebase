@@ -1,13 +1,2 @@
 .DS_Store
 .env
-
-# ignore /utils folder in app and API
-app/*/utils/
-API/*/utils/
-dev.env
-.DS_Store
-# ignore package-lock.json
-*package-lock.json
-
-# Node Project files to ignore
-node_modules/
