@@ -6,6 +6,5 @@ public record CheepViewModel(
     int CheepId,
     UserModel User,
     string Message,
-    string Timestamp,
-    ICollection<ReactionModel> Reactions
+    string Timestamp
 );

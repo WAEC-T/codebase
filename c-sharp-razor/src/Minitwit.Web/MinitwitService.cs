@@ -20,17 +20,14 @@ public class MinitwitService : ICheepService
 {
     private readonly IAuthorRepository _authorRepository;
     private readonly ICheepRepository _cheepRepository;
-    private readonly IReactionRepository _reactionRepository;
 
     public MinitwitService(
         ICheepRepository cheepRepository,
-        IAuthorRepository authorRepository,
-        IReactionRepository reactionRepository
+        IAuthorRepository authorRepository
     )
     {
         _cheepRepository = cheepRepository;
         _authorRepository = authorRepository;
-        _reactionRepository = reactionRepository;
     }
 
     public async Task<ICollection<CheepViewModel>> GetCheepsAsync(int page)
@@ -50,9 +47,6 @@ public class MinitwitService : ICheepService
         // Process each cheepDto sequentially.
         foreach (var cheepDto in cheepDtos)
         {
-            // Assuming CheepReactions is updated to be asynchronous
-            List<ReactionModel> reactionTypeCounts = await CheepReactionsAsync(cheepDto);
-
             // Find the author for the current cheep.
             Author? author = authors.FirstOrDefault(a => a.Id == cheepDto.AuthorId);
 
@@ -62,8 +56,7 @@ public class MinitwitService : ICheepService
                     cheepDto.CheepId,
                     new UserModel(author),
                     cheepDto.Text,
-                    cheepDto.TimeStamp.ToString("o"), // Using a round-trip date/time pattern
-                    reactionTypeCounts
+                    cheepDto.TimeStamp.ToString("o")
                 )
             );
         }
@@ -79,15 +72,12 @@ public class MinitwitService : ICheepService
 
         foreach (Cheep cheepDto in cheepDtos)
         {
-            List<ReactionModel> reactionTypeCounts = await CheepReactionsAsync(cheepDto);
-
             cheeps.Add(
                 new CheepViewModel(
                     cheepDto.CheepId,
                     new UserModel(author),
                     cheepDto.Text,
-                    cheepDto.TimeStamp.ToString(CultureInfo.InvariantCulture),
-                    reactionTypeCounts
+                    cheepDto.TimeStamp.ToString(CultureInfo.InvariantCulture)
                 )
             );
         }
@@ -110,7 +100,6 @@ public class MinitwitService : ICheepService
 
         foreach (Cheep cheepDto in cheepDtos)
         {
-            List<ReactionModel> reactionTypeCounts = await CheepReactionsAsync(cheepDto);
             Author? author = authors.FirstOrDefault(a => a.Id == cheepDto.AuthorId);
 
             cheeps.Add(
@@ -118,37 +107,12 @@ public class MinitwitService : ICheepService
                     cheepDto.CheepId,
                     new UserModel(author!),
                     cheepDto.Text,
-                    cheepDto.TimeStamp.ToString(CultureInfo.InvariantCulture),
-                    reactionTypeCounts
+                    cheepDto.TimeStamp.ToString(CultureInfo.InvariantCulture)
                 )
             );
         }
 
         return cheeps;
-    }
-
-    protected async Task<List<ReactionModel>> CheepReactionsAsync(Cheep cheepDto)
-    {
-        // Initialize reactions with all reaction types set to count 0.
-        var reactions = Enum.GetValues(typeof(ReactionType))
-            .Cast<ReactionType>()
-            .ToDictionary(rt => rt, rt => new ReactionModel(rt, 0));
-
-        // Assume GetReactionsFromCheepIdAsync is an async method.
-        ICollection<Reaction> reactionDTOs = await _reactionRepository.GetReactionsFromCheepIdAsync(
-            cheepDto.CheepId
-        );
-
-        // Process the reactions, if any.
-        if (reactionDTOs.Any())
-        {
-            foreach (Reaction reaction in reactionDTOs)
-            {
-                reactions[reaction.ReactionType].ReactionCount++;
-            }
-        }
-
-        return reactions.Values.ToList();
     }
 
     public async Task<ICollection<CheepViewModel>> GetCheepsFromAuthor(string authorName, int page)

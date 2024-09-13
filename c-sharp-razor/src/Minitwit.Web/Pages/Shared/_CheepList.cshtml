@@ -3,7 +3,6 @@
 @using Minitwit.Web.Models
 @inject SignInManager<Author> SigninManager
 @inject UserManager<Author> UserManager
-@inject IReactionRepository ReactionRepository
 @inject IFollowRepository FollowRepository
 @inject IAuthorRepository AuthorRepository
 @model dynamic
@@ -25,28 +24,6 @@
                     </p>
 
                     <small>&mdash; @cheep.Timestamp</small>
-                </div>
-                <div class="reaction-box">
-                    @if (SigninManager.IsSignedIn(User) && cheep.User.Username != User.Identity?.Name)
-                    {
-                        @if (ReactionRepository.HasUserReactedAsync(@cheep.CheepId, UserManager.GetUserAsync(User).Result!.Id).Result)
-                        {
-                            <form asp-page="public" asp-page-handler="RemoveReaction" method="post" asp-route-cheepId="@cheep.CheepId" asp-route-reaction="@cheep.Reactions.First().ReactionType" asp-route-currentPage="@Model.currentPage">
-                                <input class="reacted" type="submit" id="reactionId" name="ReactionIdInput" value="Like: @cheep.Reactions.First().ReactionCount"/>
-                            </form>
-                        }
-                        else
-                        {
-                            <form asp-page="public" asp-page-handler="Reaction" method="post" asp-route-cheepId="@cheep.CheepId" asp-route-reaction="@cheep.Reactions.First().ReactionType" asp-route-currentPage="@Model.currentPage">
-                                <input type="submit" id="reactionId" name="ReactionIdInput" value="Like: @cheep.Reactions.First().ReactionCount"/>
-                            </form>
-                        }
-                    }
-                    else
-                    {
-                        ReactionModel cheepReaction = cheep.Reactions.First();
-                        <u class="reactions-display">@cheepReaction.ReactionType: @cheepReaction.ReactionCount</u>
-                    }
                 </div>
 
                 @if (SigninManager.IsSignedIn(User) && cheep.User.Username != User.Identity?.Name)

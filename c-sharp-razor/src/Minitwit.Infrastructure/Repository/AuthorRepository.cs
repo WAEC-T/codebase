@@ -232,13 +232,6 @@ public class AuthorRepository : BaseRepository, IAuthorRepository
 
         foreach (var cheep in cheeps)
         {
-            // Find reactions associated with the current cheep and delete them
-            List<Reaction> reactions = await db
-                .Reactions.Where(r => r.CheepId == cheep.CheepId)
-                .ToListAsync();
-
-            db.Reactions.RemoveRange(reactions);
-
             // Delete the cheep itself
             db.Cheeps.Remove(cheep);
         }
@@ -270,15 +263,9 @@ public class AuthorRepository : BaseRepository, IAuthorRepository
         await db.SaveChangesAsync();
     }
 
-    public async Task RemoveReactionsByAuthorIdAsync(int id)
+    public Task RemoveReactionsByAuthorIdAsync(int id)
     {
-        Author? user = await GetAuthorByIdAsync(id);
-        if (user == null)
-            throw new Exception("User not found");
-
-        var reactions = await db.Reactions.Where(r => r.AuthorId == id).ToListAsync();
-        if (reactions != null)
-            db.Reactions.RemoveRange(reactions);
+        throw new NotImplementedException();
     }
 
     // ----- Save Context Method ----- //
