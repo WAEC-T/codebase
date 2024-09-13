@@ -71,7 +71,7 @@ using (IServiceScope scope = app.Services.CreateScope())
     }
 }
 
-// Apply any pending migrations to the database
+// DB migrations for ASP.NET Identity
 using (IServiceScope scope = app.Services.CreateScope())
 {
     IServiceProvider services = scope.ServiceProvider;
@@ -81,7 +81,6 @@ using (IServiceScope scope = app.Services.CreateScope())
     {
         context.Database.Migrate();
         Console.WriteLine("Database migration applied successfully.");
-
     }
     catch (Exception e)
     {

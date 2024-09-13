@@ -60,16 +60,17 @@ public sealed class MinitwitDbContext : IdentityDbContext<Author, IdentityRole<i
             .Ignore(u => u.SecurityStamp)
             .Ignore(u => u.TwoFactorEnabled);
         
-        // Configure Author entity
         modelBuilder.Entity<Author>(entity =>
         {
             entity.ToTable("users");
             entity.HasKey(a => a.Id);
             entity.Property(a => a.Id).HasColumnName("user_id");
             entity.Property(a => a.UserName).HasColumnName("username").HasMaxLength(50).IsRequired();
-            entity.Property(a => a.NormalizedUserName).HasColumnName("normalized_username").HasMaxLength(50).IsRequired();
             entity.Property(a => a.Email).HasColumnName("email").HasMaxLength(50).IsRequired();
             entity.Property(a => a.PasswordHash).HasColumnName("pw_hash").HasMaxLength(256).IsRequired();
+            entity.Property(a => a.NormalizedUserName)
+                .HasColumnName("normalized_username")
+                .HasMaxLength(50).IsRequired();
             entity.Property(a => a.ConcurrencyStamp) //  changes to a user's profile or sensitive data (e.g., passwords) are safe 
                 .HasColumnName("concurrency_stamp") 
                 .IsConcurrencyToken();
@@ -79,8 +80,7 @@ public sealed class MinitwitDbContext : IdentityDbContext<Author, IdentityRole<i
             
             entity.Ignore(a => a.NormalizedEmail);
         });
-
-        // Configure Follow entity
+        
         modelBuilder.Entity<Follow>(entity =>
         {
             entity.ToTable("followers");
@@ -93,8 +93,7 @@ public sealed class MinitwitDbContext : IdentityDbContext<Author, IdentityRole<i
             entity.HasOne<Author>().WithMany().HasForeignKey(f => f.FollowingAuthorId);
             entity.HasOne<Author>().WithMany().HasForeignKey(f => f.FollowedAuthorId);
         });
-
-        // Configure Cheep entity
+        
         modelBuilder.Entity<Cheep>(entity =>
         {
             entity.ToTable("messages");

@@ -25,7 +25,13 @@ namespace Minitwit.Infrastructure.Migrations
                 {
                     table.PrimaryKey("PK_AspNetRoles", x => x.Id);
                 });
-
+            
+            migrationBuilder.AddColumn<string>(
+                name: "normalized_username",
+                table: "users",
+                type: "text",
+                nullable: true);
+            
             migrationBuilder.AddColumn<string>(
                 name: "concurrency_stamp",
                 table: "users",
