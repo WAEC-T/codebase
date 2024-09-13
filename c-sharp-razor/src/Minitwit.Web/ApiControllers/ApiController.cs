@@ -110,7 +110,7 @@ public class ApiController : ControllerBase
         // Checks authorization
         if (NotReqFromSimulator(Request))
         {
-            
+
             return StatusCode(403, "You are not authorized to use this resource");
         }
 
@@ -126,7 +126,7 @@ public class ApiController : ControllerBase
             var users = await _authorRepository.GetAuthorsByIdAsync(authorIds);
 
             var lst = ConvertToCheepViewModelApiCollection(cheeps, users);
-            
+
             return Ok(lst);
         }
         catch (Exception ex)
@@ -176,7 +176,7 @@ public class ApiController : ControllerBase
             var formattedCheeps = cheeps
                 .Select(c => new CheepViewModelApi(username, c.Text, c.TimeStamp))
                 .ToList();
-            
+
             return Ok(formattedCheeps);
         }
         catch (Exception ex)
@@ -186,7 +186,7 @@ public class ApiController : ControllerBase
                 $"{{{ex.StackTrace}}}",
                 msgsPrivateGetLogFilePath
             );
-            
+
             return NotFound();
         }
     }
@@ -202,7 +202,7 @@ public class ApiController : ControllerBase
         // Checks authorization
         if (NotReqFromSimulator(Request))
         {
-           
+
             return StatusCode(403, "You are not authorized to use this resource");
         }
 
@@ -220,13 +220,13 @@ public class ApiController : ControllerBase
             var result = await _cheepRepository.AddCreateCheepAsync(cheep);
 
             await Update_Latest(latest);
-            
+
             return StatusCode(204, "");
         }
         catch (Exception ex)
         {
             await LogRequest(msgsdata.ToString(), $"{{{ex.StackTrace}}}", msgsPostLogFilePath);
-            
+
             return NotFound();
         }
     }
@@ -282,7 +282,7 @@ public class ApiController : ControllerBase
             );
             return NotFound();
         }
-        
+
         return Ok(new { follows = output.Take(no) });
     }
 
@@ -316,7 +316,7 @@ public class ApiController : ControllerBase
         {
             if (!string.IsNullOrEmpty(followData.follow))
             {
-                
+
                 if (await _authorRepository.GetAuthorByNameAsync(username) == null)
                 {
                     await CreateUser(username, $"{username}@user.com", "password");
@@ -326,7 +326,7 @@ public class ApiController : ControllerBase
                 var follower = await _authorRepository.GetAuthorByNameAsync(username);
 
                 await _authorRepository.AddFollowAsync(follower.Id, followed.Id);
-                
+
                 return StatusCode(204, "");
             }
 
@@ -346,7 +346,7 @@ public class ApiController : ControllerBase
                 var follower = await _authorRepository.GetAuthorByNameAsync(username);
 
                 await _authorRepository.RemoveFollowAsync(follower.Id, followed.Id);
-                
+
                 return StatusCode(204, "");
             }
         }
@@ -357,7 +357,7 @@ public class ApiController : ControllerBase
                 $"{{{ex.StackTrace}}}",
                 fllwsPostLogFilePath
             );
-            
+
             return NotFound();
         }
         catch (Exception e)
@@ -367,7 +367,7 @@ public class ApiController : ControllerBase
                 $"{{{e.StackTrace}}}",
                 fllwsPostLogFilePath
             );
-            
+
             return NotFound();
         }
         return NotFound();

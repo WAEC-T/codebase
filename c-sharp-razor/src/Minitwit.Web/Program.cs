@@ -11,10 +11,6 @@ using Minitwit.Web;
 /// It is responsible for setting up the application and starting it.
 /// </summary>
 
-
-// using var meterProvider = Sdk.CreateMeterProviderBuilder().AddMeter("myMeter").AddPrometheusExporter().Build();
-
-
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.

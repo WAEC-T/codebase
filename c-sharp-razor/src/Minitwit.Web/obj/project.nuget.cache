@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "KHeLdKqvtA0=",
+  "dgSpecHash": "Ptv/vAdDrX4=",
   "success": true,
   "projectFilePath": "/Users/simonharwick/Desktop/IT_University_Kopenhagen/02_Semesters/05_AS2425/Thesis/Codebase/codebase/c-sharp-razor/src/Minitwit.Web/Minitwit.Web.csproj",
   "expectedPackageFiles": [
@@ -57,7 +57,6 @@
     "/Users/simonharwick/.nuget/packages/opentelemetry/1.7.0/opentelemetry.1.7.0.nupkg.sha512",
     "/Users/simonharwick/.nuget/packages/opentelemetry.api/1.7.0/opentelemetry.api.1.7.0.nupkg.sha512",
     "/Users/simonharwick/.nuget/packages/opentelemetry.api.providerbuilderextensions/1.7.0/opentelemetry.api.providerbuilderextensions.1.7.0.nupkg.sha512",
-    "/Users/simonharwick/.nuget/packages/opentelemetry.exporter.prometheus.aspnetcore/1.7.0-rc.1/opentelemetry.exporter.prometheus.aspnetcore.1.7.0-rc.1.nupkg.sha512",
     "/Users/simonharwick/.nuget/packages/opentelemetry.extensions.hosting/1.7.0/opentelemetry.extensions.hosting.1.7.0.nupkg.sha512",
     "/Users/simonharwick/.nuget/packages/system.buffers/4.5.1/system.buffers.4.5.1.nupkg.sha512",
     "/Users/simonharwick/.nuget/packages/system.codedom/4.4.0/system.codedom.4.4.0.nupkg.sha512",

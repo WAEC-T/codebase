@@ -22,7 +22,7 @@ public class Cheep
     [StringLength(160, MinimumLength = 5)]
     [Required]
     public required string Text { get; set; }
-    
+
     [Required]
     public DateTime TimeStamp { get; set; }
 }

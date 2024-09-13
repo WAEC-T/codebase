@@ -21,5 +21,5 @@ public class Author : IdentityUser<int>
     [StringLength(50)]
     [Required]
     public override required string Email { get; set; }
-    
+
 }

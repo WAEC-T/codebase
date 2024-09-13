@@ -238,10 +238,6 @@
               "target": "Package",
               "version": "[8.0.2, )"
             },
-            "OpenTelemetry.Exporter.Prometheus.AspNetCore": {
-              "target": "Package",
-              "version": "[1.7.0-rc.1, )"
-            },
             "OpenTelemetry.Extensions.Hosting": {
               "target": "Package",
               "version": "[1.7.0, )"
