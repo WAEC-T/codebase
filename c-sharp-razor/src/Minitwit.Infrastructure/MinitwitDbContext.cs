@@ -70,9 +70,14 @@ public sealed class MinitwitDbContext : IdentityDbContext<Author, IdentityRole<i
             entity.Property(a => a.NormalizedUserName).HasColumnName("normalized_username").HasMaxLength(50).IsRequired();
             entity.Property(a => a.Email).HasColumnName("email").HasMaxLength(50).IsRequired();
             entity.Property(a => a.PasswordHash).HasColumnName("pw_hash").HasMaxLength(256).IsRequired();
+            entity.Property(a => a.ConcurrencyStamp) //  changes to a user's profile or sensitive data (e.g., passwords) are safe 
+                .HasColumnName("concurrency_stamp") 
+                .IsConcurrencyToken();
+            entity.Property(a => a.SecurityStamp) // cookies or refresh tokens
+                .HasColumnName("security_stamp")
+                .IsConcurrencyToken();
             
             entity.Ignore(a => a.NormalizedEmail);
-            entity.Ignore(a => a.ConcurrencyStamp);
         });
 
         // Configure Follow entity
@@ -100,8 +105,11 @@ public sealed class MinitwitDbContext : IdentityDbContext<Author, IdentityRole<i
             entity.Property(e => e.Text).HasColumnName("text").IsRequired();
             entity.Property(e => e.TimeStamp)
                 .HasColumnName("pub_date")
-                .HasColumnType("timestamp") // Correct type for PostgreSQL
-                .HasDefaultValueSql("CURRENT_TIMESTAMP"); // Default value for timestamp
+                .HasColumnType("text")
+                .HasConversion(
+                    v => v.ToString("yyyy-MM-dd HH:mm:ss"),  // Convert DateTime to string when saving
+                    v => DateTime.Parse(v)                   // Convert string to DateTime when reading
+                );
         });
 
         modelBuilder.Entity<Cheep>()
