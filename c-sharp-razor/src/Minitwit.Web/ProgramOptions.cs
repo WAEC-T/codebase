@@ -72,7 +72,7 @@ public class ProgramOptions
             }
             builder.Services.AddDbContext<MinitwitDbContext>(options =>
             {
-                options.UseSqlite($"Data Source={dbPath}");
+                options.UseNpgsql($"Data Source={dbPath}");
             });
         }
         else

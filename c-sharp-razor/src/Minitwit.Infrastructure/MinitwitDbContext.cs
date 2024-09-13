@@ -17,9 +17,7 @@ public sealed class MinitwitDbContext : IdentityDbContext<Author, IdentityRole<i
     public DbSet<Cheep> Cheeps { get; set; } = null!;
 
     public DbSet<Follow> Follows { get; set; } = null!;
-
-    public DbSet<Reaction> Reactions { get; set; } = null!;
-
+    
     public MinitwitDbContext(DbContextOptions<MinitwitDbContext> dbContextOptions)
         : base(dbContextOptions)
     {
@@ -33,21 +31,24 @@ public sealed class MinitwitDbContext : IdentityDbContext<Author, IdentityRole<i
             // Get PostgreSQL environment variables
             string username = Environment.GetEnvironmentVariable("POSTGRES_USER") ?? "user";
             string password = Environment.GetEnvironmentVariable("POSTGRES_PASSWORD") ?? "pass";
-            string host = Environment.GetEnvironmentVariable("POSTGRES_HOST") ?? "192.168.178.41";
+            string host = Environment.GetEnvironmentVariable("POSTGRES_HOST") ?? "192.168.8.175"; // 
             string port = Environment.GetEnvironmentVariable("POSTGRES_PORT") ?? "5432";
             string database = Environment.GetEnvironmentVariable("POSTGRES_DB") ?? "waect";
 
             // Construct PostgreSQL connection string
             var connectionString = $"Host={host};Port={port};Database={database};Username={username};Password={password}";
+            Console.WriteLine($"Connecting to PostgreSQL with connection string: {connectionString}");
             optionsBuilder.UseNpgsql(connectionString, 
                 b => b.MigrationsAssembly("Minitwit.Infrastructure"));
         }
     }
     
     protected override void OnModelCreating(ModelBuilder modelBuilder)
-    {
+    {   
+        
+        
         base.OnModelCreating(modelBuilder); // Ensure the base configuration is applied
-
+        
 
         modelBuilder.Entity<Author>()
             .Ignore(u => u.AccessFailedCount)
@@ -82,7 +83,7 @@ public sealed class MinitwitDbContext : IdentityDbContext<Author, IdentityRole<i
             
             // Mapping columns
             entity.Property(f => f.FollowedAuthorId).HasColumnName("who_id");
-            entity.Property(f => f.FollowedAuthorId).HasColumnName("whom_id");
+            entity.Property(f => f.FollowingAuthorId).HasColumnName("whom_id");
             
             entity.HasOne<Author>().WithMany().HasForeignKey(f => f.FollowingAuthorId);
             entity.HasOne<Author>().WithMany().HasForeignKey(f => f.FollowedAuthorId);
@@ -101,17 +102,6 @@ public sealed class MinitwitDbContext : IdentityDbContext<Author, IdentityRole<i
                 .HasColumnName("pub_date")
                 .HasColumnType("timestamp") // Correct type for PostgreSQL
                 .HasDefaultValueSql("CURRENT_TIMESTAMP"); // Default value for timestamp
-        });
-
-        // Configure Reaction entity
-        modelBuilder.Entity<Reaction>(entity =>
-        {
-            entity.ToTable("reactions"); // Update this if you have a different table name
-            entity.HasKey(r => new { r.CheepId, r.AuthorId });
-            
-            entity.Property(r => r.CheepId).HasColumnName("cheep_id");
-            entity.Property(r => r.AuthorId).HasColumnName("author_id");
-            entity.Property(r => r.ReactionType).HasColumnName("reaction_type");
         });
 
         modelBuilder.Entity<Cheep>()

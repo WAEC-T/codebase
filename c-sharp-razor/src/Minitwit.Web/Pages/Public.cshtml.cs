@@ -16,7 +16,6 @@ public class PublicModel : PageModel
     private readonly ICheepRepository _cheepRepository;
     private readonly IAuthorRepository _authorRepository;
     private readonly IFollowRepository _followRepository;
-    private readonly IReactionRepository _reactionRepository;
     private readonly IValidator<CreateCheep> _validator;
     public required Author user { get; set; }
     private readonly UserManager<Author> _userManager;
@@ -30,8 +29,7 @@ public class PublicModel : PageModel
         IAuthorRepository authorRepository,
         IFollowRepository followRepository,
         IValidator<CreateCheep> validator,
-        UserManager<Author> userManager,
-        IReactionRepository reactionRepository
+        UserManager<Author> userManager
     )
     {
         _service = service;
@@ -40,7 +38,6 @@ public class PublicModel : PageModel
         _followRepository = followRepository;
         _validator = validator;
         _userManager = userManager;
-        _reactionRepository = reactionRepository;
     }
 
     public async Task<ActionResult> OnGet()
@@ -85,28 +82,20 @@ public class PublicModel : PageModel
 
     public async Task<IActionResult> OnPostReaction(
         int cheepId,
-        ReactionType reactionType,
         int currentPage
     )
     {
         Author? author = await _userManager.GetUserAsync(User);
-        if (await _reactionRepository.HasUserReactedAsync(cheepId, author!.Id))
-            return Page();
-        await _reactionRepository.AddReaction(reactionType, cheepId, author!.Id);
         await InitializeVariables(currentPage);
         return Page();
     }
 
     public async Task<IActionResult> OnPostRemoveReaction(
         int cheepId,
-        ReactionType reactionType,
         int currentPage
     )
     {
         Author? author = await _userManager.GetUserAsync(User);
-        if (!await _reactionRepository.HasUserReactedAsync(cheepId, author!.Id))
-            return Page();
-        await _reactionRepository.RemoveReaction(reactionType, cheepId, author!.Id);
         await InitializeVariables(currentPage);
         return Page();
     }

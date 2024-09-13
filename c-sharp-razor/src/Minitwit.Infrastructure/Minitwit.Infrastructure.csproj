@@ -24,8 +24,4 @@
     <RootNamespace>Minitwit.Infrastructure</RootNamespace>
   </PropertyGroup>
 
-  <ItemGroup>
-    <Folder Include="data\" />
-  </ItemGroup>
-
 </Project>

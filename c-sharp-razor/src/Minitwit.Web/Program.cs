@@ -44,7 +44,6 @@ builder.Services.AddScoped<IAuthorRepository, AuthorRepository>();
 builder.Services.AddScoped<IValidator<CreateCheep>, CheepCreateValidator>();
 builder.Services.AddScoped<ICheepRepository, CheepRepository>();
 builder.Services.AddScoped<ICheepService, MinitwitService>();
-builder.Services.AddScoped<IReactionRepository, ReactionRepository>();
 builder.Services.AddScoped<IFollowRepository, FollowRepository>();
 
 builder.Services.AddSession(options =>
@@ -69,6 +68,25 @@ using (IServiceScope scope = app.Services.CreateScope())
     catch (Exception e)
     {
         Console.WriteLine(e);
+    }
+}
+
+// Apply any pending migrations to the database
+using (IServiceScope scope = app.Services.CreateScope())
+{
+    IServiceProvider services = scope.ServiceProvider;
+    MinitwitDbContext context = services.GetRequiredService<MinitwitDbContext>();
+
+    try
+    {
+        context.Database.Migrate();
+        Console.WriteLine("Database migration applied successfully.");
+
+    }
+    catch (Exception e)
+    {
+        Console.WriteLine(e);
+        Console.WriteLine($"Database migration failed with error.{e.Message}");
     }
 }
 
