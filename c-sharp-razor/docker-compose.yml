@@ -1,7 +1,4 @@
 version: "3.8"
-volumes:
-  prometheus-data: {}
-  grafana-data: {}
 
 services:
   
@@ -16,18 +13,6 @@ services:
     networks: 
       - minitwit-network
     command: [ "dockerize", "-wait", "tcp://database:3306", "-timeout", "30s", "./start-webserver.sh" ]
-        
-  grafana:
-    image: grafana/grafana:latest
-    container_name: grafana
-    ports:
-      - '3000:3000'
-    restart: unless-stopped
-    volumes:
-      - grafana-data:/var/lib/grafana
-      - ./dashboards:/etc/grafana/provisioning/dashboards
-    networks:
-      - minitwit-network
     
   
 networks:
