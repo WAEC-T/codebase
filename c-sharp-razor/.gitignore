@@ -1,6 +1,6 @@
 # Ignore bin and obj directories
-/bin/
-/obj/
+**/bin/
+**/obj/
 
 # Ignore DLL files and other compiled files
 *.dll
