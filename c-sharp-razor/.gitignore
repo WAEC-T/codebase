@@ -16,6 +16,7 @@ Release/
 *.suo
 *.vspscc
 .vscode/
+.idea
 
 # Ignore logs and other temporary files
 *.log
