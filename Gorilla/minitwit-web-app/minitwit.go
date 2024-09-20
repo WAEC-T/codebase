@@ -12,6 +12,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 
@@ -23,9 +24,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-const (
-	PER_PAGE = 30
-)
+const PER_PAGE = 30
 
 func getDbUrl() string {
 	user := os.Getenv("POSTGRES_USER")
@@ -38,9 +37,9 @@ func getDbUrl() string {
 	fmt.Println("env vars: ", user, pw, host, port, dbname, disableSsl)
 
 	disableSslString := ""
-	/*if disableSsl == "true" {
+	if disableSsl == "true" {
 		disableSslString = "sslmode=disable"
-	}*/
+	}
 	url := url.URL{
 		User:     url.UserPassword(user, pw),
 		Scheme:   "postgres",
@@ -48,7 +47,6 @@ func getDbUrl() string {
 		Path:     dbname,
 		RawQuery: disableSslString,
 	}
-	fmt.Println(url.String())
 	return url.String()
 }
 
@@ -137,7 +135,6 @@ func connect_db() (db *sql.DB) {
 		panic(err)
 	}
 
-	fmt.Println("dbURL: ", db)
 	return db
 }
 
@@ -145,6 +142,7 @@ func connect_db() (db *sql.DB) {
 func query_db(query string, args []any, one bool) (any, error) {
 	cur, err := db.Query(query, args...)
 	if err != nil {
+		fmt.Println("error executing query: %w", err)
 		return nil, fmt.Errorf("error executing query: %w", err)
 	}
 	defer cur.Close()
@@ -165,9 +163,23 @@ func query_db(query string, args []any, one bool) (any, error) {
 		}
 		dict := make(map[any]any)
 		for i, col := range cols {
-			dict[col] = *(row[i].(*any))
+			// Check if the column is "pub_date" and convert to int64
+			if col == "pub_date" {
+				pubDateStr, ok := (*(row[i].(*any))).(string)
+				if !ok {
+					return nil, fmt.Errorf("pub_date is not a string")
+				}
+				pubDateInt, err := strconv.ParseInt(pubDateStr, 10, 64) // Convert string to int64
+				if err != nil {
+					return nil, fmt.Errorf("error converting pub_date: %w", err)
+				}
+				dict[col] = pubDateInt
+			} else {
+				dict[col] = *(row[i].(*any))
+			}
 		}
 		rv = append(rv, dict)
+
 		if one {
 			break
 		}
@@ -222,16 +234,13 @@ func getSession(r *http.Request) (*sessions.Session, error) {
 // """Gets the user in the session"""
 func getUser(r *http.Request) (any, any, error) {
 	session, _ := getSession(r)
-	fmt.Println("session:", session)
 	user_id, ok := session.Values["user_id"]
-	fmt.Println("user_id: ", user_id)
-	fmt.Printf("user_id: %v (type: %T)\n", user_id, user_id)
 
 	if !ok {
 		fmt.Println("No user in the session")
 		return nil, nil, fmt.Errorf("no user in the session")
 	}
-	user, err := query_db("SELECT * FROM public.users", []any{user_id}, true)
+	user, err := query_db("SELECT * FROM public.users WHERE public.users.user_id = $1", []any{user_id}, true)
 	fmt.Println("user: ", user)
 	if err != nil {
 		fmt.Println("Unable to query for user data in getUser()")
@@ -311,7 +320,15 @@ func add_message(w http.ResponseWriter, r *http.Request) {
 	}
 	text := r.FormValue("text")
 	if text != "" {
-		db.Exec("INSERT INTO public.messages (author_id, text, pub_date, flagged) VALUES ($1, $2, $3, false)", user_id, text, int(time.Now().Unix()))
+		// Correct SQL query with pub_date and flagged as integer (0 for unflagged)
+		_, err := db.Exec("INSERT INTO public.messages (author_id, text, pub_date, flagged) VALUES ($1, $2, $3, $4)",
+			user_id, text, int(time.Now().Unix()), 0)
+
+		if err != nil {
+			http.Error(w, "Unable to add message", http.StatusInternalServerError)
+			return
+		}
+
 		setFlash(w, r, "Your message was recorded")
 	}
 	http.Redirect(w, r, "/", http.StatusFound)
@@ -378,8 +395,8 @@ func public_timeline(w http.ResponseWriter, r *http.Request) {
 		println("public timeline: the user is not logged in")
 	}
 	var query = `SELECT public.messages.*, public.users.* FROM public.messages, public.users
-	WHERE public.messages.flagged = 1 AND public.messages.author_id = public.users.user_id
-	ORDER BY public.messages.pub_date desc`
+	WHERE public.messages.flagged = 0 AND public.messages.author_id = public.users.user_id
+	ORDER BY public.messages.pub_date desc limit $1`
 	messages, err := query_db(query, []any{PER_PAGE}, false)
 	if err != nil {
 		println("Error when trying to query the database: ", err)
