@@ -5,7 +5,7 @@ type Message struct {
 	AuthorID  int    `gorm:"column:author_id;not null"`
 	Text      string `gorm:"column:text;not null"`
 	PubDate   int    `gorm:"column:pub_date;"`
-	Flagged   bool   `gorm:"column:flagged;"`
+	Flagged   int    `gorm:"column:flagged;"`
 }
 
 func (Message) TableName() string {

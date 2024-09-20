@@ -6,8 +6,6 @@ services:
       POSTGRES_DB: waect
       POSTGRES_USER: user
       POSTGRES_PASSWORD: pass
-      DB_HOST: host.docker.internals
-      DB_PORT: 5432
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./schema.sql:/docker-entrypoint-initdb.d/schema.sql
@@ -16,6 +14,25 @@ services:
     networks:
       - waect-network
 
+  go-gorilla: ##TODO: Create own docker compose and import waect-network
+    build:
+      context: ../Gorilla/minitwit-web-app
+      dockerfile: Dockerfile
+    container_name: go-gorilla-web-app
+    ports:
+      - "15000:15000"
+    depends_on:
+      - local_database
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PW: pass
+      POSTGRES_HOST: local_postgres                                                                                                                                   
+      POSTGRES_PORT: 5432
+      POSTGRES_DB_NAME: waect
+      POSTGRES_DISABLE_SSL: true
+    networks: 
+      - waect-network
+    
 networks:
   waect-network:
     name: waect-network

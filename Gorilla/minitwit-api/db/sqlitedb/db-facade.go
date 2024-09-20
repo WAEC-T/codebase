@@ -176,6 +176,7 @@ func (sqliteImpl *SqliteDbImplementation) QueryDelete(args []int) {
 }
 
 func (sqliteImpl *SqliteDbImplementation) GetMessages(args []int) []map[string]any {
+	fmt.Println("sqlite3 is the one!")
 	var messages []model.Message
 	res := sqliteImpl.db.Where("flagged = 0").Order("pub_date DESC").Limit(args[0]).Find(&messages)
 	if res.Error != nil {

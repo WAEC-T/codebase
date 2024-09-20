@@ -1,24 +1,38 @@
-FROM golang:1.22-alpine3.19 AS Build
+# Step 1: Build the Go binary
+FROM golang:1.23-alpine3.19 AS Build
 
+# Set the working directory inside the container
 WORKDIR /usr/src/app
 
-# pre-copy/cache go.mod for pre-downloading dependencies and only redownloading them in subsequent builds if they change
+# Copy the Go Modules manifests
 COPY *.go go.mod go.sum ./
+
+# Copy the Go Modules manifests
 RUN go mod download && go mod verify
 
+# Copy the source code into the container
 COPY . .
+
+# Build the Go application
 RUN go build -v -o /minitwit/app ./...
 
+# Step 2: Run the Go binary
 FROM alpine:latest
+
+# Set the working directory inside the container
 WORKDIR /minitwit
 RUN apk add --no-cache bash
 ADD https://raw.githubusercontent.com/vishnubob/wait-for-it/master/wait-for-it.sh wait-for-it.sh
 RUN chmod +x wait-for-it.sh
 
+# Copy the Go binary from the builder
 COPY  ./templates/ /minitwit/templates/
 COPY  ./static/ /minitwit/static/
 COPY --from=Build /minitwit/app /minitwit/app
 
+# Expose the port the web server will run on
 RUN chown -R 1000 /minitwit
 USER 1000:1000
-CMD ["/minitwit/app"]
+
+# Run the Go binary
+CMD ["/minitwit/app"]                  

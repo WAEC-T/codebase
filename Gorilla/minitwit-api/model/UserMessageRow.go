@@ -5,7 +5,7 @@ type UserMessageRow struct {
 	Author_id  int
 	Text       string
 	Pub_date   int
-	Flagged    bool
+	Flagged    int
 	User_id    int
 	Username   string
 	Email      string

@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"fmt"
 	"minitwit-api/db"
 	"minitwit-api/model"
 	"net/http"
@@ -30,7 +31,9 @@ func Messages(w http.ResponseWriter, r *http.Request) {
 	no_msg := no_msgs(r)
 
 	if r.Method == "GET" {
+		fmt.Println("no_msgs: ", no_msg)
 		messages := db.GetMessages([]int{no_msg})
+		fmt.Println("messages: ", messages)
 
 		w.WriteHeader(http.StatusOK)
 		err := json.NewEncoder(w).Encode(messages)
@@ -90,7 +93,7 @@ func Messages_per_user(w http.ResponseWriter, r *http.Request) {
 			AuthorID: user_id,
 			Text:     rv.Content,
 			PubDate:  int(time.Now().Unix()),
-			Flagged:  false,
+			Flagged:  0,
 		}
 		db.QueryMessage(message)
 		lg.Info("Message posted", user_id)
