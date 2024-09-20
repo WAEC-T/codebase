@@ -34,8 +34,6 @@ func getDbUrl() string {
 	dbname := os.Getenv("POSTGRES_DB_NAME")
 	disableSsl := os.Getenv("POSTGRES_DISABLE_SSL")
 
-	fmt.Println("env vars: ", user, pw, host, port, dbname, disableSsl)
-
 	disableSslString := ""
 	if disableSsl == "true" {
 		disableSslString = "sslmode=disable"
@@ -241,7 +239,6 @@ func getUser(r *http.Request) (any, any, error) {
 		return nil, nil, fmt.Errorf("no user in the session")
 	}
 	user, err := query_db("SELECT * FROM public.users WHERE public.users.user_id = $1", []any{user_id}, true)
-	fmt.Println("user: ", user)
 	if err != nil {
 		fmt.Println("Unable to query for user data in getUser()")
 		return nil, nil, err
