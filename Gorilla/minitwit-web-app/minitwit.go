@@ -131,7 +131,6 @@ func connect_db() (db *sql.DB) {
 	if err != nil {
 		panic(err)
 	}
-
 	return db
 }
 
@@ -403,7 +402,6 @@ func public_timeline(w http.ResponseWriter, r *http.Request) {
 	following = nil
 	if !isNil(user) {
 		following = getFollowing(user_id)
-		fmt.Println(following)
 	}
 	d := Data{Message: messages,
 		User:          user,

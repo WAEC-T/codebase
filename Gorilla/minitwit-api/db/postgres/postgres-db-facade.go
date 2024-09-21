@@ -53,31 +53,30 @@ func (pgImpl *PostgresDbImplementation) Connect_db() {
 		return
 	}
 
-	pgImpl.db.AutoMigrate(&model.User{}, &model.Follower{}, &model.Message{}, &model.Count{})
 	lg.Info("Successfully connected to the database")
 }
 
 func (pgImpl *PostgresDbImplementation) QueryUserCount() float64 { // To be called each time the counters are reset (when building the image)
 
 	var count int64
-	pgImpl.db.Model(&model.User{}).Count(&count)
+	pgImpl.db.Model(&model.Users{}).Count(&count)
 	return float64(count)
 }
 func (pgImpl *PostgresDbImplementation) QueryMessageCount() float64 { // To be called each time the counters are reset (when building the image)
 
 	var count int64
-	pgImpl.db.Model(&model.Message{}).Count(&count)
+	pgImpl.db.Model(&model.Messages{}).Count(&count)
 	return float64(count)
 }
 func (pgImpl *PostgresDbImplementation) QueryFollowerCount() float64 { // To be called each time the counters are reset (when building the image)
 
 	var count int64
-	pgImpl.db.Model(&model.Follower{}).Count(&count)
+	pgImpl.db.Model(&model.Followers{}).Count(&count)
 	return float64(count)
 }
 
 func (pgImpl *PostgresDbImplementation) QueryRegister(args []string) {
-	user := &model.User{
+	user := &model.Users{
 		Username: args[0],
 		Email:    args[1],
 		PwHash:   args[2],
@@ -91,7 +90,7 @@ func (pgImpl *PostgresDbImplementation) QueryRegister(args []string) {
 
 }
 
-func (pgImpl *PostgresDbImplementation) QueryMessage(message *model.Message) {
+func (pgImpl *PostgresDbImplementation) QueryMessage(message *model.Messages) {
 	res := pgImpl.db.Create(message)
 	if res.Error != nil {
 		lg.Error("Error creating message: ", res.Error)
@@ -101,7 +100,7 @@ func (pgImpl *PostgresDbImplementation) QueryMessage(message *model.Message) {
 }
 
 func (pgImpl *PostgresDbImplementation) QueryFollow(args []int) {
-	follower := &model.Follower{
+	follower := &model.Followers{
 		WhoID:  args[0],
 		WhomID: args[1],
 	}
@@ -114,7 +113,7 @@ func (pgImpl *PostgresDbImplementation) QueryFollow(args []int) {
 }
 
 func (pgImpl *PostgresDbImplementation) QueryUnfollow(args []int) {
-	res := pgImpl.db.Where("who_id = ? AND whom_id = ?", args[0], args[1]).Delete(&model.Follower{})
+	res := pgImpl.db.Where("who_id = ? AND whom_id = ?", args[0], args[1]).Delete(&model.Followers{})
 	if res.Error != nil {
 		lg.Error("Error unfollowing user: ", res.Error)
 		return
@@ -123,7 +122,7 @@ func (pgImpl *PostgresDbImplementation) QueryUnfollow(args []int) {
 }
 
 func (pgImpl *PostgresDbImplementation) QueryDelete(args []int) {
-	res := pgImpl.db.Delete(&model.User{}, args[0])
+	res := pgImpl.db.Delete(&model.Users{}, args[0])
 	if res.Error != nil {
 		lg.Error("Error deleting user: ", res.Error)
 		return
@@ -132,17 +131,16 @@ func (pgImpl *PostgresDbImplementation) QueryDelete(args []int) {
 }
 
 func (pgImpl *PostgresDbImplementation) GetMessages(args []int) []map[string]any {
-	var messages []model.Message
-	res := pgImpl.db.Where("flagged = false").Order("pub_date DESC").Limit(args[0]).Find(&messages)
+	var messages []model.Messages
+	res := pgImpl.db.Where("flagged = 0").Order("pub_date DESC").Limit(args[0]).Find(&messages)
 	if res.Error != nil {
 		lg.Error("Error getting messages: ", res.Error)
 		return []map[string]any{}
 	}
 
 	var Messages []map[string]any
-	fmt.Println("messages: ", messages)
 	for _, msg := range messages {
-		var user model.User
+		var user model.Users
 		pgImpl.db.First(&user, msg.AuthorID)
 
 		message := make(map[string]any)
@@ -157,7 +155,7 @@ func (pgImpl *PostgresDbImplementation) GetMessages(args []int) []map[string]any
 }
 
 func (pgImpl *PostgresDbImplementation) GetMessagesForUser(args []int) []map[string]any {
-	var messages []model.Message
+	var messages []model.Messages
 	res := pgImpl.db.Where("flagged = 0 AND author_id = ?", args[0]).Order("pub_date DESC").Limit(args[1]).Find(&messages)
 	if res.Error != nil {
 		lg.Error("Error getting messages for user: ", res.Error)
@@ -166,7 +164,7 @@ func (pgImpl *PostgresDbImplementation) GetMessagesForUser(args []int) []map[str
 	var Messages []map[string]any
 
 	for _, msg := range messages {
-		var user model.User
+		var user model.Users
 		pgImpl.db.First(&user, msg.AuthorID)
 
 		message := make(map[string]any)
@@ -182,7 +180,7 @@ func (pgImpl *PostgresDbImplementation) GetMessagesForUser(args []int) []map[str
 
 func (pgImpl *PostgresDbImplementation) GetFollowees(args []int) []string {
 	var followees []string
-	res := pgImpl.db.Model(model.User{}).
+	res := pgImpl.db.Model(model.Users{}).
 		Select("username").
 		Joins("inner join follower ON follower.whom_id = user_id").
 		Where("follower.who_id = ?", args[0]).
@@ -197,7 +195,7 @@ func (pgImpl *PostgresDbImplementation) GetFollowees(args []int) []string {
 }
 
 func (pgImpl *PostgresDbImplementation) Get_user_id(username string) (int, error) {
-	var user model.User
+	var user model.Users
 	res := pgImpl.db.Where("username = ?", username).First(&user)
 	if res.Error != nil {
 		if errors.Is(res.Error, gorm.ErrRecordNotFound) {
@@ -211,13 +209,13 @@ func (pgImpl *PostgresDbImplementation) Get_user_id(username string) (int, error
 	return user.UserID, nil
 }
 
-func (pgImpl *PostgresDbImplementation) GetAllUsers() []model.User {
-	var users []model.User
+func (pgImpl *PostgresDbImplementation) GetAllUsers() []model.Users {
+	var users []model.Users
 	pgImpl.db.Find(users)
 	return users
 }
 
-func (pgImpl *PostgresDbImplementation) CreateUsers(users *[]model.User) error {
+func (pgImpl *PostgresDbImplementation) CreateUsers(users *[]model.Users) error {
 	res := pgImpl.db.CreateInBatches(&users, 100)
 	if res.Error != nil {
 		return res.Error
@@ -225,13 +223,13 @@ func (pgImpl *PostgresDbImplementation) CreateUsers(users *[]model.User) error {
 	return nil
 }
 
-func (pgImpl *PostgresDbImplementation) GetAllMessages() []model.Message {
-	var messages []model.Message
+func (pgImpl *PostgresDbImplementation) GetAllMessages() []model.Messages {
+	var messages []model.Messages
 	pgImpl.db.Find(messages)
 	return messages
 }
 
-func (pgImpl *PostgresDbImplementation) CreateMessages(messages *[]model.Message) error {
+func (pgImpl *PostgresDbImplementation) CreateMessages(messages *[]model.Messages) error {
 	res := pgImpl.db.CreateInBatches(&messages, 100)
 	if res.Error != nil {
 		return res.Error
@@ -239,13 +237,13 @@ func (pgImpl *PostgresDbImplementation) CreateMessages(messages *[]model.Message
 	return nil
 }
 
-func (pgImpl *PostgresDbImplementation) GetAllFollowers() []model.Follower {
-	var followers []model.Follower
+func (pgImpl *PostgresDbImplementation) GetAllFollowers() []model.Followers {
+	var followers []model.Followers
 	pgImpl.db.Find(followers)
 	return followers
 }
 
-func (pgImpl *PostgresDbImplementation) CreateFollowers(followers *[]model.Follower) error {
+func (pgImpl *PostgresDbImplementation) CreateFollowers(followers *[]model.Followers) error {
 	res := pgImpl.db.CreateInBatches(&followers, 100)
 	if res.Error != nil {
 		return res.Error

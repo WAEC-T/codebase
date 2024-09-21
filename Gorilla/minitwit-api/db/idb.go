@@ -4,7 +4,7 @@ import "minitwit-api/model"
 
 type Idb interface {
 	Connect_db()
-	QueryMessage(message *model.Message)
+	QueryMessage(message *model.Messages)
 	QueryFollow(args []int)
 	QueryUnfollow(args []int)
 	QueryDelete(args []int)
@@ -16,9 +16,9 @@ type Idb interface {
 	IsNil(i interface{}) bool
 	IsZero(i int) bool
 
-	GetAllUsers() []model.User
-	GetAllFollowers() []model.Follower
-	GetAllMessages() []model.Message
+	GetAllUsers() []model.Users
+	GetAllFollowers() []model.Followers
+	GetAllMessages() []model.Messages
 
 	GetCount(key string) int
 	SetCount(key string, value int) error

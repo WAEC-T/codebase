@@ -1,13 +1,13 @@
 package model
 
-type Message struct {
+type Messages struct {
 	MessageID int    `gorm:"column:message_id;primaryKey"`
 	AuthorID  int    `gorm:"column:author_id;not null"`
 	Text      string `gorm:"column:text;not null"`
-	PubDate   int    `gorm:"column:pub_date;"`
+	PubDate   string `gorm:"column:pub_date;"`
 	Flagged   int    `gorm:"column:flagged;"`
 }
 
-func (Message) TableName() string {
-	return "message"
+func (Messages) TableName() string {
+	return "messages"
 }
