@@ -16,7 +16,7 @@ from hashlib import md5
 from datetime import datetime
 from contextlib import closing
 from flask import Flask, request, session, url_for, redirect, \
-     render_template, abort, g, flash
+    render_template, abort, g, flash
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -39,7 +39,8 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 
 # create our little application :)
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = f"postgresql://{os.getenv('POSTGRES_USER', 'user')}:{os.getenv('POSTGRES_PASSWORD', 'pass')}@{os.getenv('POSTGRES_HOST', '192.168.8.175')}:{os.getenv('POSTGRES_PORT', '5432')}/{os.getenv('POSTGRES_DB', 'mydatabase')}"
+app.config[
+    'SQLALCHEMY_DATABASE_URI'] = f"postgresql://{os.getenv('POSTGRES_USER', 'user')}:{os.getenv('POSTGRES_PASSWORD', 'pass')}@{os.getenv('POSTGRES_HOST', '192.168.8.175')}:{os.getenv('POSTGRES_PORT', '5432')}/{os.getenv('POSTGRES_DB', 'mydatabase')}"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.secret_key = os.getenv('SECRET_KEY', 'development key')
 app.debug = True
@@ -47,6 +48,7 @@ app.debug = True
 # Initialize database
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
+
 
 # Define your models (this replaces schema.sql)
 class User(db.Model):
@@ -56,10 +58,12 @@ class User(db.Model):
     email = db.Column(db.Text, nullable=False, unique=True)
     pw_hash = db.Column(db.Text, nullable=False)
 
+
 class Follower(db.Model):
     __tablename__ = 'followers'
     who_id = db.Column(db.Integer, db.ForeignKey('users.user_id'), primary_key=True)
     whom_id = db.Column(db.Integer, db.ForeignKey('users.user_id'), primary_key=True)
+
 
 class Message(db.Model):
     __tablename__ = 'messages'
@@ -68,6 +72,7 @@ class Message(db.Model):
     text = db.Column(db.Text, nullable=False)
     pub_date = db.Column(db.Text)
     flagged = db.Column(db.Integer)
+
 
 class Latest(db.Model):
     __tablename__ = 'latest'
@@ -78,7 +83,7 @@ class Latest(db.Model):
 def get_user_id(username):
     """Convenience method to look up the id for a username."""
     rv = g.db.execute('select user_id from user where username = ?',
-                       [username]).fetchone()
+                      [username]).fetchone()
     return rv[0] if rv else None
 
 
@@ -148,8 +153,6 @@ def user_timeline(username):
     return render_template('timeline.html', messages=messages, followed=followed, profile_user=profile_user)
 
 
-
-
 @app.route('/<username>/follow')
 def follow_user(username):
     """Adds the current user to the follower of the given user"""
@@ -163,7 +166,8 @@ def follow_user(username):
         abort(404)  # User to follow does not exist
 
     # Check if the user is already following this person
-    existing_follower = Follower.query.filter_by(who_id=g.user.user_id, whom_id=whom.user_id).first() # execute follower query
+    existing_follower = Follower.query.filter_by(who_id=g.user.user_id,
+                                                 whom_id=whom.user_id).first()  # execute follower query
 
     if existing_follower is None:
         # Create a new follower relationship if it doesn't exist
@@ -177,6 +181,7 @@ def follow_user(username):
     return redirect(url_for('user_timeline', username=username))
 
 
+@app.route('/<username>/unfollow')
 def unfollow_user(username):
     """Removes the curent user as follower of the given user"""
     if not g.user:
@@ -186,7 +191,8 @@ def unfollow_user(username):
         abort(404)
 
     # Check if the user is following this person
-    existing_follower = Follower.query.filter_by(who_id=g.user.user_id, whom_id=whom.user_id).first()  # execute follower query
+    existing_follower = Follower.query.filter_by(who_id=g.user.user_id,
+                                                 whom_id=whom.user_id).first()  # execute follower query
     if existing_follower is None:
         flash(f'You are no longer following "{username}"')
     else:
@@ -195,17 +201,29 @@ def unfollow_user(username):
     return redirect(url_for('user_timeline', username=username))
 
 
-@app.route('/add_message', methods=['POST'])
+@app.route('/<username>/add_message', methods=['POST'])
 def add_message():
-    """Registers a new message for the user."""
+    """Adds a new message to the timeline"""
     if 'user_id' not in session:
         abort(401)
-    if request.form['text']:
-        g.db.execute('''insert into message (author_id, text, pub_date)
-            values (?, ?, ?)''', (session['user_id'], request.form['text'],
-                                  int(time.time())))
-        g.db.commit()
-        flash('Your message was recorded')
+
+    message_text = request.form.get('text')
+
+    if message_text:
+        user_id = session['user_id']
+
+        # new message
+        new_message = Message(
+            author_id=user_id,
+            text=message_text,
+            pub_date=str(int(time.time())),
+            flagged=0
+        )
+
+        db.session.add(new_message)
+        db.session.commit()
+        flash(f'Message was recorded')
+
     return redirect(url_for('timeline'))
 
 
@@ -293,7 +311,6 @@ app.jinja_env.filters['datetimeformat'] = format_datetime
 app.jinja_env.filters['gravatar'] = gravatar_url
 app.secret_key = SECRET_KEY
 app.debug = DEBUG
-
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0")
