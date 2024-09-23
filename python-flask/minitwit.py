@@ -11,16 +11,15 @@
 from __future__ import with_statement
 import os
 import time
-import sqlite3
+import logging
 from hashlib import md5
 from datetime import datetime
-from contextlib import closing
 from flask import Flask, request, session, url_for, redirect, \
     render_template, abort, g, flash
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import text
 from flask_migrate import Migrate
 from werkzeug.security import check_password_hash, generate_password_hash
-from pathlib import Path
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -31,18 +30,18 @@ password = os.getenv('POSTGRES_PASSWORD', 'pass')
 host = os.getenv('POSTGRES_HOST', '192.168.8.175')
 port = os.getenv('POSTGRES_PORT', '5432')
 database = os.getenv('POSTGRES_DB', 'mydatabase')
+SECRET_KEY = os.getenv('SECRET_KEY')
 
 DATABASE_URL = f"postgresql://{username}:{password}@{host}:{port}/{database}"
 PER_PAGE = 30
 DEBUG = True
-SECRET_KEY = os.getenv('SECRET_KEY')
 
 # create our little application :)
 app = Flask(__name__)
 app.config[
-    'SQLALCHEMY_DATABASE_URI'] = f"postgresql://{os.getenv('POSTGRES_USER', 'user')}:{os.getenv('POSTGRES_PASSWORD', 'pass')}@{os.getenv('POSTGRES_HOST', '192.168.8.175')}:{os.getenv('POSTGRES_PORT', '5432')}/{os.getenv('POSTGRES_DB', 'mydatabase')}"
+    'SQLALCHEMY_DATABASE_URI'] = f"postgresql://{os.getenv('POSTGRES_USER', username)}:{os.getenv('POSTGRES_PASSWORD', password)}@{os.getenv('POSTGRES_HOST', host)}:{os.getenv('POSTGRES_PORT', port)}/{os.getenv('POSTGRES_DB', database)}"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.secret_key = os.getenv('SECRET_KEY', 'development key')
+app.secret_key = SECRET_KEY
 app.debug = True
 
 # Initialize database
@@ -89,7 +88,14 @@ def get_user_id(username):
 
 def format_datetime(timestamp):
     """Format a timestamp for display."""
-    return datetime.utcfromtimestamp(timestamp).strftime('%Y-%m-%d @ %H:%M')
+    print(timestamp)
+    if timestamp is None:
+        return "Unknown date"
+    if isinstance(timestamp, str):
+        dt = datetime.strptime(timestamp, '%Y-%m-%d %H:%M:%S')
+        return dt.strftime('%Y-%m-%d @ %H:%M:%S')
+    # If timestamp is an integer (Unix timestamp), convert it to datetime
+    return datetime.utcfromtimestamp(int(timestamp)).strftime('%Y-%m-%d @ %H:%M')
 
 
 def gravatar_url(email, size=80):
@@ -97,43 +103,38 @@ def gravatar_url(email, size=80):
     return 'http://www.gravatar.com/avatar/%s?d=identicon&s=%d' % \
         (md5(email.strip().lower().encode('utf-8')).hexdigest(), size)
 
-
 @app.before_request
 def before_request():
-    """Get the current user from the session."""
     g.user = None
     if 'user_id' in session:
-        g.user = User.query.filter_by(user_id=session['user_id']).first()
-
-
-@app.after_request
-def after_request(response):
-    """Closes the database again at the end of the request."""
-    g.db.close()
-    return response
-
+        g.user = User.query.filter_by(user_id=session['user_id']).first() # g = global object
 
 @app.route('/')
 def timeline():
+    print(request.endpoint)
     """Shows a user's timeline or the public timeline if no user is logged in."""
-    if not g.user:
+    if 'user_id' not in session:
         return redirect(url_for('public_timeline'))
 
-    messages = Message.query.filter(
-        (Message.author_id == g.user.user_id) |
-        (Message.author_id.in_(
-            Follower.query.with_entities(Follower.whom_id).filter_by(who_id=g.user.user_id)
-        ))
-    ).order_by(Message.pub_date.desc()).limit(PER_PAGE).all()
+    messages = db.session.query(Message, User).join(User, Message.author_id == User.user_id).order_by(
+        Message.pub_date.desc()).limit(PER_PAGE).all()
 
-    return render_template('timeline.html', messages=messages)
+    messages_with_users = [{'message': message, 'user': user} for message, user in messages]
+
+    return render_template('timeline.html', messages=messages_with_users )
 
 
 @app.route('/public')
 def public_timeline():
     """Displays the latest messages of all users."""
-    messages = Message.query.order_by(Message.pub_date.desc()).limit(PER_PAGE).all()
-    return render_template('timeline.html', messages=messages)
+    """Displays the latest messages of all users."""
+    # Join the Message and User tables to get the message and user details
+    messages = db.session.query(Message, User).join(User, Message.author_id == User.user_id).order_by(
+        Message.pub_date.desc()).limit(PER_PAGE).all()
+
+    messages_with_users = [{'message': message, 'user': user} for message, user in messages]
+
+    return render_template('timeline.html', messages=messages_with_users)
 
 
 @app.route('/<username>')
@@ -147,16 +148,18 @@ def user_timeline(username):
             who_id=g.user.user_id, whom_id=profile_user.user_id
         ).first() is not None
 
-    messages = Message.query.filter_by(author_id=profile_user.user_id).order_by(Message.pub_date.desc()).limit(
-        PER_PAGE).all()
+    messages = db.session.query(Message, User).join(User, Message.author_id == User.user_id).order_by(
+        Message.pub_date.desc()).limit(PER_PAGE).all()
 
-    return render_template('timeline.html', messages=messages, followed=followed, profile_user=profile_user)
+    messages_with_users = [{'message': message, 'user': user} for message, user in messages]
+
+    return render_template('timeline.html', messages=messages_with_users, followed=followed, profile_user=profile_user)
 
 
 @app.route('/<username>/follow')
 def follow_user(username):
     """Adds the current user to the follower of the given user"""
-    if not g.user:
+    if 'user_id' not in session:
         abort(401)
 
     # Fetch the user to follow by their username
@@ -184,8 +187,9 @@ def follow_user(username):
 @app.route('/<username>/unfollow')
 def unfollow_user(username):
     """Removes the curent user as follower of the given user"""
-    if not g.user:
+    if 'user_id' not in session:
         abort(401)
+
     whom = User.query.filter_by(username=username).first()
     if whom is None:
         abort(404)
@@ -201,7 +205,7 @@ def unfollow_user(username):
     return redirect(url_for('user_timeline', username=username))
 
 
-@app.route('/<username>/add_message', methods=['POST'])
+@app.route('/add_message', methods=['POST'])
 def add_message():
     """Adds a new message to the timeline"""
     if 'user_id' not in session:
@@ -216,7 +220,7 @@ def add_message():
         new_message = Message(
             author_id=user_id,
             text=message_text,
-            pub_date=str(int(time.time())),
+            pub_date=datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
             flagged=0
         )
 
@@ -246,6 +250,7 @@ def login():
         else:
             # user authenticated
             session['user_id'] = user.user_id
+            print(session['user_id'])
             flash('You were logged in')
             return redirect(url_for('timeline'))
 
@@ -286,39 +291,58 @@ def register():
     return render_template('register.html', error=error)
 
 
-
-
 @app.route('/logout')
 def logout():
-    """Logs the user out"""
-    flash('You were logged out')
+    """logs user out"""
     session.pop('user_id', None)
+    flash('You were logged out')
     return redirect(url_for('public_timeline'))
 
 
 @app.route('/cleardb')
 def clean_up():
+    """Clears the current database and reinitializes it."""
     print("Cleaning database from last run...")
-    Path(DATABASE).unlink()
 
-    def fill_db():
-        with closing(connect_db()) as db:
-            with open('dump.sql') as f:
-                db.cursor().executescript(f.read())
-            db.commit()
+    # Drop all tables in the database
+    db.drop_all()
 
     print("Setting up new version of DB...")
-    init_db()
-    fill_db()
+
+    db.create_all()
+
     return redirect(url_for('public_timeline'))
 
 
-# add some filters to jinja and set the secret key and debug mode
-# from the configuration.
-app.jinja_env.filters['datetimeformat'] = format_datetime
+@app.route('/check_db')
+def check_db_connection():
+    """Checks if the connection to the database is established."""
+    try:
+        # Execute a simple query to check the connection
+        result = db.session.execute('SELECT 1').scalar()
+        if result == 1:
+            return 'Database connection is successful!'
+        else:
+            return 'Database connection failed!', 500
+    except Exception as e:
+        # Catch any exceptions (like connection errors) and print them
+        return f"Database connection failed! Error: {str(e)}", 500
+
+
+
+# Register filters in Jinja
+app.jinja_env.filters['format_datetime'] = format_datetime
 app.jinja_env.filters['gravatar'] = gravatar_url
+
 app.secret_key = SECRET_KEY
 app.debug = DEBUG
 
 if __name__ == '__main__':
+    with app.app_context():
+        try:
+            # Attempt to connect to the database
+            db.session.execute(text('SELECT 1'))
+            logging.info("Database connection successful!")
+        except Exception as e:
+            logging.error(f"Database connection failed! Error: {str(e)}")
     app.run(host="0.0.0.0")
