@@ -230,54 +230,62 @@ def add_message():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     """Logs the user in."""
-    if g.user:
+    if 'user_id' in session:
         return redirect(url_for('timeline'))
     error = None
     if request.method == 'POST':
-        user = query_db('''select * from user where
-            username = ?''', [request.form['username']], one=True)
+        username = request.form.get('username')
+        password = request.form.get('password')
+
+        user = User.query.filter_by(username=username).first()
+
         if user is None:
             error = 'Invalid username'
-        elif not check_password_hash(user['pw_hash'],
-                                     request.form['password']):
+        elif not check_password_hash(user.pw_hash, password):
             error = 'Invalid password'
         else:
+            # user authenticated
+            session['user_id'] = user.user_id
             flash('You were logged in')
-            session['user_id'] = user['user_id']
             return redirect(url_for('timeline'))
-    return render_template('login.html', error=error)
 
+    return render_template('login.html', error=error)
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
-    """Registers the user."""
-    if g.user:
+    """Register user"""
+    if 'user_id' in session:
         return redirect(url_for('timeline'))
-
     error = None
     if request.method == 'POST':
-        if not request.form['username']:
+        username = request.form.get('username')
+        email = request.form.get('email')
+        password = request.form.get('password')
+        password2 = request.form.get('password2')
+
+        if not username:
             error = 'You have to enter a username'
-        elif not request.form['email'] or '@' not in request.form['email']:
+        elif not email or '@' not in email:
             error = 'You have to enter a valid email address'
-        elif not request.form['password']:
+        elif not password:
             error = 'You have to enter a password'
-        elif request.form['password'] != request.form['password2']:
+        elif password != password2:
             error = 'The two passwords do not match'
-        elif User.query.filter_by(username=request.form['username']).first():
+        elif User.query.filter_by(username=username).first():
             error = 'The username is already taken'
         else:
-            user = User(
-                username=request.form['username'],
-                email=request.form['email'],
-                pw_hash=generate_password_hash(request.form['password'])
+            new_user = User(
+                username=username,
+                email=email,
+                pw_hash=generate_password_hash(password)
             )
-            db.session.add(user)
+            db.session.add(new_user)
             db.session.commit()
             flash('You were successfully registered and can login now')
             return redirect(url_for('login'))
-
     return render_template('register.html', error=error)
+
+
 
 
 @app.route('/logout')
