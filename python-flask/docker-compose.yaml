@@ -1,0 +1,26 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: flask_app
+    environment:
+      FLASK_ENV: development
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: pass
+      POSTGRES_DB: waect
+      POSTGRES_HOST: local_database
+      POSTGRES_PORT: 5432
+      SECRET_KEY: waectsk
+    volumes:
+      - .:/app
+    ports:
+      - "5000:5000"
+    networks:
+      - waect-network
+
+networks:
+  waect-network:
+    name: waect-network
+    driver: bridge
+    external: true

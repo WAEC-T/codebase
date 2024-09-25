@@ -1,10 +1,9 @@
 import hashlib
 from datetime import datetime
-from flask import g
 from flask import jsonify
 from app.models.user import User
 from app.models.latest import Latest
-from extensions import db
+from app.extensions import db
 
 
 def get_user_id(username):

@@ -29,7 +29,7 @@ def create_app():
     app.register_blueprint(main_bp)
     app.register_blueprint(posts_bp)
     app.register_blueprint(admin_bp)
-    app.register_blueprint(sim_bp, url_prefix='/simulator')
+    app.register_blueprint(sim_bp)
 
     app.jinja_env.filters['format_datetime'] = format_datetime
     app.jinja_env.filters['gravatar'] = gravatar
