@@ -101,7 +101,7 @@ def unfollow_user(username):
         abort(404)
 
     existing_follower = Follower.query.filter_by(who_id=g.user.user_id,
-                                                 whom_id=whom.user_id).first()  # execute follower query
+                                                 whom_id=whom.user_id).first()
     if existing_follower is None:
         flash(f'You are no longer following "{username}"')
     else:
