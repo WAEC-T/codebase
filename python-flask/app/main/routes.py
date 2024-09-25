@@ -6,31 +6,45 @@ from config import PER_PAGE
 
 main_bp = Blueprint('main', __name__)
 
+
 @main_bp.route('/')
 def timeline():
-    """Shows a user's timeline or the public timeline if no user is logged in."""
+    """Shows a users timeline or if no user is logged in it will
+    redirect to the public timeline.  This timeline shows the user's
+    messages as well as all the messages of followed users."""
     if 'user_id' not in session:
         return redirect(url_for('main.public_timeline'))
-
-    messages = db.session.query(Message, User).join(User, Message.author_id == User.user_id).order_by(
-        Message.pub_date.desc()).limit(PER_PAGE).all()
+    user_id = session['user_id']
+    messages = (
+        db.session.query(Message, User)
+        .join(User, Message.author_id == User.user_id)
+        .filter(
+            (Message.author_id == user_id) |
+            (Message.author_id.in_(
+                db.session.query(Follower.whom_id)
+                .filter(Follower.who_id == user_id)
+            ))
+        )
+        .order_by(Message.pub_date.desc())
+        .limit(PER_PAGE)
+        .all()
+    )
 
     messages_with_users = [{'message': message, 'user': user} for message, user in messages]
 
-    return render_template('timeline.html', messages=messages_with_users )
+    return render_template('timeline.html', messages=messages_with_users)
 
 
 @main_bp.route('/public')
 def public_timeline():
     """Displays the latest messages of all users."""
-    """Displays the latest messages of all users."""
-    # Join the Message and User tables to get the message and user details
     messages = db.session.query(Message, User).join(User, Message.author_id == User.user_id).order_by(
         Message.pub_date.desc()).limit(PER_PAGE).all()
 
     messages_with_users = [{'message': message, 'user': user} for message, user in messages]
 
     return render_template('timeline.html', messages=messages_with_users)
+
 
 @main_bp.route('/<username>')
 def user_timeline(username):
@@ -43,13 +57,12 @@ def user_timeline(username):
             who_id=g.user.user_id, whom_id=profile_user.user_id
         ).first() is not None
 
-    messages = db.session.query(Message, User).join(User, Message.author_id == User.user_id).order_by(
+    messages = Message.query.filter_by(author_id=profile_user.user_id, flagged=0).order_by(
         Message.pub_date.desc()).limit(PER_PAGE).all()
 
-    messages_with_users = [{'message': message, 'user': user} for message, user in messages]
+    messages_with_users = [{'message': message, 'user': profile_user} for message in messages]
 
     return render_template('timeline.html', messages=messages_with_users, followed=followed, profile_user=profile_user)
-
 
 
 @main_bp.route('/<username>/follow')
@@ -58,18 +71,15 @@ def follow_user(username):
     if 'user_id' not in session:
         abort(401)
 
-    # Fetch the user to follow by their username
     whom = User.query.filter_by(username=username).first()
 
     if whom is None:
-        abort(404)  # User to follow does not exist
+        abort(404)
 
-    # Check if the user is already following this person
     existing_follower = Follower.query.filter_by(who_id=g.user.user_id,
-                                                 whom_id=whom.user_id).first()  # execute follower query
+                                                 whom_id=whom.user_id).first()
 
     if existing_follower is None:
-        # Create a new follower relationship if it doesn't exist
         new_follower = Follower(who_id=g.user.user_id, whom_id=whom.user_id)
         db.session.add(new_follower)
         db.session.commit()
@@ -77,7 +87,7 @@ def follow_user(username):
     else:
         flash(f'You are already following "{username}"')
 
-    return redirect(url_for('user_timeline', username=username))
+    return redirect(url_for('main.user_timeline', username=username))
 
 
 @main_bp.route('/<username>/unfollow')
@@ -90,7 +100,6 @@ def unfollow_user(username):
     if whom is None:
         abort(404)
 
-    # Check if the user is following this person
     existing_follower = Follower.query.filter_by(who_id=g.user.user_id,
                                                  whom_id=whom.user_id).first()  # execute follower query
     if existing_follower is None:
@@ -98,7 +107,7 @@ def unfollow_user(username):
     else:
         db.session.delete(existing_follower)
         db.session.commit()
-    return redirect(url_for('user_timeline', username=username))
+    return redirect(url_for('main.user_timeline', username=username))
 
 
 @main_bp.route('/cleardb')
@@ -106,7 +115,6 @@ def clean_up():
     """Clears the current database and reinitializes it."""
     print("Cleaning database from last run...")
 
-    # Drop all tables in the database
     db.drop_all()
 
     print("Setting up new version of DB...")
