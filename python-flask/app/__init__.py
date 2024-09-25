@@ -5,6 +5,7 @@ from app.extensions import db, migrate
 from app.main.routes import main_bp
 from app.posts.routes import posts_bp
 from app.auth.routes import admin_bp
+from app.simulator.routes import sim_bp
 from app.utils import format_datetime, gravatar
 from app.models.user import User
 
@@ -28,6 +29,7 @@ def create_app():
     app.register_blueprint(main_bp)
     app.register_blueprint(posts_bp)
     app.register_blueprint(admin_bp)
+    app.register_blueprint(sim_bp, url_prefix='/simulator')
 
     app.jinja_env.filters['format_datetime'] = format_datetime
     app.jinja_env.filters['gravatar'] = gravatar
