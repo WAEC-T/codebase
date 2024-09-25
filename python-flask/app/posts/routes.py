@@ -1,6 +1,6 @@
+from datetime import datetime
 from flask import Blueprint, request, redirect, url_for, flash, session, abort, render_template
 from app.models.post import Message
-from datetime import datetime
 from app.extensions import db
 
 posts_bp = Blueprint('posts', __name__)
