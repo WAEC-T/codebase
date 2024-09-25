@@ -1,10 +1,10 @@
 from flask import Blueprint
 from flask import jsonify, request, g, abort
+from werkzeug.security import generate_password_hash
 from datetime import datetime
 from app.models.user import User, Follower
 from app.models.post import Message
 from app.models.latest import Latest
-from werkzeug.security import generate_password_hash
 from app.utils import not_req_from_simulator, update_latest, get_user_id
 from app.extensions import db
 

@@ -1,5 +1,5 @@
-import hashlib
 from datetime import datetime
+import hashlib
 from flask import jsonify
 from app.models.user import User
 from app.models.latest import Latest
