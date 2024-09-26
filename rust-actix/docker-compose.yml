@@ -5,7 +5,7 @@ services:
       shm_size: "128m"
     container_name: mini-x
     networks:
-      - main
+      - waect-network
     ports:
       - "5000:5000"
       - "5001:5001"
@@ -13,3 +13,7 @@ services:
       - ../.env.local
     # environment:
     #   - DATABASE_URL=postgresql://user:pass@localhost:5432/waect
+
+networks:
+  waect-network:
+    external: true
