@@ -1,6 +1,6 @@
 from datetime import datetime
 from flask import Blueprint, request, redirect, url_for, flash, session, abort, render_template
-from app.models.post import Message
+from app.models.message import Message
 from app.extensions import db
 
 posts_bp = Blueprint('posts', __name__)
@@ -17,7 +17,7 @@ def add_message():
         new_message = Message(
             author_id=user_id,
             text=message_text,
-            pub_date=datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+            pub_date=datetime.now(),
             flagged=0
         )
 

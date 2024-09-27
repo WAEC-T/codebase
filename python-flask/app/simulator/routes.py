@@ -3,7 +3,7 @@ from flask import jsonify, request, g, abort
 from werkzeug.security import generate_password_hash
 from datetime import datetime
 from app.models.user import User, Follower
-from app.models.post import Message
+from app.models.message import Message
 from app.models.latest import Latest
 from app.utils import not_req_from_simulator, update_latest, get_user_id
 from app.extensions import db
@@ -85,7 +85,7 @@ def messages_per_user(username):
 
     elif request.method == "POST":
         request_data = request.json
-        message = Message(author_id=user.user_id, text=request_data["content"], pub_date=datetime.now().strftime('%Y-%m-%d %H:%M:%S'), flagged=0)
+        message = Message(author_id=user.user_id, text=request_data["content"], pub_date=datetime.now(), flagged=0)
         db.session.add(message)
         db.session.commit()
         return "", 204

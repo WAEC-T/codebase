@@ -17,11 +17,9 @@ def format_datetime(timestamp):
     print(timestamp)
     if timestamp is None:
         return "Unknown date"
-    if isinstance(timestamp, str):
-        dt = datetime.strptime(timestamp, '%Y-%m-%d %H:%M:%S')
-        return dt.strftime('%Y-%m-%d @ %H:%M:%S')
-    # If timestamp is an integer (Unix timestamp), convert it to datetime
-    return datetime.utcfromtimestamp(int(timestamp)).strftime('%Y-%m-%d @ %H:%M')
+    if isinstance(timestamp, datetime):
+        return timestamp.strftime('%Y-%m-%d @ %H:%M')
+    return str(timestamp)
 
 
 def gravatar(email, size=80):

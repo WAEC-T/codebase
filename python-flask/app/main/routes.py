@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, redirect, url_for, session, abort, flash, g
-from app.models.post import Message
+from app.models.message import Message
 from app.models.user import User, Follower
 from app.extensions import db
 from config import PER_PAGE
