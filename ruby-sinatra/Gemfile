@@ -23,6 +23,8 @@ gem "pg", "~> 1.5"
 
 gem "newrelic_rpm", "~> 9.7"
 
+gem "dotenv", "~> 3.1"
+
 group :development do
   gem "ruby-lsp"
   gem "rubocop", "~> 1.62", require: false

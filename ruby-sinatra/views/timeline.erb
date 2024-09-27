@@ -27,7 +27,7 @@
   <li><img alt="message author gravatar" src="<%= message.author.gravatar(48)%>"><p>
   <strong><a href="<%= message.author.username %>"><%= message.author.username %></a></strong>
   <%= Rack::Utils.escape_html(message.text) %>
-  <small>&mdash; <%= message.created_at %></small>
+  <small>&mdash; <%= message.pub_date %></small>
 <% end %>
 <% if @messages.empty? %>
   <li><em>There's no message so far.</em>
