@@ -2,15 +2,16 @@ package api
 
 import (
 	"encoding/json"
+	"fmt"
 	"minitwit-api/db"
 	"net/http"
 )
 
 func Get_latest(w http.ResponseWriter, r *http.Request) {
-	lg.Info("Get latest handler invoked ")
+	fmt.Println("Get latest handler invoked ")
 	db, err := db.GetDb()
 	if err != nil {
-		lg.Fatal("Could not get database", err)
+		fmt.Println("Could not get database", err)
 	}
 	count := db.GetCount("sim")
 	w.WriteHeader(http.StatusOK)

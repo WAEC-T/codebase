@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"minitwit-api/logger"
 	"minitwit-api/model"
 	"net/url"
 	"os"
@@ -15,8 +14,6 @@ import (
 	"gorm.io/gorm/clause"
 	gorm_logger "gorm.io/gorm/logger"
 )
-
-var lg = logger.InitializeLogger()
 
 type PostgresDbImplementation struct {
 	// Implement the methods defined in the Idb interface here
@@ -49,11 +46,11 @@ func (pgImpl *PostgresDbImplementation) Connect_db() {
 		Logger: newLogger,
 	})
 	if err != nil {
-		lg.Error("Error connecting to the database ", err)
+		fmt.Println("Error connecting to the database ", err)
 		return
 	}
 
-	lg.Info("Successfully connected to the database")
+	fmt.Println("Successfully connected to the database")
 }
 
 func (pgImpl *PostgresDbImplementation) QueryUserCount() float64 { // To be called each time the counters are reset (when building the image)
@@ -83,58 +80,58 @@ func (pgImpl *PostgresDbImplementation) QueryRegister(args []string) {
 	}
 	res := pgImpl.db.Create(user)
 	if res.Error != nil {
-		lg.Error("Error registering user: ", res.Error)
+		fmt.Println("Error registering user: ", res.Error)
 		return
 	}
-	lg.Info("User registered successfully: ", user.Username)
+	fmt.Println("User registered successfully: ", user.Username)
 
 }
 
 func (pgImpl *PostgresDbImplementation) QueryMessage(message *model.Messages) {
 	res := pgImpl.db.Create(message)
 	if res.Error != nil {
-		lg.Error("Error creating message: ", res.Error)
+		fmt.Println("Error creating message: ", res.Error)
 		return
 	}
-	lg.Info("Message created successfully: ", message.Text)
+	fmt.Println("Message created successfully: ", message.Text)
 }
 
 func (pgImpl *PostgresDbImplementation) QueryFollow(args []int) {
-	follower := &model.Followers{
+	followers := &model.Followers{
 		WhoID:  args[0],
 		WhomID: args[1],
 	}
-	res := pgImpl.db.Create(follower)
+	res := pgImpl.db.Create(followers)
 	if res.Error != nil {
-		lg.Error("Error creating follower: ", res.Error)
+		fmt.Println("Error creating followers: ", res.Error)
 		return
 	}
-	lg.Info("Follower created successfully: ", follower.WhoID, " -> ", follower.WhomID)
+	fmt.Println("Follower created successfully: ", followers.WhoID, " -> ", followers.WhomID)
 }
 
 func (pgImpl *PostgresDbImplementation) QueryUnfollow(args []int) {
 	res := pgImpl.db.Where("who_id = ? AND whom_id = ?", args[0], args[1]).Delete(&model.Followers{})
 	if res.Error != nil {
-		lg.Error("Error unfollowing user: ", res.Error)
+		fmt.Println("Error unfollowing user: ", res.Error)
 		return
 	}
-	lg.Info("User unfollowed successfully: ", args[0], " -> ", args[1])
+	fmt.Println("User unfollowed successfully: ", args[0], " -> ", args[1])
 }
 
 func (pgImpl *PostgresDbImplementation) QueryDelete(args []int) {
 	res := pgImpl.db.Delete(&model.Users{}, args[0])
 	if res.Error != nil {
-		lg.Error("Error deleting user: ", res.Error)
+		fmt.Println("Error deleting user: ", res.Error)
 		return
 	}
-	lg.Info("User deleted successfully: ", args[0])
+	fmt.Println("User deleted successfully: ", args[0])
 }
 
 func (pgImpl *PostgresDbImplementation) GetMessages(args []int) []map[string]any {
 	var messages []model.Messages
 	res := pgImpl.db.Where("flagged = 0").Order("pub_date DESC").Limit(args[0]).Find(&messages)
 	if res.Error != nil {
-		lg.Error("Error getting messages: ", res.Error)
+		fmt.Println("Error getting messages: ", res.Error)
 		return []map[string]any{}
 	}
 
@@ -150,7 +147,7 @@ func (pgImpl *PostgresDbImplementation) GetMessages(args []int) []map[string]any
 
 		Messages = append(Messages, message)
 	}
-	lg.Info("Messages retrieved successfully")
+	fmt.Println("Messages retrieved successfully")
 	return Messages
 }
 
@@ -158,7 +155,7 @@ func (pgImpl *PostgresDbImplementation) GetMessagesForUser(args []int) []map[str
 	var messages []model.Messages
 	res := pgImpl.db.Where("flagged = 0 AND author_id = ?", args[0]).Order("pub_date DESC").Limit(args[1]).Find(&messages)
 	if res.Error != nil {
-		lg.Error("Error getting messages for user: ", res.Error)
+		fmt.Println("Error getting messages for user: ", res.Error)
 	}
 
 	var Messages []map[string]any
@@ -174,7 +171,7 @@ func (pgImpl *PostgresDbImplementation) GetMessagesForUser(args []int) []map[str
 
 		Messages = append(Messages, message)
 	}
-	lg.Info("Messages for user retrieved successfully")
+	fmt.Println("Messages for user retrieved successfully")
 	return Messages
 }
 
@@ -182,15 +179,15 @@ func (pgImpl *PostgresDbImplementation) GetFollowees(args []int) []string {
 	var followees []string
 	res := pgImpl.db.Model(model.Users{}).
 		Select("username").
-		Joins("inner join follower ON follower.whom_id = user_id").
-		Where("follower.who_id = ?", args[0]).
+		Joins("inner join followers ON followers.whom_id = user_id").
+		Where("followers.who_id = ?", args[0]).
 		Limit(args[1]).
 		Scan(&followees)
 
 	if res.Error != nil {
-		lg.Error("Error getting followees: ", res.Error)
+		fmt.Println("Error getting followees: ", res.Error)
 	}
-	lg.Info("Followees retrieved successfully")
+	fmt.Println("Followees retrieved successfully")
 	return followees
 }
 
@@ -202,10 +199,10 @@ func (pgImpl *PostgresDbImplementation) Get_user_id(username string) (int, error
 			return 0, fmt.Errorf("user with username '%s' not found", username)
 
 		}
-		lg.Error("Error querying database: ", res.Error)
+		fmt.Println("Error querying database: ", res.Error)
 		return 0, fmt.Errorf("error querying database: %v", res.Error)
 	}
-	lg.Info("User found: ", username)
+	fmt.Println("User found: ", username)
 	return user.UserID, nil
 }
 

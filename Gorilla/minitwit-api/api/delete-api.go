@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 
 	_ "github.com/mattn/go-sqlite3"
@@ -12,37 +13,37 @@ import (
 )
 
 func Delete(w http.ResponseWriter, r *http.Request) {
-	lg.Info("Delete handler invoked")
+	fmt.Println("Delete handler invoked")
 	db, err := db.GetDb()
 	if err != nil {
-		lg.Error("Could not get database: ", err)
+		fmt.Println("Could not get database: ", err)
 	}
 	sim.UpdateLatest(r)
 	dec := json.NewDecoder(r.Body)
 	var rv model.DeleteData
 	err = dec.Decode(&rv)
 	if err != nil {
-		lg.Error("Error decoding request data: ", err)
+		fmt.Println("Error decoding request data: ", err)
 	}
 	is_auth := sim.Is_authenticated(w, r)
 	if !is_auth {
-		lg.Warn("Unauthorized access attempt to Delete")
+		fmt.Println("Unauthorized access attempt to Delete")
 		return
 	}
 	if rv.User != "" && r.Method == "POST" {
 		toDeleteUsername := rv.User
-		lg.Info("Deleting user: ", toDeleteUsername)
+		fmt.Println("Deleting user: ", toDeleteUsername)
 
 		toDeleteUser_id, _ := db.Get_user_id(toDeleteUsername)
-		lg.Info("User ID to delete: ", toDeleteUser_id)
+		fmt.Println("User ID to delete: ", toDeleteUser_id)
 
 		db.QueryDelete([]int{toDeleteUser_id})
-		lg.Info("User deleted successfully")
+		fmt.Println("User deleted successfully")
 
 	} else {
-		lg.Warn("Invalid request: username missing or request method not POST")
+		fmt.Println("Invalid request: username missing or request method not POST")
 	}
 
-	lg.Info("Delete completed")
+	fmt.Println("Delete completed")
 	w.WriteHeader(http.StatusOK)
 }

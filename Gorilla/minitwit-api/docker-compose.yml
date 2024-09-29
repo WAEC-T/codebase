@@ -1,0 +1,22 @@
+services:
+  go-api:
+    build:
+      context: .  # Assuming this docker-compose file is in the same directory as your API code
+      dockerfile: Dockerfile
+    container_name: go-gorilla-api
+    ports:
+      - "15001:15001" # Exposing the API on port 16000 (adjust as needed)
+    depends_on:
+      - local_database
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PW: pass
+      POSTGRES_HOST: local_postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_DB_NAME: waect
+    networks:
+      - waect-network
+
+networks:
+  waect-network:
+    external: true

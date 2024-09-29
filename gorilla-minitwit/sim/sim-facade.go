@@ -1,13 +1,6 @@
 package sim
 
-import (
-	"encoding/json"
-	"fmt"
-	"minitwit-api/db"
-	"net/http"
-	"strconv"
-)
-
+/*
 func UpdateLatest(r *http.Request) {
 	r.ParseForm()
 	latest := r.Form.Get("latest")
@@ -39,4 +32,4 @@ func Is_authenticated(w http.ResponseWriter, r *http.Request) bool {
 		return false
 	}
 	return true
-}
+}*/

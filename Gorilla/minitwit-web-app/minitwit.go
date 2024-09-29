@@ -218,13 +218,9 @@ func get_user_id(username string) (any, error) {
 	return user_id, err
 }
 
-// """Gets the session"""
+// Gets the session.
 func getSession(r *http.Request) (*sessions.Session, error) {
-	session, err := store.Get(r, "user-session")
-	if err != nil {
-		return nil, err
-	}
-	return session, err
+	return store.Get(r, "user-session")
 }
 
 // """Gets the user in the session"""

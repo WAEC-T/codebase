@@ -2,29 +2,29 @@ package api
 
 import (
 	"encoding/json"
+	"fmt"
 	"minitwit-api/db"
 	"minitwit-api/model"
+	"minitwit-api/sim"
 	"net/http"
 	"strconv"
 	"time"
-
-	"minitwit-api/sim"
 
 	"github.com/gorilla/mux"
 	_ "github.com/mattn/go-sqlite3"
 )
 
 func Messages(w http.ResponseWriter, r *http.Request) {
-	lg.Info("Messages handler invoked")
+	fmt.Println("Messages handler invoked")
 	db, err := db.GetDb()
 	if err != nil {
-		lg.Error("Could not get database", err)
+		fmt.Println("Could not get database", err)
 	}
 	sim.UpdateLatest(r)
 
 	is_auth := sim.Is_authenticated(w, r)
 	if !is_auth {
-		lg.Warn("Unauthorized access attempt to Messages")
+		fmt.Println("Unauthorized access attempt to Messages")
 		return
 	}
 	no_msg := no_msgs(r)
@@ -36,7 +36,7 @@ func Messages(w http.ResponseWriter, r *http.Request) {
 		err := json.NewEncoder(w).Encode(messages)
 
 		if err != nil {
-			lg.Error("Error encoding JSON response:", err)
+			fmt.Println("Error encoding JSON response:", err)
 			w.WriteHeader(http.StatusForbidden)
 			return
 		}
@@ -46,7 +46,7 @@ func Messages(w http.ResponseWriter, r *http.Request) {
 func Messages_per_user(w http.ResponseWriter, r *http.Request) {
 	db, err := db.GetDb()
 	if err != nil {
-		lg.Error("Could not get database - Messages per user", err)
+		fmt.Println("Could not get database - Messages per user", err)
 	}
 	vars := mux.Vars(r)
 	username := vars["username"]
@@ -54,14 +54,14 @@ func Messages_per_user(w http.ResponseWriter, r *http.Request) {
 
 	is_auth := sim.Is_authenticated(w, r)
 	if !is_auth {
-		lg.Warn("Unauthorized access attempt to Messages_perUser")
+		fmt.Println("Unauthorized access attempt to Messages_perUser")
 		return
 	}
 	no_msg := no_msgs(r)
 
 	user_id, err := db.Get_user_id(username)
 	if err != nil {
-		lg.Error("Error getting user ID", err)
+		fmt.Println("Error getting user ID", err)
 		w.WriteHeader(http.StatusForbidden)
 		return
 	}
@@ -72,7 +72,7 @@ func Messages_per_user(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		err = json.NewEncoder(w).Encode(messages)
 		if err != nil {
-			lg.Error("Error encoding JSON response: ", err)
+			fmt.Println("Error encoding JSON response: ", err)
 			w.WriteHeader(http.StatusForbidden)
 			return
 		}
@@ -81,19 +81,23 @@ func Messages_per_user(w http.ResponseWriter, r *http.Request) {
 		var rv model.MessageData
 
 		err := json.NewDecoder(r.Body).Decode(&rv)
+		fmt.Print(r)
 		if err != nil {
-			lg.Error("Error decoding request body: ", err)
+			fmt.Println("Error decoding request body: ", err)
 			w.WriteHeader(http.StatusForbidden)
 			return
 		}
+
+		pubDate := strconv.FormatInt(time.Now().Unix(), 10)
+		fmt.Println("pubdate: ", pubDate)
 		message := &model.Messages{
 			AuthorID: user_id,
 			Text:     rv.Content,
-			PubDate:  string(time.Now().Unix()),
+			PubDate:  pubDate,
 			Flagged:  0,
 		}
 		db.QueryMessage(message)
-		lg.Info("Message posted", user_id)
+		fmt.Println("Message posted", user_id)
 		w.WriteHeader(http.StatusNoContent)
 	}
 }

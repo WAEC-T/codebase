@@ -1,6 +1,6 @@
 module minitwit-api
 
-go 1.21
+go 1.23.1
 
 require (
 	github.com/gorilla/mux v1.8.1
@@ -11,9 +11,7 @@ require (
 	github.com/cespare/xxhash v1.1.0
 	github.com/jinzhu/gorm v1.9.16
 	github.com/prometheus/client_golang v1.19.0
-	go.uber.org/zap v1.27.0
 	gorm.io/driver/postgres v1.5.9
-	gorm.io/driver/sqlite v1.5.5
 	gorm.io/gorm v1.25.12
 
 )
@@ -31,7 +29,6 @@ require (
 	github.com/prometheus/client_model v0.5.0 // indirect
 	github.com/prometheus/common v0.48.0 // indirect
 	github.com/prometheus/procfs v0.12.0 // indirect
-	go.uber.org/multierr v1.10.0 // indirect
 	golang.org/x/crypto v0.17.0 // indirect
 	golang.org/x/sync v0.3.0 // indirect
 	golang.org/x/sys v0.16.0 // indirect

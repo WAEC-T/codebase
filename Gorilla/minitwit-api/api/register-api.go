@@ -15,17 +15,18 @@ import (
 )
 
 func Register(w http.ResponseWriter, r *http.Request) {
-	lg.Info("Register handler invoked")
+	fmt.Println("Register handler invoked")
 	db, err := db.GetDb()
 	if err != nil {
-		lg.Error("Could not get database: ", err)
+		fmt.Println("Could not get database: ", err)
 	}
 	sim.UpdateLatest(r)
 
 	var rv model.RegisterData
 	err = json.NewDecoder(r.Body).Decode(&rv)
+	fmt.Println(r.Body)
 	if err != nil {
-		lg.Error("Error decoding request body: ", err)
+		fmt.Println("Error decoding request body: ", err)
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
@@ -46,11 +47,11 @@ func Register(w http.ResponseWriter, r *http.Request) {
 		} else {
 			hash_pw := hashPassword(rv.Pwd)
 			db.QueryRegister([]string{rv.Username, rv.Email, hash_pw})
-			lg.Info("User registered successfully", rv.Username)
+			fmt.Println("User registered successfully", rv.Username)
 			w.WriteHeader(http.StatusNoContent)
 		}
 		if errMsg != "" {
-			lg.Error("Registration error: ", errMsg)
+			fmt.Println("Registration error: ", errMsg)
 			w.WriteHeader(http.StatusBadRequest)
 		}
 	}
