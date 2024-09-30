@@ -10,7 +10,7 @@ import (
 	"gorm.io/gorm/schema"
 )
 
-func CheckValueInMap(maps []map[interface{}]interface{}, value interface{}) bool {
+func checkValueInMap(maps []map[interface{}]interface{}, value interface{}) bool {
 	for _, m := range maps {
 		for _, v := range m {
 			if v == value {
@@ -21,7 +21,7 @@ func CheckValueInMap(maps []map[interface{}]interface{}, value interface{}) bool
 	return false
 }
 
-func ConnectDB(dsn string) (*gorm.DB, error) {
+func connectDB(dsn string) (*gorm.DB, error) {
 	fmt.Println("Connecting to the database...")
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{NamingStrategy: schema.NamingStrategy{SingularTable: true}})
 	if err != nil {
@@ -37,7 +37,7 @@ func ConnectDB(dsn string) (*gorm.DB, error) {
 }
 
 // Fetches a username by their ID
-func GetUserNameByUserID(userID string) (string, error) {
+func getUserNameByUserID(userID string) (string, error) {
 	var user models.Users
 	result := postgresDB.First(&user, userID) // Use the passed db instance
 
@@ -50,8 +50,7 @@ func GetUserNameByUserID(userID string) (string, error) {
 }
 
 // fetches a user by their ID
-func GetUserIDByUsername(userName string) (int, error) {
-
+func getUserIDByUsername(userName string) (int, error) {
 	var user models.Users
 	postgresDB.Where("username = ?", userName).First(&user)
 
@@ -61,6 +60,18 @@ func GetUserIDByUsername(userName string) (int, error) {
 
 		return user.UserID, nil
 	}
+}
+
+func getUserByUsername(userName string) (models.Users, error) {
+	var user models.Users
+	postgresDB.Where("username = ?", userName).First(&user)
+
+	if postgresDB.Error != nil {
+		fmt.Println(postgresDB.Error.Error())
+		return user, postgresDB.Error
+	}
+
+	return user, nil
 }
 
 func getPublicMessages(numMsgs int) ([]models.MessageUser, error) {
@@ -75,6 +86,8 @@ func getPublicMessages(numMsgs int) ([]models.MessageUser, error) {
 		Limit(numMsgs).
 		Find(&messages)
 
+	fmt.Println("messages: ", messages)
+
 	if result.Error != nil {
 		fmt.Println("getPublicMessages error:", postgresDB.Error.Error())
 		return nil, postgresDB.Error
@@ -83,7 +96,7 @@ func getPublicMessages(numMsgs int) ([]models.MessageUser, error) {
 }
 
 // registers a new user
-func RegisterUser(userName string, email string, password [16]byte) error {
+func registerUser(userName string, email string, password [16]byte) error {
 
 	pwHashString := hex.EncodeToString(password[:])
 

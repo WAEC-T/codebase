@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"html"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/gorilla/sessions"
@@ -37,14 +38,16 @@ func getUser(r *http.Request) (any, string, error) {
 		return nil, "", fmt.Errorf("no user in the session")
 	}
 
+	fmt.Println("getUser user_id:", userID)
+
 	// Perform type assertion for userID
-	userIDStr, ok := userID.(string)
+	userIDStr := strconv.Itoa(userID.(int))
 	if !ok {
 		return nil, "", fmt.Errorf("user_id is not of type string")
 	}
 
 	// Query the user from the database
-	user, err := GetUserNameByUserID(userIDStr) // Assuming queryUserByID is defined
+	user, err := getUserNameByUserID(userIDStr) // Assuming queryUserByID is defined
 	if err != nil {
 		return nil, "", err
 	}
@@ -81,25 +84,33 @@ func setFlash(w http.ResponseWriter, r *http.Request, message string) {
 	session.Save(r, w)
 }
 
+func reload(w http.ResponseWriter, r *http.Request, message string, template string) {
+	d := Data{}
+	if message != "" {
+		setFlash(w, r, message)
+	}
+	d.FlashMessages = getFlash(w, r)
+	tpl.ExecuteTemplate(w, template, d)
+}
+
 // publicTimeline displays the latest messages of all users.
 func public_timeline(w http.ResponseWriter, r *http.Request) {
 	user, userID, err := getUser(r)
+	fmt.Println("user: ", user)
+	fmt.Println("user_id:", userID)
 	if err != nil {
 		// Log the error and handle the user not being logged in
 		fmt.Println("public timeline: error retrieving user:", err)
 	}
 
-	fmt.Println("user_id:", userID)
-
 	// Fetch public messages
 	messages, err := getPublicMessages(PER_PAGE)
+	fmt.Println("getPublicMessages messages:", messages)
 	if err != nil {
 		fmt.Println("Error fetching public messages:", err)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
-
-	fmt.Println("messages:", messages)
 
 	// Prepare data for rendering
 	flash := getFlash(w, r)
@@ -120,7 +131,7 @@ func public_timeline(w http.ResponseWriter, r *http.Request) {
 }
 
 // """Registers the user."""
-func Register(w http.ResponseWriter, r *http.Request) {
+func register(w http.ResponseWriter, r *http.Request) {
 	user, _, err := getUser(r)
 	if err == nil && !(isNil(user)) {
 		http.Redirect(w, r, "/", http.StatusSeeOther)
@@ -150,7 +161,7 @@ func Register(w http.ResponseWriter, r *http.Request) {
 			reload(w, r, "The two passwords do not match", "register.html")
 			return
 
-		} else if id, err := GetUserIDByUsername(username); err != nil && id != 0 {
+		} else if id, err := getUserIDByUsername(username); err != nil && id != 0 {
 			fmt.Println("error: ", err)
 			reload(w, r, "The username is already taken", "register.html")
 			return
@@ -161,21 +172,56 @@ func Register(w http.ResponseWriter, r *http.Request) {
 				fmt.Println("Error hashing the password")
 				return
 			}
-			err := RegisterUser(username, email, hash)
+			err := registerUser(username, email, hash)
 			if err != nil {
 				fmt.Println("error: ", err)
 			}
 			setFlash(w, r, "You were successfully registered and can login now")
-			http.Redirect(w, r, "/public", http.StatusFound)
+			http.Redirect(w, r, "/login", http.StatusFound)
 		}
 	}
 }
 
-func reload(w http.ResponseWriter, r *http.Request, message string, template string) {
-	d := Data{}
-	if message != "" {
-		setFlash(w, r, message)
+// """Logs the user in."""
+func login(w http.ResponseWriter, r *http.Request) {
+	user, _, err := getUser(r)
+	if err == nil && !(isNil(user)) {
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+
+	} else if r.Method == "GET" {
+		reload(w, r, "", "login.html")
+
+	} else if r.Method == "POST" {
+		fmt.Println("POST, render login")
+		username := r.FormValue("username")
+		password := r.FormValue("password")
+
+		user, err := getUserByUsername(username)
+		if err != nil || isNil(user) {
+			reload(w, r, "Invalid username", "login.html")
+			return
+		}
+
+		pwHash := user.PwHash
+		if !checkPasswordHash(password, pwHash) {
+			reload(w, r, "Invalid password", "login.html")
+			return
+		}
+		session, _ := getSession(r)
+		session.Options = &sessions.Options{
+			Path:     "/",
+			MaxAge:   3600, // 1 hour in seconds
+			HttpOnly: true, // Recommended for security
+		}
+		user_id, err := getUserIDByUsername(username)
+		if err != nil {
+			panic("This is not allowed happen!")
+		}
+		session.Values["user_id"] = user_id
+		fmt.Println("setting user_id for session: ", session.Values["user_id"])
+		session.Save(r, w)
+		setFlash(w, r, "You were logged in")
+		http.Redirect(w, r, "/public", http.StatusSeeOther)
+		return
 	}
-	d.FlashMessages = getFlash(w, r)
-	tpl.ExecuteTemplate(w, template, d)
 }

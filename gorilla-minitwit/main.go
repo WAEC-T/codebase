@@ -30,7 +30,7 @@ func main() {
 	/*---------------------
 	 * Connect to DB
 	 *----------------------*/
-	postgresDB, err = ConnectDB(dsn) // Ensure this matches the function name in the db package
+	postgresDB, err = connectDB(dsn) // Ensure this matches the function name in the db package
 	if err != nil {
 		log.Fatalf("Failed to connect to database: %v", err)
 	}
@@ -42,7 +42,7 @@ func main() {
 		"getavatar": func(url string, size int) string {
 			return gravatar_url(url, size) // Assuming this function is defined somewhere
 		},
-		"gettimestamp": func(time int64) string {
+		"gettimestamp": func(time string) string {
 			return format_datetime(time) // Assuming this function is defined somewhere
 		},
 		"url_for": func(routename string, username string) string {
@@ -71,7 +71,7 @@ func main() {
 			return strings.Replace(username, " ", "%20", -1)
 		},
 		"IsFollowing": func(following []map[interface{}]interface{}, messageAuthorId int64) bool {
-			return CheckValueInMap(following, messageAuthorId)
+			return checkValueInMap(following, messageAuthorId)
 		},
 	}
 
@@ -84,7 +84,8 @@ func main() {
 	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 
 	r.HandleFunc("/public", public_timeline)
-	r.HandleFunc("/register", Register)
+	r.HandleFunc("/register", register)
+	r.HandleFunc("/login", login)
 	/*	r.HandleFunc("/", timeline) // Define your handler function for the timeline here
 		r.HandleFunc("/add_message", add_message).Methods("POST")
 		r.HandleFunc("/login", Login)
