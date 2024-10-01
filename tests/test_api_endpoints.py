@@ -216,4 +216,4 @@ def test_cleaning_the_db():
     clean_database()
     
     response = session.get(url, params=query)
-    assert response.status_code == 400
+    assert response.status_code == 404

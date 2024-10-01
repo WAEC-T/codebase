@@ -32,8 +32,7 @@ start-service:
 
 .PHONY: start-rust-actix
 start-rust-actix:
-	@$(eval SERVICE = rust-actix)
-	@$(MAKE) start-service SERVICE=$(SERVICE)
+	@$(MAKE) -s start-service SERVICE=rust-actix
 
 .PHONY: stop-service
 stop-service:
