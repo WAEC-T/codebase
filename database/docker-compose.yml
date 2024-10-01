@@ -1,7 +1,7 @@
 services:
-  local_database:
+  database:
     image: postgres:latest
-    container_name: local_postgres
+    container_name: database
     environment:
       POSTGRES_DB: waect
       POSTGRES_USER: user
@@ -9,7 +9,7 @@ services:
       DB_HOST: host.docker.internals
       DB_PORT: 5432
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      # - postgres_data:/var/lib/postgresql/data
       - ./schema.sql:/docker-entrypoint-initdb.d/schema.sql
     ports:
       - "5432:5432"
@@ -20,6 +20,5 @@ networks:
   waect-network:
     name: waect-network
     driver: bridge
-
-volumes:
-  postgres_data:
+# volumes:
+#   postgres_data:

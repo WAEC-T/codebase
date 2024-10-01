@@ -12,8 +12,6 @@ use diesel::{prelude::*, sql_query, Connection as Conn};
 use std::error::Error;
 
 fn load_db_url_from_env() -> Result<String, Box<dyn Error>> {
-    
-    dotenvy::from_path("../.env.local")?;
 
     let database_url = env::var("DATABASE_URL")?;
 
