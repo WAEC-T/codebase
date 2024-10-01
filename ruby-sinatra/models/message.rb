@@ -13,7 +13,7 @@ class Message < ActiveRecord::Base
     {
       content: text,
       user: author.username,
-      pub_date: created_at,
+      pub_date: pub_date,
     }
   end
 end

@@ -2,7 +2,7 @@
 
 ## Ruby setup guide
 
-Requires Ruby 3.3.0 and Bundler
+Requires Ruby 3.3.0, Bundler and Postgres
 
 ### Other prerequisites
 
@@ -10,9 +10,7 @@ Requires Ruby 3.3.0 and Bundler
 sudo apt update && sudo apt install libpq-dev
 ```
 
-### Setup
+### Setup and run
 
 - Install required gems with `bundle install`
-- Initial database with `bundle exec rake db:create`
-- Run migrations `bundle exec rake db:migrate`
 - Start the app with `bundle exec ruby myapp.rb`
