@@ -14,7 +14,6 @@ def get_user_id(username):
 
 def format_datetime(timestamp):
     """Format a timestamp for display."""
-    print(timestamp)
     if timestamp is None:
         return "Unknown date"
     if isinstance(timestamp, datetime):
