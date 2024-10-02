@@ -1,7 +1,7 @@
 from distutils.command.config import config
 
 from flask import Flask, session, g
-from app.extensions import db, migrate
+from app.extensions import db
 from app.main.routes import main_bp
 from app.posts.routes import posts_bp
 from app.auth.routes import admin_bp
@@ -23,7 +23,6 @@ def create_app():
 
     # Initialize extensions
     db.init_app(app)
-    migrate.init_app(app, db)
 
     # Register Blueprints
     app.register_blueprint(main_bp)
