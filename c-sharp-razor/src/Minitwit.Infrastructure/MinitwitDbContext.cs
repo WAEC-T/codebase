@@ -17,6 +17,8 @@ public sealed class MinitwitDbContext : IdentityDbContext<Author, IdentityRole<i
     public DbSet<Cheep> Cheeps { get; set; } = null!;
 
     public DbSet<Follow> Follows { get; set; } = null!;
+    
+    public DbSet<Latest> LatestEntries { get; set; } = null!; 
 
     public MinitwitDbContext(DbContextOptions<MinitwitDbContext> dbContextOptions)
         : base(dbContextOptions)
@@ -107,6 +109,19 @@ public sealed class MinitwitDbContext : IdentityDbContext<Author, IdentityRole<i
 
         modelBuilder.Entity<Cheep>()
             .HasIndex(c => c.TimeStamp);
+        
+        modelBuilder.Entity<Latest>(entity =>
+        {
+            entity.ToTable("latest");  
+
+            entity.HasKey(e => e.Id);
+
+            entity.Property(e => e.Id)
+                .HasColumnName("id");
+            
+            entity.Property(e => e.Value)
+                .HasColumnName("value");
+        });
     }
 
     public async Task RemoveDuplicateUserLogins()

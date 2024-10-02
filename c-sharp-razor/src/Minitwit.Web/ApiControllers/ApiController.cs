@@ -13,25 +13,27 @@ public class ApiController : ControllerBase
 {
     private readonly IAuthorRepository _authorRepository;
     private readonly ICheepRepository _cheepRepository;
+    private readonly ILatestRepository _latestRepository;
     private readonly UserManager<Author> _userManager;
     private readonly IUserStore<Author> _userStore;
     private readonly IUserEmailStore<Author> _emailStore;
-
+    
     public ApiController(
         IAuthorRepository authorRepository,
         ICheepRepository cheepRepository,
+        ILatestRepository latestRepository,
         UserManager<Author> userManager,
         IUserStore<Author> userStore
     )
     {
         _authorRepository = authorRepository;
         _cheepRepository = cheepRepository;
+        _latestRepository = latestRepository;
         _userManager = userManager;
         _userStore = userStore;
         _emailStore = GetEmailStore();
     }
 
-    private const string LatestCommandIdFilePath = "./latest_processed_sim_action_id.txt";
     private const string latestLogFilePath = "./LogLatestGet.txt";
     private const string registerLogFilePath = "./LogRegisterPost.txt";
     private const string msgsGetLogFilePath = "./LogMsgsGet.txt";
@@ -52,20 +54,19 @@ public class ApiController : ControllerBase
 
         try
         {
-            if (!System.IO.File.Exists(LatestCommandIdFilePath))
-                return Ok(new { latest = -1 });
-            string fileContent = await System.IO.File.ReadAllTextAsync(LatestCommandIdFilePath);
-            if (!int.TryParse(fileContent, out var latestProcessedCommandId))
-            {
-                latestProcessedCommandId = -1;
-            }
+            // Fetch entry
+            var latestEntry = await _latestRepository.GetLatestAsync();
+
+            // Default to -1 if no entry is found
+            var latestProcessedCommandId = latestEntry?.Value ?? -1;
+
             return Ok(new { latest = latestProcessedCommandId });
         }
         catch (Exception ex)
         {
             await LogRequest("{}", $"{{{ex.StackTrace}}}", latestLogFilePath);
 
-            // Handle exception appropriately, e.g., log it
+            // Handle exception
             Console.WriteLine("Error occurred while getting latest id: " + ex.Message);
             return StatusCode(500, "Internal server error");
         }
@@ -479,9 +480,20 @@ public class ApiController : ControllerBase
     {
         try
         {
-            await using (StreamWriter writer = new StreamWriter(LatestCommandIdFilePath, false))
+            // Fetch the latest entry from the latest table
+            var latestEntry = await _latestRepository.GetLatestAsync();
+
+            if (latestEntry == null)
             {
-                await writer.WriteAsync(latestId.ToString());
+                // If no entry exists, create a new one
+                latestEntry = new Latest { Id = 1, Value = latestId }; // Assuming Id is always 1
+                await _latestRepository.AddLatestAsync(latestEntry);
+            }
+            else
+            {
+                // If the entry exists, update the value
+                latestEntry.Value = latestId;
+                await _latestRepository.UpdateLatestAsync(latestEntry);
             }
         }
         catch (Exception ex)
