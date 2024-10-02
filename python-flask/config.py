@@ -1,14 +1,6 @@
 import os
 
-# configuration
-USERNAME = os.getenv('POSTGRES_USER', 'user')
-PASSWORD = os.getenv('POSTGRES_PASSWORD', 'pass')
-HOST = os.getenv('POSTGRES_HOST', '192.168.8.175')
-PORT = os.getenv('POSTGRES_PORT', '5432')
-DATABASE = os.getenv('POSTGRES_DB')
 SECRET_KEY = os.getenv('SECRET_KEY')
-
-SQLALCHEMY_DATABASE_URI = f"postgresql://{USERNAME}:{PASSWORD}@{HOST}:{PORT}/{DATABASE}"
+SQLALCHEMY_DATABASE_URI = os.getenv('SQLALCHEMY_DATABASE_URI')
 SQLALCHEMY_TRACK_MODIFICATIONS = False
-SECRET_KEY = os.getenv('SECRET_KEY')
 PER_PAGE = 50
