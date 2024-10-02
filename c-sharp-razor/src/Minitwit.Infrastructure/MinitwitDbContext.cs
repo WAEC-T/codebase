@@ -102,11 +102,7 @@ public sealed class MinitwitDbContext : IdentityDbContext<Author, IdentityRole<i
             entity.Property(e => e.Text).HasColumnName("text").IsRequired();
             entity.Property(e => e.TimeStamp)
                 .HasColumnName("pub_date")
-                .HasColumnType("text")
-                .HasConversion(
-                    v => v.ToString("yyyy-MM-dd HH:mm:ss"),  // Convert DateTime to string when saving
-                    v => DateTime.Parse(v)                   // Convert string to DateTime when reading
-                );
+                .HasColumnType("timestamp"); 
         });
 
         modelBuilder.Entity<Cheep>()
