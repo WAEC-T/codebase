@@ -33,8 +33,6 @@ def create_app():
 
     app.jinja_env.filters['format_datetime'] = format_datetime
     app.jinja_env.filters['gravatar'] = gravatar
-
-    app.secret_key = app.config['SECRET_KEY']
     app.debug = app.config['DEBUG']
 
     app.before_request(before_request)
