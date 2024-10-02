@@ -40,6 +40,7 @@ builder.Services.AddScoped<IValidator<CreateCheep>, CheepCreateValidator>();
 builder.Services.AddScoped<ICheepRepository, CheepRepository>();
 builder.Services.AddScoped<ICheepService, MinitwitService>();
 builder.Services.AddScoped<IFollowRepository, FollowRepository>();
+builder.Services.AddScoped<ILatestRepository, LatestRepository>();
 
 builder.Services.AddSession(options =>
 {
