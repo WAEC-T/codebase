@@ -1,3 +1,5 @@
 pub mod api_server;
 
-pub mod api_structs;
+pub mod model;
+pub mod routes;
+pub mod controllers;
