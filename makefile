@@ -1,12 +1,9 @@
 SERVICES = rust-actix
-
 COMPOSE_FILE_STANDARD = docker-compose.yml
-
 TEST_COMMAND = pytest tests/test_api_endpoints.py
-
 LOCAL_DATABASE = ./database/docker-compose.yml
-
 DATABASE_TABLES = users, followers, messages, latest
+DELAY_TEST_EXECUTION_SECONDS = 3
 
 .PHONY: start-local-db
 start-local-db:
@@ -52,7 +49,7 @@ test-all: start-local-db
 		echo "Testing service: $$service..."; \
 		echo "====================================="; \
 		if [ -d "$$service" ]; then \
-			$(MAKE) -s start-service SERVICE=$$service;\
+			$(MAKE) -s start-service SERVICE=$$service && sleep $(DELAY_TEST_EXECUTION_SECONDS);\
 	 		$(MAKE) -s test-service; \
 	 		echo "Stopping service: $$service..." && $(MAKE) -s stop-service SERVICE=$$service; \
 		else \

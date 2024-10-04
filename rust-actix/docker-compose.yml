@@ -1,6 +1,7 @@
 services:
   rust-actix:
-    image: rust-actix
+    image: waect/rust-actix
+    build: .
     container_name: rust-actix
     ports:
       - "5000:5000"
