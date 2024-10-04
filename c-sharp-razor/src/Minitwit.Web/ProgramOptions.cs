@@ -80,7 +80,7 @@ public class ProgramOptions
             // Get PostgreSQL environment variables
             string username = Environment.GetEnvironmentVariable("POSTGRES_USER") ?? "user";
             string password = Environment.GetEnvironmentVariable("POSTGRES_PASSWORD") ?? "pass";
-            string host = Environment.GetEnvironmentVariable("POSTGRES_HOST") ?? "192.168.8.175";
+            string host = Environment.GetEnvironmentVariable("POSTGRES_HOST") ?? "192.168.0.146";
             string port = Environment.GetEnvironmentVariable("POSTGRES_PORT") ?? "5432";
             string database = Environment.GetEnvironmentVariable("POSTGRES_DB") ?? "waect";
 
