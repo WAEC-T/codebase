@@ -3,7 +3,6 @@ package main
 import (
 	"crypto/md5"
 	"encoding/hex"
-	"fmt"
 	"strconv"
 	"time"
 
@@ -40,7 +39,5 @@ func hashPassword(password string) (string, error) {
 func checkPasswordHash(userEnteredPwd string, dbpwd string) bool {
 	hash := md5.Sum([]byte(userEnteredPwd))
 	str := hex.EncodeToString(hash[:])
-	fmt.Println("str: ", str)
-	fmt.Println("dbpwd: ", dbpwd)
 	return str == dbpwd
 }

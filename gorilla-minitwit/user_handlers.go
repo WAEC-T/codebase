@@ -5,10 +5,12 @@ import (
 	"encoding/hex"
 	"fmt"
 	"html"
+	"net"
 	"net/http"
 	"strconv"
 	"strings"
 
+	"github.com/gorilla/mux"
 	"github.com/gorilla/sessions"
 )
 
@@ -37,8 +39,6 @@ func getUser(r *http.Request) (any, string, error) {
 	if !ok {
 		return nil, "", fmt.Errorf("no user in the session")
 	}
-
-	fmt.Println("getUser user_id:", userID)
 
 	// Perform type assertion for userID
 	userIDStr := strconv.Itoa(userID.(int))
@@ -96,7 +96,6 @@ func reload(w http.ResponseWriter, r *http.Request, message string, template str
 // publicTimeline displays the latest messages of all users.
 func public_timeline(w http.ResponseWriter, r *http.Request) {
 	user, userID, err := getUser(r)
-	fmt.Println("user: ", user)
 	fmt.Println("user_id:", userID)
 	if err != nil {
 		// Log the error and handle the user not being logged in
@@ -105,7 +104,6 @@ func public_timeline(w http.ResponseWriter, r *http.Request) {
 
 	// Fetch public messages
 	messages, err := getPublicMessages(PER_PAGE)
-	fmt.Println("getPublicMessages messages:", messages)
 	if err != nil {
 		fmt.Println("Error fetching public messages:", err)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
@@ -145,6 +143,11 @@ func register(w http.ResponseWriter, r *http.Request) {
 		password := r.FormValue("password")
 		password2 := r.FormValue("password2")
 
+		userID, err := getUserIDByUsername(username)
+		if err != nil {
+			fmt.Errorf("failed to connect to database: %w", err)
+		}
+
 		if username == "" {
 			reload(w, r, "You have to enter a username", "register.html")
 			return
@@ -161,7 +164,7 @@ func register(w http.ResponseWriter, r *http.Request) {
 			reload(w, r, "The two passwords do not match", "register.html")
 			return
 
-		} else if id, err := getUserIDByUsername(username); err != nil && id != 0 {
+		} else if fmt.Sprint(userID) != "-1" || err != nil {
 			fmt.Println("error: ", err)
 			reload(w, r, "The username is already taken", "register.html")
 			return
@@ -192,7 +195,6 @@ func login(w http.ResponseWriter, r *http.Request) {
 		reload(w, r, "", "login.html")
 
 	} else if r.Method == "POST" {
-		fmt.Println("POST, render login")
 		username := r.FormValue("username")
 		password := r.FormValue("password")
 
@@ -218,10 +220,180 @@ func login(w http.ResponseWriter, r *http.Request) {
 			panic("This is not allowed happen!")
 		}
 		session.Values["user_id"] = user_id
-		fmt.Println("setting user_id for session: ", session.Values["user_id"])
+		fmt.Println("Setting user_id for session: ", session.Values["user_id"])
 		session.Save(r, w)
 		setFlash(w, r, "You were logged in")
 		http.Redirect(w, r, "/public", http.StatusSeeOther)
+		return
+	}
+}
+
+// """Logs the user out"""
+func logout(w http.ResponseWriter, r *http.Request) {
+	session, err := getSession(r)
+	if err != nil {
+		fmt.Println("Error getting session data")
+	} else {
+		setFlash(w, r, "You were logged out")
+		delete(session.Values, "user_id")
+		err = session.Save(r, w)
+		if err != nil {
+			fmt.Println("Error in saving the session data")
+		}
+		http.Redirect(w, r, "/public", http.StatusSeeOther)
+	}
+}
+
+func timeline(w http.ResponseWriter, r *http.Request) {
+	_, ip, _ := net.SplitHostPort(r.RemoteAddr)
+	fmt.Println("We got a visitor from: ", ip)
+
+	user, user_id, err := getUser(r)
+	if err != nil || isNil(user) {
+		http.Redirect(w, r, "/public", http.StatusFound)
+	} else {
+
+		messages, err := getMyMessages(user_id)
+		if err != nil {
+			fmt.Println("Timeline: Error when trying to query the database", err)
+			return
+		}
+		flash := getFlash(w, r)
+		profile_user := user
+
+		following, err := getFollowing(user_id, 30) //TODO: LIMIT OF FOLLOWERS WE QUERY?
+
+		d := Data{
+			User:          user,
+			ProfileUser:   profile_user,
+			Messages:      messages,
+			FlashMessages: flash,
+			Followed:      following,
+		}
+
+		err = tpl.ExecuteTemplate(w, "timeline.html", d)
+		if err != nil {
+			fmt.Println("Error when trying to execute the template: ", err)
+			return
+		}
+	}
+}
+
+// """Registers a new message for the user."""
+func add_message(w http.ResponseWriter, r *http.Request) {
+	user, user_id, err := getUser(r)
+	userIDString, errStr := strconv.Atoi(user_id)
+	if err != nil || errStr != nil || isNil(user) {
+		http.Error(w, "You need to login before you can post a message", http.StatusUnauthorized)
+		return
+	}
+	text := r.FormValue("text")
+	if text != "" {
+		// Correct SQL query with pub_date and flagged as integer (0 for unflagged)
+		err := addMessage(text, userIDString)
+
+		if err != nil {
+			http.Error(w, "Unable to add message", http.StatusInternalServerError)
+			return
+		}
+
+		setFlash(w, r, "Your message was recorded")
+	}
+	http.Redirect(w, r, "/", http.StatusFound)
+}
+
+// """Adds the current user as follower of the given user."""
+func follow_user(w http.ResponseWriter, r *http.Request) {
+	user, user_id, err := getUser(r)
+	if err != nil || isNil(user) {
+		http.Error(w, "You need to login before you can follow the user", http.StatusUnauthorized)
+		return
+	}
+	vars := mux.Vars(r)
+	username := vars["username"]
+	println("Now following " + username)
+
+	profileUser, err := getUserByUsername(username)
+	profileUserID := fmt.Sprintf("%v", profileUser.UserID)
+	if err != nil {
+		http.Error(w, "Followuser: Error when trying to find the user in the database in follow", http.StatusNotFound)
+		return
+	}
+	err = followUser(user_id, profileUserID)
+	if err != nil {
+		fmt.Println("Error when trying to insert data into the database")
+		return
+	}
+	message := fmt.Sprintf("You are now following &#34;%s&#34;", username)
+	setFlash(w, r, message)
+	http.Redirect(w, r, "/", http.StatusSeeOther)
+}
+
+// """Removes the current user as follower of the given user."""
+func unfollow_user(w http.ResponseWriter, r *http.Request) {
+	user, user_id, err := getUser(r)
+	if err != nil || isNil(user) {
+		http.Error(w, "You need to login before you can follow the user", http.StatusUnauthorized)
+		return
+	}
+	vars := mux.Vars(r)
+	username := vars["username"]
+	println("displaying username for " + username)
+
+	profileUser, err := getUserByUsername(username)
+	profileUserID := fmt.Sprintf("%v", profileUser.UserID)
+	if err != nil {
+		http.Error(w, "Error when trying to find the user in the database in unfollow", http.StatusNotFound)
+		return
+	}
+	err = unfollowUser(user_id, profileUserID)
+	if err != nil {
+		fmt.Println("Error when trying to delete data from database")
+		return
+	}
+	message := fmt.Sprintf("You are no longer following &#34;%s&#34;", username)
+	setFlash(w, r, message)
+	http.Redirect(w, r, "/", http.StatusFound)
+}
+
+// """Display's a users tweets."""
+func user_timeline(w http.ResponseWriter, r *http.Request) {
+	user, user_id, err := getUser(r)
+	fmt.Println("user_id: ", user_id)
+	if err != nil || isNil(user) {
+		setFlash(w, r, "You need to login before you can see the user's timeline")
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
+	}
+	vars := mux.Vars(r)
+	username := vars["username"]
+
+	following, err := getFollowing(user_id, 30) //TODO: LIMIT OF FOLLOWERS WE QUERY?
+	profile_user, err := getUserByUsername(username)
+	if err != nil || isNil(profile_user) {
+		setFlash(w, r, "The user does not exist")
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return
+	}
+	profile_user_id := profile_user.UserID
+
+	messages, err := getUserMessages(profile_user_id, 30)
+	if err != nil {
+		fmt.Println("User Timeline: Error when trying to query the database", err)
+		return
+	}
+	flash := getFlash(w, r)
+
+	d := Data{
+		Messages:      messages,
+		User:          user,
+		ProfileUser:   profile_user.Username,
+		FlashMessages: flash,
+		Followed:      following,
+	}
+	err = tpl.ExecuteTemplate(w, "timeline.html", d)
+	if err != nil {
+		fmt.Println("Error when trying to execute the template: ", err)
 		return
 	}
 }

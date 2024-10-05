@@ -23,7 +23,7 @@
     {{if eq .Req (print "/public")}}
       <h2>Public timeline</h2>
     {{else}}
-      <h2>{{.Profileuser.Username}}'s timeline</h2>
+      <h2>{{.ProfileUser}}'s timeline</h2>
     {{end}}
 
     {{if .FlashMessages}}
@@ -37,9 +37,9 @@
     <div>
       {{if ne .Req (print "/public")}}
         </div>
-        {{if eq .User.user_id .Profileuser.user_id}}
+        {{if eq .User .ProfileUser}}
           <div class="twitbox">
-            <h3>What's on your mind, {{.User.Username}}?</h3>
+            <h3>What's on your mind, {{.User}}?</h3>
             <form action="{{url_for "add_message" ""}}" method="POST">
               <p>
                 <input type="text" name="text" size="60">
@@ -62,7 +62,7 @@
               <div class="followstatus">
                 {{if eq $user $fields.Username}}
                   This is you!
-                {{else if IsFollowing $following $fields.Author_id}}
+                {{else if IsFollowing $following $fields.AuthorID}}
                   You are currently following this user
                   <a class="unfollow" href="{{url_for "unfollow" (formatUsernameUrl $fields.Username)}}">Unfollow user</a>
                 {{else}}

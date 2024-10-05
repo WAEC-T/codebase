@@ -24,7 +24,6 @@ func main() {
 	/*---------------------
 	* Load env vars
 	*----------------------*/
-	// TODO: load env vars
 	dsn := "user=user password=password dbname=waect host=localhost port=5432 sslmode=disable" // Modify as needed
 
 	/*---------------------
@@ -70,7 +69,7 @@ func main() {
 		"formatUsernameUrl": func(username string) string {
 			return strings.Replace(username, " ", "%20", -1)
 		},
-		"IsFollowing": func(following []map[interface{}]interface{}, messageAuthorId int64) bool {
+		"IsFollowing": func(following []map[interface{}]interface{}, messageAuthorId int) bool {
 			return checkValueInMap(following, messageAuthorId)
 		},
 	}
@@ -86,18 +85,15 @@ func main() {
 	r.HandleFunc("/public", public_timeline)
 	r.HandleFunc("/register", register)
 	r.HandleFunc("/login", login)
-	/*	r.HandleFunc("/", timeline) // Define your handler function for the timeline here
-		r.HandleFunc("/add_message", add_message).Methods("POST")
-		r.HandleFunc("/login", Login)
-		r.HandleFunc("/logout", Logout)
-		r.HandleFunc("/register", Register)
-		r.HandleFunc("/{username}/follow", follow_user)
-		r.HandleFunc("/{username}/unfollow", unfollow_user)
-		r.HandleFunc("/{username}", user_timeline)
-	*/
+	r.HandleFunc("/logout", logout)
+	r.HandleFunc("/", timeline)
+	r.HandleFunc("/add_message", add_message).Methods("POST")
+	r.HandleFunc("/{username}/follow", follow_user)
+	r.HandleFunc("/{username}", user_timeline)
+	r.HandleFunc("/{username}/unfollow", unfollow_user)
 
-	fmt.Println("Listening on port 15000...")
-	err = http.ListenAndServe(":15000", r)
+	fmt.Println("Listening on port 5000...")
+	err = http.ListenAndServe(":5000", r)
 	if err != nil {
 		log.Fatalf("Failed to start server: %v", err)
 	}

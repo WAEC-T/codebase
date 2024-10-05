@@ -1,5 +1,7 @@
 package sim
 
+//TODO: USE CODE BELOW FOR API
+
 /*
 func UpdateLatest(r *http.Request) {
 	r.ParseForm()

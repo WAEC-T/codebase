@@ -4,6 +4,8 @@ import (
 	"encoding/hex"
 	"fmt"
 	"gorilla-minitwit/models"
+	"strconv"
+	"time"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -86,8 +88,6 @@ func getPublicMessages(numMsgs int) ([]models.MessageUser, error) {
 		Limit(numMsgs).
 		Find(&messages)
 
-	fmt.Println("messages: ", messages)
-
 	if result.Error != nil {
 		fmt.Println("getPublicMessages error:", postgresDB.Error.Error())
 		return nil, postgresDB.Error
@@ -114,4 +114,166 @@ func registerUser(userName string, email string, password [16]byte) error {
 	}
 
 	return nil
+}
+
+// fetches all messages for the current logged in user for 'My Timeline'
+func getMyMessages(userID string) ([]models.MessageUser, error) {
+
+	var messages []models.MessageUser
+
+	subQuery := postgresDB.Table("followers").
+		Select("whom_id").
+		Where("who_id = ?", userID)
+
+	var followerIDs []int
+
+	// Find the IDs from the subquery
+	if err := subQuery.Find(&followerIDs).Error; err != nil {
+		fmt.Println(err.Error())
+		return nil, err
+	}
+
+	// Use the retrieved followerIDs in the main query
+	postgresDB.Table("messages").
+		Select("messages.*, users.*").
+		Joins("JOIN users ON messages.author_id = users.user_id").
+		Where("messages.flagged = ? AND (users.user_id = ? OR users.user_id IN (?))", 0, userID, followerIDs).
+		Order("messages.pub_date desc").
+		Find(&messages)
+
+	if postgresDB.Error != nil {
+		fmt.Println(postgresDB.Error.Error())
+		return nil, postgresDB.Error
+	}
+	return messages, nil
+}
+
+// getFollowing fetches up to `limit` users that the user identified by userID is following
+func getFollowing(userID string, limit int) ([]map[interface{}]interface{}, error) {
+	var users []models.Users
+	postgresDB.
+		Select("users.*").
+		Joins("INNER JOIN followers ON users.user_id = followers.whom_id").
+		Where("followers.who_id = ?", userID).
+		Limit(limit).
+		Find(&users)
+
+	if postgresDB.Error != nil {
+		fmt.Println(postgresDB.Error.Error())
+		return nil, postgresDB.Error
+	}
+
+	// Convert []models.Users to []map[interface{}]interface{}
+	var result []map[interface{}]interface{}
+	for _, user := range users {
+		m := map[interface{}]interface{}{
+			"UserID": user.UserID,
+			"Name":   user.Username,
+			"Email":  user.Email,
+			// Add more fields as needed
+		}
+		result = append(result, m)
+	}
+
+	return result, nil
+}
+
+// adds a new message to the database
+func addMessage(text string, author_id int) error {
+	currentTime := time.Now().UTC()
+	unixTimestamp := currentTime.Unix()
+
+	newMessage := models.Messages{
+		AuthorID: author_id,
+		Text:     text,
+		PubDate:  string(unixTimestamp), //TODO: ALIGN W. LADS: IS THIS CORRECT?
+		Flagged:  0,
+	}
+
+	postgresDB.Create(&newMessage)
+
+	if postgresDB.Error != nil {
+		fmt.Println(postgresDB.Error.Error())
+		return postgresDB.Error
+	}
+
+	return nil
+}
+
+// followUser adds a new follower to the database
+func followUser(userID string, profileUserID string) error {
+
+	userIDInt, errz := strconv.Atoi(userID)
+	profileUserIDInt, errx := strconv.Atoi(profileUserID)
+
+	if errz != nil {
+		fmt.Println(errz.Error())
+		return errz
+	} else if errx != nil {
+		fmt.Println(errx.Error())
+		return errx
+	}
+
+	// following relationship already exists
+	var count int64
+	postgresDB.Model(&models.Followers{}).Where("who_id = ? AND whom_id = ?", userIDInt, profileUserIDInt).Count(&count)
+	if count > 0 {
+		return nil
+	}
+
+	newFollower := models.Followers{
+		WhoID:  userIDInt,
+		WhomID: profileUserIDInt,
+	}
+
+	postgresDB.Create(&newFollower)
+
+	if postgresDB.Error != nil {
+		fmt.Println(postgresDB.Error.Error())
+		return postgresDB.Error
+	}
+
+	return nil
+}
+
+// unfollowUser removes a follower from the database
+func unfollowUser(userID string, profileUserID string) error {
+	userIDInt, errz := strconv.Atoi(userID)
+	profileUserIDInt, errx := strconv.Atoi(profileUserID)
+
+	if errz != nil {
+		fmt.Println(errz.Error())
+		return errz
+	} else if errx != nil {
+		fmt.Println(errx.Error())
+		return errx
+	}
+
+	postgresDB.Where("who_id = ? AND whom_id = ?", userIDInt, profileUserIDInt).Delete(&models.Followers{})
+
+	if postgresDB.Error != nil {
+		fmt.Println(postgresDB.Error.Error())
+		return postgresDB.Error
+	}
+
+	return nil
+}
+
+// fetches all messages from picked user
+func getUserMessages(pUserId int, numMsgs int) ([]models.MessageUser, error) {
+	var messages []models.MessageUser
+	postgresDB.Table("messages").
+		Select("messages.*, users.*").
+		Joins("JOIN users ON users.user_id = messages.author_id").
+		Where("users.user_id = ?", pUserId).
+		Order("messages.pub_date asc").
+		Limit(numMsgs).
+		Find(&messages)
+
+	if postgresDB.Error != nil {
+		fmt.Println(postgresDB.Error.Error())
+		return nil, postgresDB.Error
+	}
+
+	return messages, nil
 }
