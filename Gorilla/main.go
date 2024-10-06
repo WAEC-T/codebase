@@ -41,8 +41,8 @@ func main() {
 		"getavatar": func(url string, size int) string {
 			return gravatar_url(url, size) // Assuming this function is defined somewhere
 		},
-		"gettimestamp": func(time string) string {
-			return format_datetime(time) // Assuming this function is defined somewhere
+		"gettimestamp": func(timestamp string) string {
+			return format_datetime(timestamp)
 		},
 		"url_for": func(routename string, username string) string {
 			switch routename {

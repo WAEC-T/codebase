@@ -30,11 +30,6 @@ func connectDB(dsn string) (*gorm.DB, error) {
 		return nil, fmt.Errorf("failed to connect to database: %w", err)
 	}
 
-	// Perform Auto Migration
-	if err := db.AutoMigrate(&models.Users{}, &models.Messages{}, &models.Followers{}); err != nil {
-		return nil, fmt.Errorf("failed to migrate database: %w", err)
-	}
-
 	return db, nil
 }
 
@@ -181,12 +176,13 @@ func getFollowing(userID string, limit int) ([]map[interface{}]interface{}, erro
 // adds a new message to the database
 func addMessage(text string, author_id int) error {
 	currentTime := time.Now().UTC()
-	unixTimestamp := currentTime.Unix()
+
+	fmt.Println("timestamp:", currentTime)
 
 	newMessage := models.Messages{
 		AuthorID: author_id,
 		Text:     text,
-		PubDate:  string(unixTimestamp), //TODO: ALIGN W. LADS: IS THIS CORRECT?
+		PubDate:  currentTime, //TODO: ALIGN W. LADS: IS THIS CORRECT?
 		Flagged:  0,
 	}
 

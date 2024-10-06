@@ -3,24 +3,26 @@ package main
 import (
 	"crypto/md5"
 	"encoding/hex"
-	"strconv"
+	"fmt"
 	"time"
 
 	"golang.org/x/crypto/bcrypt"
 )
 
 func format_datetime(timestamp string) string {
-	// Convert the string to an int64 (timestamp in seconds)
-	unixTime, err := strconv.ParseInt(timestamp, 10, 64)
+	// Define the layout that matches your input timestamp format
+	layout := time.RFC3339 // or "2006-01-02T15:04:05Z07:00" for a custom layout
+
+	// Parse the string into a time.Time object
+	parsedTime, err := time.Parse(layout, timestamp)
 	if err != nil {
-		return "format_datetime error"
+		// Handle the error, return the original string or an error message
+		fmt.Println("Error parsing timestamp:", err)
+		return timestamp
 	}
 
-	// Create a time.Time object from the Unix timestamp
-	t := time.Unix(unixTime, 0)
-
-	// Format the time into the desired display format
-	return t.Format("2006-01-02 @ 15:04")
+	// Format the time.Time object into your desired display format
+	return parsedTime.Format("2006-01-02 15:04:05") // Customize this layout as needed
 }
 
 func isNil(i interface{}) bool {
