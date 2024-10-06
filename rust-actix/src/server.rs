@@ -1,14 +1,16 @@
 use actix_web::middleware::Logger;
 use actix_web::{App, HttpServer};
-use mini_x::api::services::api_services;
+use waect_rust::api::services::api_services;
+use waect_rust::frontend::services::{page_services, page_middleware};
 
-// TODO: right now it has only the api ! Add all the frontend as a service here too! [figure out how to not use the middleware and stuff fr the api]
 #[actix_web::main]
 pub async fn start() -> std::io::Result<()> {
     HttpServer::new(move || {
         App::new()
             .wrap(Logger::default())
             .service(api_services())
+            //TODO implement the middlewares!!
+            .service(page_services())
     })
     .bind(("0.0.0.0", 5000))?
     .run()

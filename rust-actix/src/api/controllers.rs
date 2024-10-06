@@ -1,8 +1,4 @@
-use crate::{api::model::*};
-use crate::{
-    create_msg, create_user, establish_connection, follow, get_followers, get_public_messages,
-    get_timeline, unfollow, get_user_by_name, set_latest,
-};
+use crate::{api::model::*, database::repository::{establish_connection, get_user_by_name, set_latest, get_latest, create_user, get_public_messages, get_timeline, create_msg, get_followers, follow, unfollow}};
 use actix_web::{web, HttpResponse};
 use chrono::Utc;
 use pwhash::bcrypt;
@@ -18,8 +14,8 @@ fn update_latest(conn: &mut PgConnection, query: web::Query<Latest>) {
 }
 
 pub async fn retrieve_latest() -> HttpResponse {
-    let conn = &mut establish_connection();
-    let latest = crate::get_latest(conn);
+    let conn: &mut PgConnection = &mut establish_connection();
+    let latest = get_latest(conn);
     HttpResponse::Ok().json(Latest { latest })
 }
 
