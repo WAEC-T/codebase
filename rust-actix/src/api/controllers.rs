@@ -17,13 +17,13 @@ fn update_latest(conn: &mut PgConnection, query: web::Query<Latest>) {
     set_latest(conn, query.latest);
 }
 
-pub async fn get_latest() -> HttpResponse {
+pub async fn retrieve_latest() -> HttpResponse {
     let conn = &mut establish_connection();
     let latest = crate::get_latest(conn);
     HttpResponse::Ok().json(Latest { latest })
 }
 
-pub async fn post_register(info: RegisterInfo, query: web::Query<Latest>) -> HttpResponse {
+pub async fn register_new_user(info: RegisterInfo, query: web::Query<Latest>) -> HttpResponse {
     let conn = &mut establish_connection();
     update_latest(conn, query);
 
@@ -54,7 +54,7 @@ pub async fn post_register(info: RegisterInfo, query: web::Query<Latest>) -> Htt
     }
 }
 
-pub async fn messages_api(amount: web::Query<MessageAmount>, query: web::Query<Latest>) -> HttpResponse {
+pub async fn list_feed_messages(amount: web::Query<MessageAmount>, query: web::Query<Latest>) -> HttpResponse {
     let conn = &mut establish_connection();
     update_latest(conn, query);
     let messages: Vec<Message> = get_public_messages(conn, amount.no)
@@ -71,7 +71,7 @@ pub async fn messages_api(amount: web::Query<MessageAmount>, query: web::Query<L
     HttpResponse::Ok().json(messages)
 }
 
-pub async fn messages_per_user_get(username: String, amount: web::Query<MessageAmount>, query: web::Query<Latest>) -> HttpResponse {
+pub async fn list_user_messages(username: String, amount: web::Query<MessageAmount>, query: web::Query<Latest>) -> HttpResponse {
     let conn = &mut establish_connection();
     update_latest(conn, query);
 
@@ -93,7 +93,7 @@ pub async fn messages_per_user_get(username: String, amount: web::Query<MessageA
     }
 }
 
-pub async fn messages_per_user_post(username: String, msg: MessageContent, query: web::Query<Latest>) -> HttpResponse {
+pub async fn create_user_message(username: String, msg: MessageContent, query: web::Query<Latest>) -> HttpResponse {
     let conn = &mut establish_connection();
     update_latest(conn, query);
 
@@ -105,7 +105,7 @@ pub async fn messages_per_user_post(username: String, msg: MessageContent, query
     }
 }
 
-pub async fn follows_get(username: String, amount: web::Query<MessageAmount>, query: web::Query<Latest>) -> HttpResponse {
+pub async fn list_user_followers(username: String, amount: web::Query<MessageAmount>, query: web::Query<Latest>) -> HttpResponse {
     let conn = &mut establish_connection();
     update_latest(conn, query);
 
@@ -118,7 +118,7 @@ pub async fn follows_get(username: String, amount: web::Query<MessageAmount>, qu
     }
 }
 
-pub async fn follows_post(username: String, follow_param: FollowParam, query: web::Query<Latest>) -> HttpResponse {
+pub async fn update_user_followers(username: String, follow_param: FollowParam, query: web::Query<Latest>) -> HttpResponse {
     let conn = &mut establish_connection();
     update_latest(conn, query);
 
