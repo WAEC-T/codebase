@@ -21,7 +21,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_04_12_083347) do
   end
 
   create_table "latest", force: :cascade do |t|
-    t.integer "value"
+    t.integer "id"
   end
 
   create_table "messages", force: :cascade do |t|
@@ -29,7 +29,6 @@ ActiveRecord::Schema[7.1].define(version: 2024_04_12_083347) do
     t.string "text", null: false
     t.boolean "flagged"
     t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
     t.index ["author_id"], name: "index_messages_on_author_id"
     t.index ["created_at"], name: "index_messages_on_created_at", order: :desc
     t.index ["flagged"], name: "index_messages_on_flagged"
@@ -38,7 +37,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_04_12_083347) do
   create_table "users", force: :cascade do |t|
     t.string "username", null: false
     t.string "email", null: false
-    t.string "password_digest", null: false
+    t.string "pw_hash", null: false
     t.index ["username"], name: "index_users_on_username"
   end
 
