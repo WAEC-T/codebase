@@ -20,7 +20,7 @@ stop-local-db:
 clean-db:
 	@echo "Cleaning the database..."
 	@export PGPASSWORD=pass
-	@docker-compose -f $(LOCAL_DATABASE) exec local_database psql -U user -d waect -c "TRUNCATE TABLE $(DATABASE_TABLES) ;"
+	@docker-compose -f $(LOCAL_DATABASE) exec database psql -U user -d waect -c "TRUNCATE TABLE $(DATABASE_TABLES) ;"
 
 .PHONY: start-service
 start-service:
@@ -59,4 +59,4 @@ test-all: start-local-db
 	 	fi; \
 	done
 	$(MAKE) -s stop-local-db
-	@echo "All services tested successfully!"
+	@echo "All services tested!"
