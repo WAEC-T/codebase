@@ -5,7 +5,7 @@ services:
       dockerfile: Dockerfile
     container_name: flask_app
     env_file:
-      - .env
+      - ../.env.local
     volumes:
       - .:/app
     ports:
