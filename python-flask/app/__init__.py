@@ -1,39 +1,8 @@
-from distutils.command.config import config
-
-from flask import Flask, session, g
-from app.extensions import db
-from app.main.routes import main_bp
-from app.posts.routes import posts_bp
-from app.auth.routes import admin_bp
-from app.simulator.routes import sim_bp
-from app.utils import format_datetime, gravatar
-from app.models.user import User
-
-def before_request():
-    """Runs before every request to check if a user is logged in."""
-    g.user = None
-    if 'user_id' in session:
-        g.user = User.query.filter_by(user_id=session['user_id']).first()
+from flask import Flask
+from app.app_setup import prepare_application
 
 def create_app():
+    """Flask application factory."""
     app = Flask(__name__)
-
-    # Configurations
-    app.config.from_pyfile('../config.py')
-
-    # Initialize extensions
-    db.init_app(app)
-
-    # Register Blueprints
-    app.register_blueprint(main_bp)
-    app.register_blueprint(posts_bp)
-    app.register_blueprint(admin_bp)
-    app.register_blueprint(sim_bp, url_prefix='/api')
-
-    app.jinja_env.filters['format_datetime'] = format_datetime
-    app.jinja_env.filters['gravatar'] = gravatar
-    app.debug = app.config['DEBUG']
-
-    app.before_request(before_request)
-
+    prepare_application(app)
     return app
