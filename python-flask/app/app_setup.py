@@ -5,7 +5,7 @@ from app.models.user import User
 from app.main.routes import main_bp
 from app.posts.routes import posts_bp
 from app.auth.routes import admin_bp
-from app.api.routes import sim_bp
+from app.api.routes import api_bp
 from app.extensions import db
 from app.utils import format_datetime, gravatar
 
@@ -23,7 +23,7 @@ def register_blueprints(app):
     app.register_blueprint(main_bp)
     app.register_blueprint(posts_bp)
     app.register_blueprint(admin_bp)
-    app.register_blueprint(sim_bp, url_prefix='/api')
+    app.register_blueprint(api_bp, url_prefix='/api')
 
 def configure_server(app):
     """Configure server settings and database initialization."""
