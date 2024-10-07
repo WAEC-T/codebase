@@ -8,15 +8,15 @@ from app.models.latest import Latest
 from app.utils import not_req_from_simulator, update_latest, get_user_id
 from app.extensions import db
 
-sim_bp = Blueprint('sim', __name__)
+api_bp = Blueprint('api', __name__)
 
-@sim_bp.route("/latest", methods=["GET"])
+@api_bp.route("/latest", methods=["GET"])
 def get_latest():
     latest_entry = Latest.query.first()  # Fetch the first and only entry
     latest_processed_command_id = latest_entry.value if latest_entry else -1
     return jsonify({"latest": latest_processed_command_id})
 
-@sim_bp.route("/register", methods=["POST"])
+@api_bp.route("/register", methods=["POST"])
 def register():
     update_latest(request)
     not_from_sim_response = not_req_from_simulator(request)
@@ -43,7 +43,7 @@ def register():
         return "", 204
 
 
-@sim_bp.route("/msgs", methods=["GET"])
+@api_bp.route("/msgs", methods=["GET"])
 def messages():
     """Return all latest messages."""
     update_latest(request)
@@ -65,7 +65,7 @@ def messages():
     return jsonify(filtered_msgs)
 
 
-@sim_bp.route("/msgs/<username>", methods=["GET", "POST"])
+@api_bp.route("/msgs/<username>", methods=["GET", "POST"])
 def messages_per_user(username):
     """Returns all messages for a specific user or adds a new message for specified user."""
     update_latest(request)
@@ -91,7 +91,7 @@ def messages_per_user(username):
         return "", 204
 
 
-@sim_bp.route("/fllws/<username>", methods=["GET", "POST"])
+@api_bp.route("/fllws/<username>", methods=["GET", "POST"])
 def follow(username):
     update_latest(request)
     not_from_sim_response = not_req_from_simulator(request)

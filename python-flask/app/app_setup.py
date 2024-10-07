@@ -5,7 +5,7 @@ from app.models.user import User
 from app.main.routes import main_bp
 from app.posts.routes import posts_bp
 from app.auth.routes import admin_bp
-from app.simulator.routes import sim_bp
+from app.api.routes import sim_bp
 from app.extensions import db
 from app.utils import format_datetime, gravatar
 
