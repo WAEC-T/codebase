@@ -8,7 +8,7 @@ RUN apk add --no-cache cargo
 RUN apk add --no-cache libpq-dev
 
 # Copy over the Cargo.toml files to the shell project
-COPY Cargo.toml Cargo.lock ./
+COPY Cargo.toml ./
 
 # Build and cache the dependencies
 RUN mkdir src && echo "fn main() {}" > src/main.rs
