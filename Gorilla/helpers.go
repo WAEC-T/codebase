@@ -24,13 +24,8 @@ func format_datetime(timestamp string) string {
 	// Format the time.Time object into your desired display format
 	return parsedTime.Format("2006-01-02 15:04:05") // Customize this layout as needed
 }
-
-return i == nil || i == interface{}(nil)
-	if i == nil || i == interface{}(nil) {
-		return true
-	} else {
-		return false
-	}
+func isNil(i interface{}) bool {
+	return i == nil || i == interface{}(nil)
 }
 
 func hashPassword(password string) (string, error) {
