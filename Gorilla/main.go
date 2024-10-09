@@ -80,7 +80,8 @@ func main() {
 	}
 
 	r := mux.NewRouter()
-	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
+	r := mux.NewRouter()
+	setRouteHandlers(r)
 
 	r.HandleFunc("/public", public_timeline)
 	r.HandleFunc("/register", register)
