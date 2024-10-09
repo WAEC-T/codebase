@@ -1,9 +1,10 @@
-package main
+package db
 
 import (
 	"encoding/hex"
 	"fmt"
-	"gorilla-minitwit/models"
+	"gorilla-minitwit/internal/config"
+	"gorilla-minitwit/internal/models"
 	"strconv"
 	"time"
 
@@ -12,7 +13,7 @@ import (
 	"gorm.io/gorm/schema"
 )
 
-func checkValueInMap(maps []map[interface{}]interface{}, value interface{}) bool {
+func CheckValueInMap(maps []map[interface{}]interface{}, value interface{}) bool {
 	for _, m := range maps {
 		for _, v := range m {
 			if v == value {
@@ -23,7 +24,7 @@ func checkValueInMap(maps []map[interface{}]interface{}, value interface{}) bool
 	return false
 }
 
-func connectDB(dsn string) (*gorm.DB, error) {
+func ConnectDB(dsn string) (*gorm.DB, error) {
 	fmt.Println("Connecting to the database...")
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{NamingStrategy: schema.NamingStrategy{SingularTable: true}})
 	if err != nil {
@@ -34,9 +35,9 @@ func connectDB(dsn string) (*gorm.DB, error) {
 }
 
 // Fetches a username by their ID
-func getUserNameByUserID(userID string) (string, error) {
+func GetUserNameByUserID(userID string) (string, error) {
 	var user models.Users
-	result := postgresDB.First(&user, userID) // Use the passed db instance
+	result := config.DB.First(&user, userID) // Use the passed db instance
 
 	if result.Error != nil {
 		fmt.Println(result.Error.Error())
@@ -47,9 +48,9 @@ func getUserNameByUserID(userID string) (string, error) {
 }
 
 // fetches a user by their ID
-func getUserIDByUsername(userName string) (int, error) {
+func GetUserIDByUsername(userName string) (int, error) {
 	var user models.Users
-	postgresDB.Where("username = ?", userName).First(&user)
+	config.DB.Where("username = ?", userName).First(&user)
 
 	if user.UserID == 0 {
 		return -1, nil
@@ -59,23 +60,23 @@ func getUserIDByUsername(userName string) (int, error) {
 	}
 }
 
-func getUserByUsername(userName string) (models.Users, error) {
+func GetUserByUsername(userName string) (models.Users, error) {
 	var user models.Users
-	postgresDB.Where("username = ?", userName).First(&user)
+	config.DB.Where("username = ?", userName).First(&user)
 
-	if postgresDB.Error != nil {
-		fmt.Println(postgresDB.Error.Error())
-		return user, postgresDB.Error
+	if config.DB.Error != nil {
+		fmt.Println(config.DB.Error.Error())
+		return user, config.DB.Error
 	}
 
 	return user, nil
 }
 
-func getPublicMessages(numMsgs int) ([]models.MessageUser, error) {
+func GetPublicMessages(numMsgs int) ([]models.MessageUser, error) {
 
 	var messages []models.MessageUser
 	// Ensure only the required fields are selected
-	result := postgresDB.Table("messages").
+	result := config.DB.Table("messages").
 		Select("messages.message_id, messages.author_id, messages.text, messages.pub_date, messages.flagged, users.user_id, users.username, users.email").
 		Joins("JOIN users ON messages.author_id = users.user_id").
 		Where("messages.flagged = ?", 0).
@@ -84,14 +85,14 @@ func getPublicMessages(numMsgs int) ([]models.MessageUser, error) {
 		Find(&messages)
 
 	if result.Error != nil {
-		fmt.Println("getPublicMessages error:", postgresDB.Error.Error())
-		return nil, postgresDB.Error
+		fmt.Println("getPublicMessages error:", config.DB.Error.Error())
+		return nil, config.DB.Error
 	}
 	return messages, nil
 }
 
 // registers a new user
-func registerUser(userName string, email string, password [16]byte) error {
+func RegisterUser(userName string, email string, password [16]byte) error {
 
 	pwHashString := hex.EncodeToString(password[:])
 
@@ -101,22 +102,22 @@ func registerUser(userName string, email string, password [16]byte) error {
 		PwHash:   pwHashString,
 	}
 
-	postgresDB.Create(&newUser)
+	config.DB.Create(&newUser)
 
-	if postgresDB.Error != nil {
-		fmt.Println(postgresDB.Error.Error())
-		return postgresDB.Error
+	if config.DB.Error != nil {
+		fmt.Println(config.DB.Error.Error())
+		return config.DB.Error
 	}
 
 	return nil
 }
 
 // fetches all messages for the current logged in user for 'My Timeline'
-func getMyMessages(userID string) ([]models.MessageUser, error) {
+func GetMyMessages(userID string) ([]models.MessageUser, error) {
 
 	var messages []models.MessageUser
 
-	subQuery := postgresDB.Table("followers").
+	subQuery := config.DB.Table("followers").
 		Select("whom_id").
 		Where("who_id = ?", userID)
 
@@ -129,33 +130,33 @@ func getMyMessages(userID string) ([]models.MessageUser, error) {
 	}
 
 	// Use the retrieved followerIDs in the main query
-	postgresDB.Table("messages").
+	config.DB.Table("messages").
 		Select("messages.*, users.*").
 		Joins("JOIN users ON messages.author_id = users.user_id").
 		Where("messages.flagged = ? AND (users.user_id = ? OR users.user_id IN (?))", 0, userID, followerIDs).
 		Order("messages.pub_date desc").
 		Find(&messages)
 
-	if postgresDB.Error != nil {
-		fmt.Println(postgresDB.Error.Error())
-		return nil, postgresDB.Error
+	if config.DB.Error != nil {
+		fmt.Println(config.DB.Error.Error())
+		return nil, config.DB.Error
 	}
 	return messages, nil
 }
 
 // getFollowing fetches up to `limit` users that the user identified by userID is following
-func getFollowing(userID string, limit int) ([]map[interface{}]interface{}, error) {
+func GetFollowing(userID string, limit int) ([]map[interface{}]interface{}, error) {
 	var users []models.Users
-	postgresDB.
+	config.DB.
 		Select("users.*").
 		Joins("INNER JOIN followers ON users.user_id = followers.whom_id").
 		Where("followers.who_id = ?", userID).
 		Limit(limit).
 		Find(&users)
 
-	if postgresDB.Error != nil {
-		fmt.Println(postgresDB.Error.Error())
-		return nil, postgresDB.Error
+	if config.DB.Error != nil {
+		fmt.Println(config.DB.Error.Error())
+		return nil, config.DB.Error
 	}
 
 	// Convert []models.Users to []map[interface{}]interface{}
@@ -174,7 +175,7 @@ func getFollowing(userID string, limit int) ([]map[interface{}]interface{}, erro
 }
 
 // adds a new message to the database
-func addMessage(text string, author_id int) error {
+func AddMessage(text string, author_id int) error {
 	currentTime := time.Now().UTC()
 
 	fmt.Println("timestamp:", currentTime)
@@ -186,18 +187,18 @@ func addMessage(text string, author_id int) error {
 		Flagged:  0,
 	}
 
-	postgresDB.Create(&newMessage)
+	config.DB.Create(&newMessage)
 
-	if postgresDB.Error != nil {
-		fmt.Println(postgresDB.Error.Error())
-		return postgresDB.Error
+	if config.DB.Error != nil {
+		fmt.Println(config.DB.Error.Error())
+		return config.DB.Error
 	}
 
 	return nil
 }
 
 // followUser adds a new follower to the database
-func followUser(userID string, profileUserID string) error {
+func FollowUser(userID string, profileUserID string) error {
 
 	userIDInt, errz := strconv.Atoi(userID)
 	profileUserIDInt, errx := strconv.Atoi(profileUserID)
@@ -212,7 +213,7 @@ func followUser(userID string, profileUserID string) error {
 
 	// following relationship already exists
 	var count int64
-	postgresDB.Model(&models.Followers{}).Where("who_id = ? AND whom_id = ?", userIDInt, profileUserIDInt).Count(&count)
+	config.DB.Model(&models.Followers{}).Where("who_id = ? AND whom_id = ?", userIDInt, profileUserIDInt).Count(&count)
 	if count > 0 {
 		return nil
 	}
@@ -222,18 +223,18 @@ func followUser(userID string, profileUserID string) error {
 		WhomID: profileUserIDInt,
 	}
 
-	postgresDB.Create(&newFollower)
+	config.DB.Create(&newFollower)
 
-	if postgresDB.Error != nil {
-		fmt.Println(postgresDB.Error.Error())
-		return postgresDB.Error
+	if config.DB.Error != nil {
+		fmt.Println(config.DB.Error.Error())
+		return config.DB.Error
 	}
 
 	return nil
 }
 
 // unfollowUser removes a follower from the database
-func unfollowUser(userID string, profileUserID string) error {
+func UnfollowUser(userID string, profileUserID string) error {
 	userIDInt, errz := strconv.Atoi(userID)
 	profileUserIDInt, errx := strconv.Atoi(profileUserID)
 
@@ -245,20 +246,20 @@ func unfollowUser(userID string, profileUserID string) error {
 		return errx
 	}
 
-	postgresDB.Where("who_id = ? AND whom_id = ?", userIDInt, profileUserIDInt).Delete(&models.Followers{})
+	config.DB.Where("who_id = ? AND whom_id = ?", userIDInt, profileUserIDInt).Delete(&models.Followers{})
 
-	if postgresDB.Error != nil {
-		fmt.Println(postgresDB.Error.Error())
-		return postgresDB.Error
+	if config.DB.Error != nil {
+		fmt.Println(config.DB.Error.Error())
+		return config.DB.Error
 	}
 
 	return nil
 }
 
 // fetches all messages from picked user
-func getUserMessages(pUserId int, numMsgs int) ([]models.MessageUser, error) {
+func GetUserMessages(pUserId int, numMsgs int) ([]models.MessageUser, error) {
 	var messages []models.MessageUser
-	postgresDB.Table("messages").
+	config.DB.Table("messages").
 		Select("messages.*, users.*").
 		Joins("JOIN users ON users.user_id = messages.author_id").
 		Where("users.user_id = ?", pUserId).
@@ -266,9 +267,9 @@ func getUserMessages(pUserId int, numMsgs int) ([]models.MessageUser, error) {
 		Limit(numMsgs).
 		Find(&messages)
 
-	if postgresDB.Error != nil {
-		fmt.Println(postgresDB.Error.Error())
-		return nil, postgresDB.Error
+	if config.DB.Error != nil {
+		fmt.Println(config.DB.Error.Error())
+		return nil, config.DB.Error
 	}
 
 	return messages, nil
