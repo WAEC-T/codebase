@@ -39,7 +39,7 @@ func main() {
 	*----------------------*/
 	funcMap := SetupRouting()
 
-	config.Tpl, err = template.New("timeline.html").Funcs(funcMap).ParseGlob("../../templates/*.html") // We need to add the funcs that we want to use before parsing
+	config.Tpl, err = template.New("timeline.html").Funcs(funcMap).ParseGlob("../../templates/*.html")
 	if err != nil {
 		log.Fatalf("Error parsing template: %v", err)
 	}
