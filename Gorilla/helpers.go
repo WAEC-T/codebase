@@ -25,7 +25,7 @@ func format_datetime(timestamp string) string {
 	return parsedTime.Format("2006-01-02 15:04:05") // Customize this layout as needed
 }
 
-func isNil(i interface{}) bool {
+return i == nil || i == interface{}(nil)
 	if i == nil || i == interface{}(nil) {
 		return true
 	} else {
