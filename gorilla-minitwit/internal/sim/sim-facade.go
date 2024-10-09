@@ -1,8 +1,14 @@
 package sim
 
+import (
+	"encoding/json"
+	"fmt"
+	"net/http"
+	"strconv"
+)
+
 //TODO: USE CODE BELOW FOR API
 
-/*
 func UpdateLatest(r *http.Request) {
 	r.ParseForm()
 	latest := r.Form.Get("latest")
@@ -34,4 +40,4 @@ func Is_authenticated(w http.ResponseWriter, r *http.Request) bool {
 		return false
 	}
 	return true
-}*/
+}
