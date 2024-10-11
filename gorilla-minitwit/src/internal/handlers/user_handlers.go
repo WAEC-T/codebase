@@ -4,9 +4,9 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"fmt"
-	"gorilla-minitwit/internal/config"
-	"gorilla-minitwit/internal/db"
-	"gorilla-minitwit/internal/helpers"
+	"gorilla-minitwit/src/internal/config"
+	"gorilla-minitwit/src/internal/db"
+	"gorilla-minitwit/src/internal/helpers"
 
 	"html"
 	"net"
