@@ -3,8 +3,8 @@ package db
 import (
 	"encoding/hex"
 	"fmt"
-	"gorilla-minitwit/internal/config"
-	"gorilla-minitwit/internal/models"
+	"gorilla-minitwit/src/internal/config"
+	"gorilla-minitwit/src/internal/models"
 	"strconv"
 	"time"
 
@@ -24,9 +24,9 @@ func CheckValueInMap(maps []map[interface{}]interface{}, value interface{}) bool
 	return false
 }
 
-func ConnectDB(dsn string) (*gorm.DB, error) {
+func ConnectDB(uri string) (*gorm.DB, error) {
 	fmt.Println("Connecting to the database...")
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{NamingStrategy: schema.NamingStrategy{SingularTable: true}})
+	db, err := gorm.Open(postgres.Open(uri), &gorm.Config{NamingStrategy: schema.NamingStrategy{SingularTable: true}})
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to database: %w", err)
 	}

@@ -6,7 +6,6 @@ require (
 	github.com/cespare/xxhash v1.1.0
 	github.com/gorilla/mux v1.8.1
 	github.com/gorilla/sessions v1.2.0
-	github.com/joho/godotenv v1.5.1
 	github.com/lib/pq v1.10.9
 	github.com/mattn/go-sqlite3 v1.14.24
 	golang.org/x/crypto v0.17.0
