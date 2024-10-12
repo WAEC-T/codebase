@@ -3,7 +3,6 @@ module gorilla-minitwit
 go 1.23.1
 
 require (
-	github.com/cespare/xxhash v1.1.0
 	github.com/gorilla/mux v1.8.1
 	github.com/gorilla/sessions v1.2.0
 	github.com/lib/pq v1.10.9

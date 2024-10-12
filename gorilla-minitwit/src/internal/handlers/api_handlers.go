@@ -1,23 +1,22 @@
 package handlers
 
 import (
+	"crypto/md5"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"strconv"
-	"strings"
-	"time"
 
-	"github.com/cespare/xxhash"
 	"github.com/gorilla/mux"
 	_ "github.com/mattn/go-sqlite3"
 
-	"gorilla-minitwit/internal/db"
-	"gorilla-minitwit/internal/models"
-	"gorilla-minitwit/internal/sim"
+	auth "gorilla-minitwit/src/internal/auth"
+	"gorilla-minitwit/src/internal/config"
+	"gorilla-minitwit/src/internal/db"
+	"gorilla-minitwit/src/internal/models"
 )
 
-func Follow(w http.ResponseWriter, r *http.Request) {
+func API_Follow(w http.ResponseWriter, r *http.Request) {
 	//Log
 	fmt.Println("Follow handler invoked")
 
@@ -26,10 +25,10 @@ func Follow(w http.ResponseWriter, r *http.Request) {
 	username := vars["username"]
 
 	//Update latest value
-	sim.UpdateLatest(r)
+	API_UpdateLatestHandler(w, r)
 
 	//Ensure authentication
-	is_auth := sim.Is_authenticated(w, r)
+	is_auth := auth.Is_authenticated(w, r)
 	if !is_auth {
 		fmt.Println("Unauthorized access attempt to Follow: ", username)
 		return
@@ -46,63 +45,74 @@ func Follow(w http.ResponseWriter, r *http.Request) {
 	//Convert user id to string
 	userIDStr := strconv.Itoa(user_id)
 
-	//Get number of followers -> TODO: how many?
-	no_flws := No_followees(r)
-
 	//Set follow-request type
 	var rv models.FollowData
 
-	//If the request is a POST but body is missing
+	// Decode JSON body for POST requests
 	if r.Method == "POST" {
-		err := json.NewDecoder(r.Body).Decode(&rv)
-		if err != nil {
-			fmt.Println("Error decoding request body", err)
-			w.WriteHeader(http.StatusForbidden)
-			return
-		}
-	}
-	//If the request is POST and it is a follow-request
-	if r.Method == "POST" && rv.Follow != "" {
-		follow_username := rv.Follow
-		follow_user_id, err := db.GetUserIDByUsername(follow_username)
-
-		if err != nil {
-			w.WriteHeader(http.StatusNotFound)
-			fmt.Println("Follow user not found or invalid user ID", follow_username)
+		if err := json.NewDecoder(r.Body).Decode(&rv); err != nil {
+			fmt.Println("Error decoding request body:", err)
+			http.Error(w, "Invalid request body", http.StatusBadRequest)
 			return
 		}
 
-		// Perform type assertion for userID
-		follower_userIDStr := strconv.Itoa(follow_user_id)
-
-		db.FollowUser(userIDStr, follower_userIDStr)
-		fmt.Println("User followed")
-		w.WriteHeader(http.StatusNoContent)
-
-		//If the request is POST and it is a unfollow-request
-	} else if r.Method == "POST" && rv.Unfollow != "" {
-
-		unfollow_username := rv.Unfollow
-		unfollow_user_id, err := db.GetUserIDByUsername(unfollow_username)
-
-		if err != nil {
-			fmt.Println("Unfollow user not found or invalid user ID", unfollow_username)
-			w.WriteHeader(http.StatusNotFound)
+		// Check if neither follow nor unfollow is provided
+		if rv.Follow == "" && rv.Unfollow == "" {
+			fmt.Println("Missing follow/unfollow field in request body")
+			http.Error(w, "Missing 'follow' or 'unfollow' field", http.StatusBadRequest)
 			return
 		}
 
-		unfollower_userIDStr := strconv.Itoa(unfollow_user_id)
+		// Check if it's a follow request
+		if rv.Follow != "" {
+			follow_username := rv.Follow
+			follow_user_id, err := db.GetUserIDByUsername(follow_username)
+			if err != nil {
+				fmt.Println("Follow user not found or invalid user ID:", follow_username)
+				w.WriteHeader(http.StatusNotFound)
+				return
+			}
 
-		db.UnfollowUser(userIDStr, unfollower_userIDStr)
-		fmt.Println("User unfollowed")
-		w.WriteHeader(http.StatusNoContent)
+			// Convert follow_user_id to string and follow the user
+			follower_userIDStr := strconv.Itoa(follow_user_id)
+			db.FollowUser(userIDStr, follower_userIDStr)
+			fmt.Println("User followed:", follow_username)
+			w.WriteHeader(http.StatusNoContent)
+			return
+		}
+
+		// Check if it's an unfollow request
+		if rv.Unfollow != "" {
+			unfollow_username := rv.Unfollow
+			unfollow_user_id, err := db.GetUserIDByUsername(unfollow_username)
+			if err != nil {
+				fmt.Println("Unfollow user not found or invalid user ID:", unfollow_username)
+				w.WriteHeader(http.StatusNotFound)
+				return
+			}
+
+			// Convert unfollow_user_id to string and unfollow the user
+			unfollower_userIDStr := strconv.Itoa(unfollow_user_id)
+			db.UnfollowUser(userIDStr, unfollower_userIDStr)
+			fmt.Println("User unfollowed:", unfollow_username)
+			w.WriteHeader(http.StatusNoContent)
+			return
+		}
 
 	} else if r.Method == "GET" {
-		followers, errx := db.GetFollowing(userIDStr, no_flws)
+		followers, errx := db.GetFollowing(userIDStr, 100)
 		if errx != nil {
 			fmt.Println("Error getting followers for", username)
 			w.WriteHeader(http.StatusNotFound)
 			return
+		}
+
+		// empty slice for follower usernames
+		followerNames := []string{}
+
+		// Append the usernames to the followerNames slice
+		for _, follower := range followers {
+			followerNames = append(followerNames, string(follower.Username))
 		}
 
 		// Set response header as JSON
@@ -110,31 +120,23 @@ func Follow(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 
 		// Encode and return followers as JSON
-		if err := json.NewEncoder(w).Encode(followers); err != nil {
+		if err := json.NewEncoder(w).Encode(followerNames); err != nil {
 			fmt.Println("Error encoding followers as JSON:", err)
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
-
-		fmt.Println("Retrieved followers for", username)
 	}
+
+	fmt.Println("Retrieved followers for", username)
 }
 
-func No_followees(r *http.Request) int {
-	value := r.URL.Query().Get("no")
-	if value != "" {
-		intValue, err := strconv.Atoi(value)
-		if err == nil {
-			return intValue
-		}
-	}
-	return 100
-}
-
-func Get_latest(w http.ResponseWriter, r *http.Request) {
+func API_GetLatestHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Get latest handler invoked ")
 
-	count := db.GetCount("sim")
+	count, err := db.GetLatest()
+	if err != nil {
+		return
+	}
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(struct {
 		Latest int `json:"latest"`
@@ -143,52 +145,68 @@ func Get_latest(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-func Messages(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("Messages handler invoked")
-	db, err := db.GetDb()
-	if err != nil {
-		fmt.Println("Could not get database", err)
-	}
-	sim.UpdateLatest(r)
+func API_UpdateLatestHandler(w http.ResponseWriter, r *http.Request) {
+	// Get the "latest" query parameter
+	parsedCommandID := r.URL.Query().Get("latest")
 
-	is_auth := sim.Is_authenticated(w, r)
+	// Try to convert the parameter to an integer
+	commandID, err := strconv.Atoi(parsedCommandID)
+
+	if err != nil || parsedCommandID == "" {
+		// Handle the case where the parameter is not present or cannot be converted to an integer
+		commandID = -1
+	}
+
+	if commandID != -1 {
+		// Attempt to update the latest command ID
+		err := db.UpdateLatest(commandID)
+		if err != nil {
+			// Respond with a JSON error message
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(map[string]string{"error": "Failed to update latest value"})
+			return
+		}
+	}
+}
+
+func API_Messages(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Messages handler invoked")
+	//Update latest
+	API_UpdateLatestHandler(w, r)
+
+	is_auth := auth.Is_authenticated(w, r)
 	if !is_auth {
 		fmt.Println("Unauthorized access attempt to Messages")
 		return
 	}
-	no_msg := no_msgs(r)
 
 	if r.Method == "GET" {
-		messages := db.GetMessages([]int{no_msg})
-
-		w.WriteHeader(http.StatusOK)
-		err := json.NewEncoder(w).Encode(messages)
+		messages, err := db.GetPublicMessages(100) //TODO: Agree on number
 
 		if err != nil {
 			fmt.Println("Error encoding JSON response:", err)
 			w.WriteHeader(http.StatusForbidden)
 			return
 		}
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(messages)
 	}
 }
 
-func Messages_per_user(w http.ResponseWriter, r *http.Request) {
-	db, err := db.GetDb()
-	if err != nil {
-		fmt.Println("Could not get database - Messages per user", err)
-	}
+func API_Messages_per_user(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	username := vars["username"]
-	sim.UpdateLatest(r)
 
-	is_auth := sim.Is_authenticated(w, r)
+	//Update latest handler
+	API_UpdateLatestHandler(w, r)
+
+	is_auth := auth.Is_authenticated(w, r)
 	if !is_auth {
 		fmt.Println("Unauthorized access attempt to Messages_perUser")
 		return
 	}
-	no_msg := no_msgs(r)
 
-	user_id, err := db.Get_user_id(username)
+	user_id, err := db.GetUserIDByUsername(username)
 	if err != nil {
 		fmt.Println("Error getting user ID", err)
 		w.WriteHeader(http.StatusForbidden)
@@ -196,18 +214,18 @@ func Messages_per_user(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if r.Method == "GET" {
-		messages := db.GetMessagesForUser([]int{user_id, no_msg})
+		messages, err := db.GetUserMessages(user_id, 100)
 
-		w.WriteHeader(http.StatusOK)
-		err = json.NewEncoder(w).Encode(messages)
 		if err != nil {
 			fmt.Println("Error encoding JSON response: ", err)
 			w.WriteHeader(http.StatusForbidden)
 			return
 		}
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(messages)
 
 	} else if r.Method == "POST" {
-		var rv model.MessageData
+		var rv models.Messages
 
 		err := json.NewDecoder(r.Body).Decode(&rv)
 		fmt.Print(r)
@@ -217,41 +235,25 @@ func Messages_per_user(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		pubDate := strconv.FormatInt(time.Now().Unix(), 10)
-		fmt.Println("pubdate: ", pubDate)
-		message := &model.Messages{
-			AuthorID: user_id,
-			Text:     rv.Content,
-			PubDate:  pubDate,
-			Flagged:  0,
-		}
-		db.QueryMessage(message)
+		db.AddMessage(rv.Content, user_id)
 		fmt.Println("Message posted", user_id)
 		w.WriteHeader(http.StatusNoContent)
 	}
 }
 
-func no_msgs(r *http.Request) int {
-	value := r.URL.Query().Get("no")
-	if value != "" {
-		intValue, err := strconv.Atoi(value)
-		if err == nil {
-			return intValue
-		}
-	}
-	return 100
-}
-
-func Register(w http.ResponseWriter, r *http.Request) {
+func API_Register(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Register handler invoked")
-	db, err := db.GetDb()
-	if err != nil {
-		fmt.Println("Could not get database: ", err)
-	}
-	sim.UpdateLatest(r)
+	//Update latest
+	API_UpdateLatestHandler(w, r)
 
-	var rv model.RegisterData
-	err = json.NewDecoder(r.Body).Decode(&rv)
+	is_auth := auth.Is_authenticated(w, r)
+	if !is_auth {
+		fmt.Println("Unauthorized access attempt to Messages_perUser")
+		return
+	}
+
+	var rv models.RegisterData
+	err := json.NewDecoder(r.Body).Decode(&rv)
 	fmt.Println(r.Body)
 	if err != nil {
 		fmt.Println("Error decoding request body: ", err)
@@ -260,31 +262,14 @@ func Register(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if r.Method == "POST" {
-		user_id, _ := db.Get_user_id(rv.Username)
-
-		errMsg := ""
-
-		if rv.Username == "" {
-			errMsg = "You have to enter a username"
-		} else if rv.Email == "" || !strings.Contains(rv.Email, "@") {
-			errMsg = "You have to enter a valid email address"
-		} else if rv.Pwd == "" {
-			errMsg = "You have to enter a password"
-		} else if !db.IsZero(user_id) {
-			errMsg = "The username is already taken"
-		} else {
-			hash_pw := hashPassword(rv.Pwd)
-			db.QueryRegister([]string{rv.Username, rv.Email, hash_pw})
-			fmt.Println("User registered successfully", rv.Username)
-			w.WriteHeader(http.StatusNoContent)
-		}
-		if errMsg != "" {
-			fmt.Println("Registration error: ", errMsg)
-			w.WriteHeader(http.StatusBadRequest)
-		}
+		hash := md5.Sum([]byte(rv.Pwd))
+		db.RegisterUser(rv.Username, rv.Email, hash)
+		fmt.Println("User registered successfully", rv.Username)
+		w.WriteHeader(http.StatusNoContent)
 	}
-}
+	if config.DB.Error != nil {
+		fmt.Println("Registration error: ", config.DB.Error)
+		w.WriteHeader(http.StatusBadRequest)
+	}
 
-func hashPassword(password string) string {
-	return fmt.Sprintf("%d", xxhash.Sum64([]byte(password)))
 }

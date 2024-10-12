@@ -145,7 +145,7 @@ func GetMyMessages(userID string) ([]models.MessageUser, error) {
 }
 
 // getFollowing fetches up to `limit` users that the user identified by userID is following
-func GetFollowing(userID string, limit int) ([]map[interface{}]interface{}, error) {
+func GetFollowing(userID string, limit int) ([]models.Users, error) {
 	var users []models.Users
 	config.DB.
 		Select("users.*").
@@ -159,19 +159,7 @@ func GetFollowing(userID string, limit int) ([]map[interface{}]interface{}, erro
 		return nil, config.DB.Error
 	}
 
-	// Convert []models.Users to []map[interface{}]interface{}
-	var result []map[interface{}]interface{}
-	for _, user := range users {
-		m := map[interface{}]interface{}{
-			"UserID": user.UserID,
-			"Name":   user.Username,
-			"Email":  user.Email,
-			// Add more fields as needed
-		}
-		result = append(result, m)
-	}
-
-	return result, nil
+	return users, nil
 }
 
 // adds a new message to the database
@@ -182,7 +170,7 @@ func AddMessage(text string, author_id int) error {
 
 	newMessage := models.Messages{
 		AuthorID: author_id,
-		Text:     text,
+		Content:  text,
 		PubDate:  currentTime, //TODO: ALIGN W. LADS: IS THIS CORRECT?
 		Flagged:  0,
 	}
@@ -273,4 +261,19 @@ func GetUserMessages(pUserId int, numMsgs int) ([]models.MessageUser, error) {
 	}
 
 	return messages, nil
+}
+
+func GetLatest() (int, error) {
+	var latest models.Latest
+	config.DB.Where("id = 1").First(&latest)
+	return latest.Value, nil
+}
+
+func UpdateLatest(commandID int) error {
+	config.DB.Save(&models.Latest{ID: 1, Value: commandID})
+	if config.DB.Error != nil {
+		fmt.Println(config.DB.Error.Error())
+		return config.DB.Error
+	}
+	return nil
 }

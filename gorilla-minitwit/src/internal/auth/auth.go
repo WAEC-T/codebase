@@ -1,27 +1,9 @@
-package sim
+package auth
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
-	"strconv"
 )
-
-//TODO: USE CODE BELOW FOR API
-
-func UpdateLatest(r *http.Request) {
-	r.ParseForm()
-	latest := r.Form.Get("latest")
-	fmt.Println("latest: ", latest)
-	if latest != "" {
-		db, err := db.GetDb()
-		if err != nil {
-			fmt.Println("Failed to get DB", err)
-		}
-		val, _ := strconv.Atoi(latest)
-		db.SetCount("sim", val)
-	}
-}
 
 func Is_authenticated(w http.ResponseWriter, r *http.Request) bool {
 	from_simulator := r.Header.Get("Authorization")
