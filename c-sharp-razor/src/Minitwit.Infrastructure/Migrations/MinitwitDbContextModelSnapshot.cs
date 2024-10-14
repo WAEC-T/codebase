@@ -234,7 +234,7 @@ namespace Minitwit.Infrastructure.Migrations
 
                     b.Property<string>("TimeStamp")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("timestamp")
                         .HasColumnName("pub_date");
 
                     b.HasKey("CheepId");
