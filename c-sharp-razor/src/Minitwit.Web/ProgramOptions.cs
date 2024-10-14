@@ -45,17 +45,12 @@ public class ProgramOptions
 
     public static void AddDatabase(WebApplicationBuilder builder)
     {   
-        // Load environment variables from the .env.local file
-        Env.Load("../../../.env.local");
-
-        // Fetch environment variables
         string dbUser = Environment.GetEnvironmentVariable("POSTGRES_USER") ?? "user";
         string dbPassword = Environment.GetEnvironmentVariable("POSTGRES_PASSWORD") ?? "pass";
         string dbHost = Environment.GetEnvironmentVariable("POSTGRES_HOST") ?? "local_postgres";
         string dbPort = Environment.GetEnvironmentVariable("POSTGRES_PORT") ?? "5432";
         string dbName = Environment.GetEnvironmentVariable("POSTGRES_DB") ?? "waect";
-
-        // Construct PostgreSQL connection string
+        
         var connectionString = $"Host={dbHost};Port={dbPort};Database={dbName};Username={dbUser};Password={dbPassword}";
         Console.WriteLine($"Testing connection with: {connectionString}");
 
