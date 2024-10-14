@@ -17,7 +17,7 @@ public class ApiController : ControllerBase
     private readonly UserManager<Author> _userManager;
     private readonly IUserStore<Author> _userStore;
     private readonly IUserEmailStore<Author> _emailStore;
-    
+
     public ApiController(
         IAuthorRepository authorRepository,
         ICheepRepository cheepRepository,

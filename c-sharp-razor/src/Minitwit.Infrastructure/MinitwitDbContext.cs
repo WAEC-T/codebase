@@ -17,8 +17,8 @@ public sealed class MinitwitDbContext : IdentityDbContext<Author, IdentityRole<i
     public DbSet<Cheep> Cheeps { get; set; } = null!;
 
     public DbSet<Follow> Follows { get; set; } = null!;
-    
-    public DbSet<Latest> LatestEntries { get; set; } = null!; 
+
+    public DbSet<Latest> LatestEntries { get; set; } = null!;
 
     public MinitwitDbContext(DbContextOptions<MinitwitDbContext> dbContextOptions)
         : base(dbContextOptions)
@@ -71,14 +71,15 @@ public sealed class MinitwitDbContext : IdentityDbContext<Author, IdentityRole<i
             entity.Property(a => a.NormalizedUserName)
                 .HasColumnName("normalized_username")
                 .HasMaxLength(50).IsRequired();
-            entity.Property(a => a.ConcurrencyStamp) //  changes to a user's profile or sensitive data (e.g., passwords) are safe 
+            entity.Property(a => a.NormalizedEmail) 
+                .HasColumnName("normalized_email")
+                .HasMaxLength(50).IsRequired();
+            entity.Property(a => a.ConcurrencyStamp) 
                 .HasColumnName("concurrency_stamp")
                 .IsConcurrencyToken();
-            entity.Property(a => a.SecurityStamp) // cookies or refresh tokens
+            entity.Property(a => a.SecurityStamp)
                 .HasColumnName("security_stamp")
                 .IsConcurrencyToken();
-
-            entity.Ignore(a => a.NormalizedEmail);
         });
 
         modelBuilder.Entity<Follow>(entity =>
@@ -104,21 +105,21 @@ public sealed class MinitwitDbContext : IdentityDbContext<Author, IdentityRole<i
             entity.Property(e => e.Text).HasColumnName("text").IsRequired();
             entity.Property(e => e.TimeStamp)
                 .HasColumnName("pub_date")
-                .HasColumnType("timestamp"); 
+                .HasColumnType("timestamp");
         });
 
         modelBuilder.Entity<Cheep>()
             .HasIndex(c => c.TimeStamp);
-        
+
         modelBuilder.Entity<Latest>(entity =>
         {
-            entity.ToTable("latest");  
+            entity.ToTable("latest");
 
             entity.HasKey(e => e.Id);
 
             entity.Property(e => e.Id)
                 .HasColumnName("id");
-            
+
             entity.Property(e => e.Value)
                 .HasColumnName("value");
         });

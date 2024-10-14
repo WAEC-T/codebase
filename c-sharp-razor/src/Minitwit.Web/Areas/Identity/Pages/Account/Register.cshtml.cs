@@ -133,6 +133,23 @@ namespace Minitwit.Web.Areas.Identity.Pages.Account
             ).ToList();
             if (ModelState.IsValid)
             {
+                // Check if a user with the same username already exists
+                var existingUserByUsername = await _userManager.FindByNameAsync(Input.Username);
+                if (existingUserByUsername != null)
+                {
+                    ModelState.AddModelError("Input.Username", "Username is already taken.");
+                    return Page();
+                }
+
+                // Check if a user with the same email already exists
+                var existingUserByEmail = await _userManager.FindByEmailAsync(Input.Email);
+                if (existingUserByEmail != null)
+                {
+                    ModelState.AddModelError("Input.Email", "Email is already registered.");
+                    return Page();
+                }
+
+                // If no user with the same username or email exists, proceed with creating the user
                 var user = CreateUser();
 
                 await _userStore.SetUserNameAsync(user, Input.Username, CancellationToken.None);

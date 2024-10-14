@@ -31,6 +31,12 @@ namespace Minitwit.Infrastructure.Migrations
                 table: "users",
                 type: "text",
                 nullable: true);
+            
+            migrationBuilder.AddColumn<string>(
+                name: "normalized_email",
+                table: "users",
+                type: "text",
+                nullable: true);
 
             migrationBuilder.AddColumn<string>(
                 name: "concurrency_stamp",
@@ -196,12 +202,6 @@ namespace Minitwit.Infrastructure.Migrations
                 name: "IX_users_user_id",
                 table: "users",
                 column: "user_id",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "UserNameIndex",
-                table: "users",
-                column: "normalized_username",
                 unique: true);
         }
 
