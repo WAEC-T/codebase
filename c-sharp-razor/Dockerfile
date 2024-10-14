@@ -20,7 +20,7 @@ RUN dotnet restore "src/Minitwit.Web/Minitwit.Web.csproj"
 COPY . .
 RUN dotnet build "src/Minitwit.Web/Minitwit.Web.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
-# Stage 3: Publish the application
+# Stage 3: Publish the application - using a self-contained, optimized version of the application 
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
 RUN dotnet publish "src/Minitwit.Web/Minitwit.Web.csproj" -c $BUILD_CONFIGURATION -o /app/publish

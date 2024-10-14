@@ -11,8 +11,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Minitwit.Infrastructure", "
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Minitwit.Web", "src\Minitwit.Web\Minitwit.Web.csproj", "{EF12EDE5-B97E-4E6C-81AE-6ED8EC3FC6F0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Minitwit.End2EndTest", "test\Minitwit.End2EndTest\Minitwit.End2EndTest.csproj", "{F3802C11-01A1-4D75-B8CB-56965E3901BF}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
