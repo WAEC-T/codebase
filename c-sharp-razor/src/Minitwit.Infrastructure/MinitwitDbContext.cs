@@ -71,7 +71,7 @@ public sealed class MinitwitDbContext : IdentityDbContext<Author, IdentityRole<i
             entity.Property(a => a.NormalizedUserName)
                 .HasColumnName("normalized_username")
                 .HasMaxLength(50).IsRequired();
-            entity.Property(a => a.NormalizedEmail) 
+            entity.Property(a => a.NormalizedEmail)
                 .HasColumnName("normalized_email")
                 .HasMaxLength(50).IsRequired();
             entity.Property(a => a.ConcurrencyStamp) 
