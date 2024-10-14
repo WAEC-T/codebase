@@ -11,7 +11,7 @@ public class LatestRepository : BaseRepository, ILatestRepository
 
     public async Task<Latest> GetLatestAsync()
     {
-        return await db.LatestEntries.FirstOrDefaultAsync(); 
+        return await db.LatestEntries.FirstOrDefaultAsync();
     }
 
     public async Task AddLatestAsync(Latest latest)
@@ -26,5 +26,5 @@ public class LatestRepository : BaseRepository, ILatestRepository
         await db.SaveChangesAsync();
     }
 }
-    
-   
+
+
