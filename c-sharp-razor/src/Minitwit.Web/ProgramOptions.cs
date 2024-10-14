@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Minitwit.Core.Entities;
 using Minitwit.Infrastructure;
 using Npgsql;
+using DotNetEnv;
 
 namespace Minitwit.Web;
 
@@ -43,68 +44,38 @@ public class ProgramOptions
     }
 
     public static void AddDatabase(WebApplicationBuilder builder)
-    {
-        string environmentName = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+    {   
+        // Load environment variables from the .env.local file
+        Env.Load("../../../.env.local");
 
-        // Set up the database path
-        if (environmentName != null && environmentName.Equals("Development"))
+        // Fetch environment variables
+        string dbUser = Environment.GetEnvironmentVariable("POSTGRES_USER") ?? "user";
+        string dbPassword = Environment.GetEnvironmentVariable("POSTGRES_PASSWORD") ?? "pass";
+        string dbHost = Environment.GetEnvironmentVariable("POSTGRES_HOST") ?? "local_postgres";
+        string dbPort = Environment.GetEnvironmentVariable("POSTGRES_PORT") ?? "5432";
+        string dbName = Environment.GetEnvironmentVariable("POSTGRES_DB") ?? "waect";
+
+        // Construct PostgreSQL connection string
+        var connectionString = $"Host={dbHost};Port={dbPort};Database={dbName};Username={dbUser};Password={dbPassword}";
+        Console.WriteLine($"Testing connection with: {connectionString}");
+
+        try
         {
-            string currentDirectory = Directory.GetCurrentDirectory();
-            string dbPath;
-
-            if (
-                Directory.Exists(
-                    Path.Combine(currentDirectory, "..", "Minitwit.Infrastructure", "data")
-                )
-            )
-            {
-                dbPath = Path.Combine(
-                    currentDirectory,
-                    "..",
-                    "Minitwit.Infrastructure",
-                    "data",
-                    "MinitwitDBContext.db"
-                ); //Build directory
-            }
-            else
-            {
-                dbPath = Path.Combine(currentDirectory, "data", "MinitwitDBContext.db"); //Publish directory
-            }
-            builder.Services.AddDbContext<MinitwitDbContext>(options =>
-            {
-                options.UseNpgsql($"Data Source={dbPath}");
-            });
+            using var conn = new NpgsqlConnection(connectionString);
+            conn.Open();
+            Console.WriteLine("Connection successful!");
         }
-        else
+        catch (Exception ex)
         {
-            // Get PostgreSQL environment variables
-            string username = Environment.GetEnvironmentVariable("POSTGRES_USER") ?? "user";
-            string password = Environment.GetEnvironmentVariable("POSTGRES_PASSWORD") ?? "pass";
-            string host = Environment.GetEnvironmentVariable("POSTGRES_HOST") ?? "192.168.8.129";
-            string port = Environment.GetEnvironmentVariable("POSTGRES_PORT") ?? "5432";
-            string database = Environment.GetEnvironmentVariable("POSTGRES_DB") ?? "waect";
-
-            // Construct PostgreSQL connection string
-            var connectionString = $"Host={host};Port={port};Database={database};Username={username};Password={password}";
-            Console.WriteLine($"Testing connection with: {connectionString}");
-
-            try
-            {
-                using var conn = new NpgsqlConnection(connectionString);
-                conn.Open();
-                Console.WriteLine("Connection successful!");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Connection failed: {ex.Message}");
-            }
-
-            builder.Services.AddDbContext<MinitwitDbContext>(options =>
-            {
-                options.UseNpgsql(connectionString);
-            });
-
-            Console.WriteLine($"Connection string: Host={host}; Port={port}; Database={database}; Username={username}; Password={password}");
+            Console.WriteLine($"Connection failed: {ex.Message}");
         }
+
+        builder.Services.AddDbContext<MinitwitDbContext>(options =>
+        {
+            options.UseNpgsql(connectionString);
+        });
+
+        Console.WriteLine(
+            $"Connection string: Host={dbHost}; Port={dbPort}; Database={dbName}; Username={dbUser}; Password={dbPassword}");
     }
 }

@@ -1,22 +1,23 @@
 version: "3.8"
 
 services:
-  
   minitwit:
-    container_name: webserver
-    image: minitwitimage:latest
-    ports:
-      - "8080:8080"
-      - "8081:8081"
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: c_sharp_razor 
     env_file:
-      - .env
-    networks: 
-      - minitwit-network
-    command: [ "dockerize", "-wait", "tcp://database:3306", "-timeout", "30s", "./start-webserver.sh" ]
-    
-  
+      - ../.env.local         
+    ports:
+      - "5022:5022"    
+    networks:
+      - waect-network
+    command: ["dotnet", "Minitwit.Web.dll"]
+
 networks:
-    minitwit-network:
-        name: minitwit-network
+  waect-network:
+    name: waect-network
+    driver: bridge
+    external: true
         
 
