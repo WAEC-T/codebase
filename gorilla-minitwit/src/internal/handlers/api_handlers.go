@@ -8,7 +8,6 @@ import (
 	"strconv"
 
 	"github.com/gorilla/mux"
-	_ "github.com/mattn/go-sqlite3"
 
 	auth "gorilla-minitwit/src/internal/auth"
 	"gorilla-minitwit/src/internal/config"
