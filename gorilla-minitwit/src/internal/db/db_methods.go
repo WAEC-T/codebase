@@ -164,7 +164,10 @@ func GetFollowing(userID string, limit int) ([]models.Users, error) {
 
 // adds a new message to the database
 func AddMessage(text string, author_id int) error {
-	currentTime := time.Now().UTC()
+	currentTime, err := time.Parse(time.RFC3339, time.Now().UTC().Format(time.RFC3339))
+	if err != nil {
+		return fmt.Errorf("error formatting time: %v", err)
+	}
 
 	fmt.Println("timestamp:", currentTime)
 
