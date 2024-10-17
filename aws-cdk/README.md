@@ -30,11 +30,8 @@ This guide explains how to connect to the PostgreSQL database instance created u
 3. **Connect using psql**:
    Use the following command structure to connect:
 ```
-psql -h <hostname> -p 5432 -U waect -d waectResultStorage
+psql -h waectdatabase-waectresultstoragedbe1ccf3e0-tmed4lgituj0.c10ia6ywc903.eu-central-1.rds.amazonaws.com -p 5432 -U waect -d waectResultStorage
 ````
-
-
-Replace `<hostname>` with the actual hostname from the secret.
 
 4. **Enter Password**:
 When prompted, enter the password retrieved from the secret.
