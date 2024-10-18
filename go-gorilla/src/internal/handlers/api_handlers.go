@@ -4,15 +4,15 @@ import (
 	"crypto/md5"
 	"encoding/json"
 	"fmt"
+	"go-gorilla/src/internal/auth"
+	"go-gorilla/src/internal/config"
+	"go-gorilla/src/internal/db"
+	"go-gorilla/src/internal/models"
+
 	"net/http"
 	"strconv"
 
 	"github.com/gorilla/mux"
-
-	auth "gorilla-minitwit/src/internal/auth"
-	"gorilla-minitwit/src/internal/config"
-	"gorilla-minitwit/src/internal/db"
-	"gorilla-minitwit/src/internal/models"
 )
 
 func API_Follow(w http.ResponseWriter, r *http.Request) {

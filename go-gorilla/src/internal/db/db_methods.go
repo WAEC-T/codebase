@@ -3,8 +3,8 @@ package db
 import (
 	"encoding/hex"
 	"fmt"
-	"gorilla-minitwit/src/internal/config"
-	"gorilla-minitwit/src/internal/models"
+	"go-gorilla/src/internal/config"
+	"go-gorilla/src/internal/models"
 	"strconv"
 	"time"
 

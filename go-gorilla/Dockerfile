@@ -14,7 +14,7 @@ RUN go mod download && go mod verify
 COPY . .
 
 # Build the Go application
-RUN go build -v -o /minitwit/app gorilla-minitwit/src
+RUN go build -v -o /minitwit/app go-gorilla/src
 
 # Step 2: Run the Go binary
 FROM alpine:latest

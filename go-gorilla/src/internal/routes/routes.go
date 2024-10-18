@@ -1,9 +1,9 @@
 package routes
 
 import (
-	"gorilla-minitwit/src/internal/db"
-	"gorilla-minitwit/src/internal/handlers"
-	"gorilla-minitwit/src/internal/helpers"
+	"go-gorilla/src/internal/db"
+	"go-gorilla/src/internal/handlers"
+	"go-gorilla/src/internal/helpers"
 	"net/http"
 	"os"
 	"strings"
@@ -54,7 +54,7 @@ func SetupRouting() template.FuncMap {
 
 func SetRouteHandlers(r *mux.Router) {
 	//UI
-	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
+	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("../static"))))
 	r.HandleFunc("/public", handlers.Public_timeline)
 	r.HandleFunc("/register", handlers.Register)
 	r.HandleFunc("/login", handlers.Login)

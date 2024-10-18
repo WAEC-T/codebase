@@ -2,9 +2,9 @@ package main
 
 import (
 	"fmt"
-	"gorilla-minitwit/src/internal/config"
-	"gorilla-minitwit/src/internal/db"
-	"gorilla-minitwit/src/internal/routes"
+	"go-gorilla/src/internal/config"
+	"go-gorilla/src/internal/db"
+	"go-gorilla/src/internal/routes"
 	"log"
 	"net/http"
 	"text/template"
@@ -35,7 +35,7 @@ func main() {
 	*----------------------*/
 	funcMap := routes.SetupRouting()
 
-	config.Tpl, err = template.New("timeline.html").Funcs(funcMap).ParseGlob("templates/*.html")
+	config.Tpl, err = template.New("timeline.html").Funcs(funcMap).ParseGlob("../templates/*.html")
 	if err != nil {
 		log.Fatalf("Error parsing template: %v", err)
 	}
