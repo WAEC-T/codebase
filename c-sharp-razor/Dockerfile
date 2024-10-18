@@ -1,7 +1,7 @@
 # Stage 1: Base image for the runtime (using Alpine)
 FROM mcr.microsoft.com/dotnet/aspnet:8.0-alpine AS base
 WORKDIR /app
-EXPOSE 5000
+EXPOSE 5022
 
 # Stage 2: Build the application (using Alpine SDK)
 FROM mcr.microsoft.com/dotnet/sdk:8.0-alpine AS build
@@ -32,7 +32,7 @@ COPY --from=publish /app/publish .
 
 # Set environment to Production
 ENV ASPNETCORE_ENVIRONMENT=Production
-ENV ASPNETCORE_URLS=http://0.0.0.0:5000
+ENV ASPNETCORE_URLS=http://0.0.0.0:5022
 
 # Run the application
 ENTRYPOINT ["dotnet", "Minitwit.Web.dll"]
