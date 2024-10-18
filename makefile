@@ -1,62 +1,84 @@
-SERVICES = rust-actix
+ALL_SERVICES = rust-actix
+
 COMPOSE_FILE_STANDARD = docker-compose.yml
 TEST_COMMAND = pytest tests/test_api_endpoints.py
 LOCAL_DATABASE = ./database/docker-compose.yml
 DATABASE_TABLES = users, followers, messages, latest
 DELAY_TEST_EXECUTION_SECONDS = 3
 
+# echo colors \o/ >.<
+CYAN = \033[0;36m
+PINK = \033[0;35m
+BLUE = \033[0;34m
+RED = \033[0;31m
+YELLOW = \033[1;33m
+GREEN = \033[0;32m
+RESET = \033[0m
+
 .PHONY: start-local-db
 start-local-db:
-	@echo "Starting the database container..."
-	docker-compose -f $(LOCAL_DATABASE) up -d
+	@echo "$(BLUE)Starting the database container...$(RESET)"
+	@docker-compose -f $(LOCAL_DATABASE) up -d > /dev/null 2>&1
 
 .PHONY: stop-local-db
 stop-local-db:
-	@echo "Stopping and removing the database container..."
-	@docker-compose -f $(LOCAL_DATABASE) stop
-	@docker-compose -f $(LOCAL_DATABASE) rm -f database
+	@echo "\n$(BLUE)Stopping and removing the database container...$(RESET)"
+	@docker-compose -f $(LOCAL_DATABASE) stop > /dev/null 2>&1
+	@docker-compose -f $(LOCAL_DATABASE) rm -f database > /dev/null 2>&1
 
 .PHONY: clean-db
 clean-db:
-	@echo "Cleaning the database..."
+	echo "$(PINK)Cleaning the database...$(RESET)"
 	@export PGPASSWORD=pass
-	@docker-compose -f $(LOCAL_DATABASE) exec database psql -U user -d waect -c "TRUNCATE TABLE $(DATABASE_TABLES) ;"
+	docker-compose -f $(LOCAL_DATABASE) exec database psql -U user -d waect -c "TRUNCATE TABLE $(DATABASE_TABLES) > /dev/null 2>&1;"
 
 .PHONY: start-service
 start-service:
-	@echo "Starting service with Docker Compose file: $(SERVICE)..."
-	docker-compose -f ./$(SERVICE)/$(COMPOSE_FILE_STANDARD) up -d
-
-.PHONY: start-rust-actix
-start-rust-actix:
-	@$(MAKE) -s start-service SERVICE=rust-actix
+	@echo "$(CYAN)Spinning service and running tests...$(RESET) \n"
+	@docker-compose -f ./$(SERVICE)/$(COMPOSE_FILE_STANDARD) up -d > /dev/null 2>&1
 
 .PHONY: stop-service
 stop-service:
-	@echo "Stopping and removing service with Docker Compose file: $(SERVICE)..."
-	docker-compose -f ./$(SERVICE)/$(COMPOSE_FILE_STANDARD) stop
-	docker-compose -f ./$(SERVICE)/$(COMPOSE_FILE_STANDARD) rm -f
+	echo "\n$(CYAN)Stopping and removing $(SERVICE)..$(RESET)"
+	@docker-compose -f ./$(SERVICE)/$(COMPOSE_FILE_STANDARD) stop > /dev/null 2>&1
+	@docker-compose -f ./$(SERVICE)/$(COMPOSE_FILE_STANDARD) rm -f > /dev/null 2>&1
 
-.PHONY: test-service
-test-service:
-	@echo "Running tests for service..."
-	$(TEST_COMMAND)
+.PHONY: test-single-service
+test-single-service:
+	@echo "\n$(BLUE)=====================================$(RESET)"
+	@echo "$(PINK)Testing service: $(YELLOW)$(SERVICE)...$(RESET)"
+	@echo "$(BLUE)=====================================$(RESET) \n \n"
+	@if [ -d "$(SERVICE)" ]; then \
+		$(MAKE) -s start-service SERVICE=$(SERVICE) && sleep $(DELAY_TEST_EXECUTION_SECONDS); \
+		$(TEST_COMMAND); \
+		$(MAKE) -s stop-service SERVICE=$(SERVICE); \
+	else \
+		echo "$(CYAN)Directory $(SERVICE) does not exist.$(RESET)"; \
+		$(MAKE) -s stop-local-db; \
+		exit 1; \
+	fi
 
-.PHONY: test-all test-service
+.PHONY: test-all
 test-all: start-local-db
-	@for service in $(SERVICES); do \
-		echo "====================================="; \
-		echo "Testing service: $$service..."; \
-		echo "====================================="; \
-		if [ -d "$$service" ]; then \
-			$(MAKE) -s start-service SERVICE=$$service && sleep $(DELAY_TEST_EXECUTION_SECONDS);\
-	 		$(MAKE) -s test-service; \
-	 		echo "Stopping service: $$service..." && $(MAKE) -s stop-service SERVICE=$$service; \
-		else \
-			echo "Directory $$service does not exist."; \
-			$(MAKE) -s stop-local-db; \
-			exit 1; \
-	 	fi; \
+	@for service in $(ALL_SERVICES); do \
+		$(MAKE) -s test-single-service SERVICE=$$service; \
 	done
 	$(MAKE) -s stop-local-db
-	@echo "All services tested!"
+	@echo "$(GREEN)All services tested!$(RESET)"
+
+.PHONY: test-service
+test-service: start-local-db
+	@services=$$(echo "$(MAKECMDGOALS)" | tr ' ' '\n' | grep -v '^test-service$$'); \
+	for service in $$services; do \
+		if echo "$(ALL_SERVICES)" | grep -wq "$$service"; then \
+			$(MAKE) -s test-single-service SERVICE=$$service; \
+		else \
+			echo "$(RED)Service $$service is not defined as a base service and is not valid.$(RESET)"; \
+		fi; \
+	done; \
+	echo "$(GREEN)[$$services] tested$(RESET)" | tr '\n' ', ';
+	@$(MAKE) -s stop-local-db
+
+# Don't remove these weird thing here because it prevents the services to be treated as targets by make ;)
+%:
+	@:
