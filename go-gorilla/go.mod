@@ -1,4 +1,4 @@
-module gorilla-minitwit
+module go-gorilla
 
 go 1.23.1
 
