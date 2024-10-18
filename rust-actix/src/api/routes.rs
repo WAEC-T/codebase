@@ -1,5 +1,5 @@
 use crate::api::controllers::*;
-use crate::{api::model::*};
+use crate::api::model::*;
 use actix_web::{web, get, post, Responder};
 
 #[get("/latest")]

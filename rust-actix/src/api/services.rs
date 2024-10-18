@@ -11,4 +11,3 @@ pub fn api_services() -> Scope {
         .service(get_followers)
         .service(post_followers)      
 }
-

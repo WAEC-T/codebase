@@ -32,6 +32,5 @@ RUN apk add libgcc
 RUN apk add libpq
 
 EXPOSE 5000
-EXPOSE 5001
 
 CMD ["./mini-x"]
