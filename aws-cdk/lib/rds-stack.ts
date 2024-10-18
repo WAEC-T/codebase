@@ -26,14 +26,14 @@ export class RDSStack extends cdk.Stack {
     const engine: cdk.aws_rds.IInstanceEngine = DatabaseInstanceEngine.postgres({ version: PostgresEngineVersion.VER_16_4 })
     const instanceType: cdk.aws_ec2.InstanceType = InstanceType.of(InstanceClass.T3, InstanceSize.MICRO);
     const port: number = 5432;
-    const dbName: string = "waectResultStorage"; 
+    const dbName: string = "waect"; 
 
     // create a VPC (Virtual Private Cloud)
-    const vpc = Vpc.fromLookup(this, 'waectResultStorageVPC', { vpcId: "vpc-08d145893bcbe80f7" });
+    const vpc = Vpc.fromLookup(this, 'waectVPC', { vpcId: "vpc-08d145893bcbe80f7" });
 
     // create a security group
-    const dbSg: cdk.aws_ec2.SecurityGroup = new SecurityGroup(this, "waectResultStorageSG", {
-      securityGroupName: "waectResultStorageSG",
+    const dbSg: cdk.aws_ec2.SecurityGroup = new SecurityGroup(this, "waectSG", {
+      securityGroupName: "waectSG",
       vpc: vpc
     });
 
@@ -51,7 +51,7 @@ export class RDSStack extends cdk.Stack {
     const credentials: cdk.aws_rds.Credentials = Credentials.fromPassword('waect', customPassword);
 
     // create RDS instance (PostgreSQL)
-    const dbInstance: cdk.aws_rds.DatabaseInstance = new DatabaseInstance(this, "waectResultStorageDB", {
+    const dbInstance: cdk.aws_rds.DatabaseInstance = new DatabaseInstance(this, "waectDB", {
       vpc: vpc,
       vpcSubnets: { subnetType: SubnetType.PUBLIC },
       instanceType,
@@ -68,8 +68,8 @@ export class RDSStack extends cdk.Stack {
     const hostname: string = dbInstance.instanceEndpoint.hostname;
 
     // Create a new Secrets Manager secret with the endpoint included
-    new secretsmanager.Secret(this, 'waectResultStorageSECRET', {
-      secretName: 'waectResultStorageSECRET',
+    new secretsmanager.Secret(this, 'waectSECRET', {
+      secretName: 'waectSECRET',
       secretStringValue: cdk.SecretValue.unsafePlainText(JSON.stringify({
           username: 'waect',
           password: process.env.AWS_DATABASE_PASSWORD || '', 
