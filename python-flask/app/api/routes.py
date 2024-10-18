@@ -123,3 +123,9 @@ def follow(username):
                 db.session.commit()
             return "", 204
 
+    elif request.method == "GET":
+        no_followers = request.args.get("no", type=int, default=100)
+        followed_users = db.session.query(User.username).join(Follower, User.user_id == Follower.whom_id).filter(
+            Follower.who_id == user.user_id).limit(no_followers).all()
+        followed_usernames = [f.username for f in followed_users]
+        return jsonify({"follows": followed_usernames})
