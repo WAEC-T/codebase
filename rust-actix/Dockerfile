@@ -1,6 +1,6 @@
 FROM alpine:edge as BUILDER
 
-WORKDIR /usr/src/mini-x
+WORKDIR /usr/src/waect-rust
 
 RUN apk update
 RUN apk add --no-cache rust
@@ -21,9 +21,9 @@ RUN cargo build --release
 
 FROM alpine:edge
 
-WORKDIR /usr/src/mini-x
+WORKDIR /usr/src/waect-rust
 
-COPY --from=BUILDER /usr/src/mini-x/target/release ./
+COPY --from=BUILDER /usr/src/waect-rust/target/release ./
 
 COPY src/frontend/static/ ./src/frontend/static/
 RUN apk update
@@ -33,4 +33,4 @@ RUN apk add libpq
 
 EXPOSE 5000
 
-CMD ["./mini-x"]
+CMD ["./waect-rust"]
