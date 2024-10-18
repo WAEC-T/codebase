@@ -1,4 +1,4 @@
-ALL_SERVICES = rust-actix
+ALL_SERVICES = python-flask c-sharp-razor go-gorilla ruby-sinatra rust-actix javascript-express go-gin
 
 COMPOSE_FILE_STANDARD = docker-compose.yml
 TEST_COMMAND = pytest tests/test_api_endpoints.py
@@ -7,6 +7,7 @@ DATABASE_TABLES = users, followers, messages, latest
 DELAY_TEST_EXECUTION_SECONDS = 3
 
 # echo colors \o/ >.<
+WHITE = \033[0;37m
 CYAN = \033[0;36m
 PINK = \033[0;35m
 BLUE = \033[0;34m
@@ -28,9 +29,9 @@ stop-local-db:
 
 .PHONY: clean-db
 clean-db:
-	echo "$(PINK)Cleaning the database...$(RESET)"
+	@echo "$(PINK)Cleaning the database...$(RESET)"
 	@export PGPASSWORD=pass
-	docker-compose -f $(LOCAL_DATABASE) exec database psql -U user -d waect -c "TRUNCATE TABLE $(DATABASE_TABLES) > /dev/null 2>&1;"
+	@docker-compose -f $(LOCAL_DATABASE) exec database psql -U user -d waect -c "TRUNCATE TABLE $(DATABASE_TABLES) > /dev/null 2>&1;"
 
 .PHONY: start-service
 start-service:
@@ -39,7 +40,7 @@ start-service:
 
 .PHONY: stop-service
 stop-service:
-	echo "\n$(CYAN)Stopping and removing $(SERVICE)..$(RESET)"
+	@echo "\n$(CYAN)Stopping and removing $(SERVICE)..$(RESET)"
 	@docker-compose -f ./$(SERVICE)/$(COMPOSE_FILE_STANDARD) stop > /dev/null 2>&1
 	@docker-compose -f ./$(SERVICE)/$(COMPOSE_FILE_STANDARD) rm -f > /dev/null 2>&1
 
@@ -47,15 +48,17 @@ stop-service:
 test-single-service:
 	@echo "\n$(BLUE)=====================================$(RESET)"
 	@echo "$(PINK)Testing service: $(YELLOW)$(SERVICE)...$(RESET)"
-	@echo "$(BLUE)=====================================$(RESET) \n \n"
-	@if [ -d "$(SERVICE)" ]; then \
+	@echo "$(BLUE)=====================================$(RESET) \n"
+	@if [ -d "$(SERVICE)" ] && [ -f "$(SERVICE)/$(COMPOSE_FILE_STANDARD)" ]; then \
 		$(MAKE) -s start-service SERVICE=$(SERVICE) && sleep $(DELAY_TEST_EXECUTION_SECONDS); \
 		$(TEST_COMMAND); \
 		$(MAKE) -s stop-service SERVICE=$(SERVICE); \
 	else \
-		echo "$(CYAN)Directory $(SERVICE) does not exist.$(RESET)"; \
-		$(MAKE) -s stop-local-db; \
-		exit 1; \
+		if [ ! -d "$(SERVICE)" ]; then \
+			echo "$(WHITE)Skipping - directory $(SERVICE) does not exist.$(RESET)"; \
+		else \
+			echo "$(WHITE)Skipping - docker compose file $(COMPOSE_FILE_STANDARD) does not exist in $(SERVICE).$(RESET)"; \
+		fi; \
 	fi
 
 .PHONY: test-all
@@ -63,7 +66,7 @@ test-all: start-local-db
 	@for service in $(ALL_SERVICES); do \
 		$(MAKE) -s test-single-service SERVICE=$$service; \
 	done
-	$(MAKE) -s stop-local-db
+	@$(MAKE) -s stop-local-db
 	@echo "$(GREEN)All services tested!$(RESET)"
 
 .PHONY: test-service
