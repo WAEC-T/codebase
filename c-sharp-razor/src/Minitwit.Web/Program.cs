@@ -31,9 +31,9 @@ public class Program
 
         // Dependency Injection
         builder.Services.AddScoped<IAuthorRepository, AuthorRepository>();
-        builder.Services.AddScoped<IValidator<CreateCheep>, CheepCreateValidator>();
-        builder.Services.AddScoped<ICheepRepository, CheepRepository>();
-        builder.Services.AddScoped<ICheepService, MinitwitService>();
+        builder.Services.AddScoped<IValidator<CreateMessage>, MessageCreateValidator>();
+        builder.Services.AddScoped<IMessageRepository, MessageRepository>();
+        builder.Services.AddScoped<IMessageService, MinitwitService>();
         builder.Services.AddScoped<IFollowRepository, FollowRepository>();
         builder.Services.AddScoped<ILatestRepository, LatestRepository>();
 

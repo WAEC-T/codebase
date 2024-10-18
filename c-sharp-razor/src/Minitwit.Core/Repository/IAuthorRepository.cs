@@ -12,12 +12,12 @@ public interface IAuthorRepository
     public Task<Author> GetAuthorByNameAsync(string name);
     public Task<Author> GetAuthorByEmail(string email);
 
-    public Task<ICollection<Cheep>> GetCheepsByAuthorAsync(int id);
-    public Task<ICollection<Cheep>> GetCheepsByAuthor(int authorId, int page);
-    public Task<ICollection<Cheep>> GetCheepsByAuthorAndFollowing(int authorId, int page);
+    public Task<ICollection<Message>> GetMessagesByAuthorAsync(int id);
+    public Task<ICollection<Message>> GetMessagesByAuthor(int authorId, int page);
+    public Task<ICollection<Message>> GetMessagesByAuthorAndFollowing(int authorId, int page);
 
-    public Task<int> GetCheepCountByAuthorAsync(int authorId);
-    public Task<int> GetCheepCountByAuthorAndFollowing(int authorId);
+    public Task<int> GetMessageCountByAuthorAsync(int authorId);
+    public Task<int> GetMessageCountByAuthorAndFollowing(int authorId);
 
     public Task<int> GetPageCountByAuthor(int authorId);
     public Task<int> GetPageCountByAuthorAndFollowing(int authorId);
@@ -28,7 +28,7 @@ public interface IAuthorRepository
     public Task AddFollowAsync(int followingAuthorId, int followedAuthorId);
     public Task RemoveFollowAsync(int followingAuthorId, int followedAuthorId);
 
-    public Task DeleteCheepsByAuthorIdAsync(int authorId);
+    public Task DeleteMessagesByAuthorIdAsync(int authorId);
 
     public Task RemoveAllFollowersByAuthorIdAsync(int id);
 

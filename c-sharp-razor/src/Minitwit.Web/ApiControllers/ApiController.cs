@@ -12,7 +12,7 @@ namespace Minitwit.Web.ApiControllers;
 public class ApiController : ControllerBase
 {
     private readonly IAuthorRepository _authorRepository;
-    private readonly ICheepRepository _cheepRepository;
+    private readonly IMessageRepository _MessageRepository;
     private readonly ILatestRepository _latestRepository;
     private readonly UserManager<Author> _userManager;
     private readonly IUserStore<Author> _userStore;
@@ -20,14 +20,14 @@ public class ApiController : ControllerBase
 
     public ApiController(
         IAuthorRepository authorRepository,
-        ICheepRepository cheepRepository,
+        IMessageRepository MessageRepository,
         ILatestRepository latestRepository,
         UserManager<Author> userManager,
         IUserStore<Author> userStore
     )
     {
         _authorRepository = authorRepository;
-        _cheepRepository = cheepRepository;
+        _MessageRepository = MessageRepository;
         _latestRepository = latestRepository;
         _userManager = userManager;
         _userStore = userStore;
@@ -122,11 +122,11 @@ public class ApiController : ControllerBase
 
         try
         {
-            var cheeps = await _cheepRepository.GetCheepsByCountAsync(no);
-            var authorIds = cheeps.Select(c => c.AuthorId).Distinct();
+            var Messages = await _MessageRepository.GetMessagesByCountAsync(no);
+            var authorIds = Messages.Select(c => c.AuthorId).Distinct();
             var users = await _authorRepository.GetAuthorsByIdAsync(authorIds);
 
-            var lst = ConvertToCheepViewModelApiCollection(cheeps, users);
+            var lst = ConvertToMessageViewModelApiCollection(Messages, users);
 
             return Ok(lst);
         }
@@ -169,16 +169,16 @@ public class ApiController : ControllerBase
 
             Author author = await _authorRepository.GetAuthorByNameAsync(username);
             int authorId = author.Id;
-            ICollection<Cheep> cheeps = await _cheepRepository.GetCheepsFromAuthorByCountAsync(
+            ICollection<Message> Messages = await _MessageRepository.GetMessagesFromAuthorByCountAsync(
                 authorId,
                 no
             );
 
-            var formattedCheeps = cheeps
-                .Select(c => new CheepViewModelApi(username, c.Text, c.TimeStamp))
+            var formattedMessages = Messages
+                .Select(c => new MessageViewModelApi(username, c.Text, c.TimeStamp))
                 .ToList();
 
-            return Ok(formattedCheeps);
+            return Ok(formattedMessages);
         }
         catch (Exception ex)
         {
@@ -216,9 +216,9 @@ public class ApiController : ControllerBase
 
             Author user = await _authorRepository.GetAuthorByNameAsync(username);
 
-            CreateCheep cheep = new CreateCheep(user.Id, msgsdata.content);
+            CreateMessage Message = new CreateMessage(user.Id, msgsdata.content);
 
-            var result = await _cheepRepository.AddCreateCheepAsync(cheep);
+            var result = await _MessageRepository.AddCreateMessageAsync(Message);
 
             await Update_Latest(latest);
 
@@ -548,13 +548,13 @@ public class ApiController : ControllerBase
         return stringBuilderError.ToString();
     }
 
-    private ICollection<CheepViewModelApi> ConvertToCheepViewModelApiCollection(ICollection<Cheep> cheeps, ICollection<Author> users)
+    private ICollection<MessageViewModelApi> ConvertToMessageViewModelApiCollection(ICollection<Message> Messages, ICollection<Author> users)
     {
-        var lst = cheeps
-                .Select(cheep => new CheepViewModelApi(
-                    users.FirstOrDefault(a => a.Id == cheep.AuthorId)?.UserName ?? "Unknown",
-                    cheep.Text,
-                    cheep.TimeStamp
+        var lst = Messages
+                .Select(Message => new MessageViewModelApi(
+                    users.FirstOrDefault(a => a.Id == Message.AuthorId)?.UserName ?? "Unknown",
+                    Message.Text,
+                    Message.TimeStamp
                 ))
                 .ToList();
 

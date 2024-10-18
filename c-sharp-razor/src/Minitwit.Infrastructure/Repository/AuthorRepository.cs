@@ -51,117 +51,117 @@ public class AuthorRepository : BaseRepository, IAuthorRepository
         return author!;
     }
 
-    // ----- Get Cheeps By Author and Page Methods ----- //
-    public async Task<ICollection<Cheep>> GetCheepsByAuthorAsync(int id)
+    // ----- Get Messages By Author and Page Methods ----- //
+    public async Task<ICollection<Message>> GetMessagesByAuthorAsync(int id)
     {
-        return await db.Cheeps.Where(e => e.AuthorId == id).ToListAsync();
+        return await db.Messages.Where(e => e.AuthorId == id).ToListAsync();
     }
 
-    public async Task<ICollection<Cheep>> GetCheepsByAuthor(int id, int page)
+    public async Task<ICollection<Message>> GetMessagesByAuthor(int id, int page)
     {
-        var cheeps = await GetCheepsByAuthorAsync(id);
+        var Messages = await GetMessagesByAuthorAsync(id);
 
-        //Check that author has cheeps
-        if (cheeps == null || cheeps.Count == 0)
-            throw new Exception("This author has no cheeps");
+        //Check that author has Messages
+        if (Messages == null || Messages.Count == 0)
+            throw new Exception("This author has no Messages");
 
         if (page < 1)
             page = 1;
 
         int pageSizeIndex = (page - 1) * PageSize;
 
-        if (cheeps.Count < pageSizeIndex + PageSize)
-            return cheeps
+        if (Messages.Count < pageSizeIndex + PageSize)
+            return Messages
                 .ToList()
-                .GetRange(pageSizeIndex, cheeps.Count - pageSizeIndex)
+                .GetRange(pageSizeIndex, Messages.Count - pageSizeIndex)
                 .OrderByDescending(c => c.TimeStamp)
                 .ToList();
-        if (cheeps.Count > PageSize)
-            return cheeps
+        if (Messages.Count > PageSize)
+            return Messages
                 .ToList()
                 .GetRange(pageSizeIndex, PageSize)
                 .OrderByDescending(c => c.TimeStamp)
                 .ToList();
-        return cheeps.OrderByDescending(c => c.TimeStamp).ToList();
+        return Messages.OrderByDescending(c => c.TimeStamp).ToList();
     }
 
-    public async Task<ICollection<Cheep>> GetCheepsByAuthorAndFollowingAsync(int id)
+    public async Task<ICollection<Message>> GetMessagesByAuthorAndFollowingAsync(int id)
     {
-        ICollection<Cheep> cheeps = new List<Cheep>(await GetCheepsByAuthorAsync(id));
+        ICollection<Message> Messages = new List<Message>(await GetMessagesByAuthorAsync(id));
 
         foreach (Author author in await GetFollowingByIdAsync(id))
         {
-            cheeps = cheeps.Concat(await GetCheepsByAuthorAsync(author.Id)).ToList();
+            Messages = Messages.Concat(await GetMessagesByAuthorAsync(author.Id)).ToList();
         }
 
-        return cheeps;
+        return Messages;
     }
 
-    public async Task<ICollection<Cheep>> GetCheepsByAuthorAndFollowing(int id, int page)
+    public async Task<ICollection<Message>> GetMessagesByAuthorAndFollowing(int id, int page)
     {
         Author? author = await GetAuthorByIdAsync(id);
-        //Get cheeps from the author, and append cheeps from followers to that list
+        //Get Messages from the author, and append Messages from followers to that list
         ICollection<Author> following = await GetFollowingByIdAsync(id);
-        ICollection<Cheep> cheeps = new List<Cheep>();
+        ICollection<Message> Messages = new List<Message>();
 
-        // Add all the users cheeps to the list without pagination
-        foreach (var cheepDto in await GetCheepsByAuthorAsync(id))
-            cheeps.Add(cheepDto);
+        // Add all the users Messages to the list without pagination
+        foreach (var MessageDto in await GetMessagesByAuthorAsync(id))
+            Messages.Add(MessageDto);
 
         foreach (Author? follower in following)
         {
-            ICollection<Cheep> followingCheeps = await GetCheepsByAuthorAsync(follower.Id);
-            //If follower has no cheeps, skip them
-            if (followingCheeps.Count == 0)
+            ICollection<Message> followingMessages = await GetMessagesByAuthorAsync(follower.Id);
+            //If follower has no Messages, skip them
+            if (followingMessages.Count == 0)
             {
                 continue;
             }
 
-            //Add each cheep from the follower to the list
+            //Add each Message from the follower to the list
             //TODO Try to find alternative to foreach
-            foreach (var cheepDto in followingCheeps)
+            foreach (var MessageDto in followingMessages)
             {
-                cheeps.Add(cheepDto);
+                Messages.Add(MessageDto);
             }
         }
-        //Sort the cheeps according to timestamp, latest first
-        cheeps = cheeps.OrderByDescending(c => c.TimeStamp).ToList();
+        //Sort the Messages according to timestamp, latest first
+        Messages = Messages.OrderByDescending(c => c.TimeStamp).ToList();
 
         int pageSizeIndex = (page - 1) * PageSize;
 
-        if (cheeps.Count < pageSizeIndex + PageSize)
-            return cheeps.ToList<Cheep>().GetRange(pageSizeIndex, cheeps.Count - pageSizeIndex);
-        if (cheeps.Count > PageSize)
-            return cheeps.ToList<Cheep>().GetRange(pageSizeIndex, PageSize);
-        return cheeps;
+        if (Messages.Count < pageSizeIndex + PageSize)
+            return Messages.ToList<Message>().GetRange(pageSizeIndex, Messages.Count - pageSizeIndex);
+        if (Messages.Count > PageSize)
+            return Messages.ToList<Message>().GetRange(pageSizeIndex, PageSize);
+        return Messages;
     }
 
-    // ----- Get Cheeps By Author Methods ----- //
-    public async Task<int> GetCheepCountByAuthorAsync(int authorId)
+    // ----- Get Messages By Author Methods ----- //
+    public async Task<int> GetMessageCountByAuthorAsync(int authorId)
     {
-        ICollection<Cheep> cheeps = await GetCheepsByAuthorAsync(authorId);
-        //Check that author has cheeps
-        if (cheeps.Count == 0 || cheeps == null)
+        ICollection<Message> Messages = await GetMessagesByAuthorAsync(authorId);
+        //Check that author has Messages
+        if (Messages.Count == 0 || Messages == null)
             return 0;
 
-        return cheeps.Count;
+        return Messages.Count;
     }
 
-    public async Task<int> GetCheepCountByAuthorAndFollowing(int authorId)
+    public async Task<int> GetMessageCountByAuthorAndFollowing(int authorId)
     {
-        ICollection<Cheep> cheeps = await GetCheepsByAuthorAndFollowingAsync(authorId);
-        return cheeps.Count;
+        ICollection<Message> Messages = await GetMessagesByAuthorAndFollowingAsync(authorId);
+        return Messages.Count;
     }
 
     // ----- Get Page Count Methods ----- //
     public async Task<int> GetPageCountByAuthor(int authorId)
     {
-        return await GetCheepCountByAuthorAsync(authorId) / PageSize + 1;
+        return await GetMessageCountByAuthorAsync(authorId) / PageSize + 1;
     }
 
     public async Task<int> GetPageCountByAuthorAndFollowing(int authorId)
     {
-        return await GetCheepCountByAuthorAndFollowing(authorId) / PageSize + 1;
+        return await GetMessageCountByAuthorAndFollowing(authorId) / PageSize + 1;
     }
 
     // ----- Get Followers and Following Methods ----- //
@@ -226,14 +226,14 @@ public class AuthorRepository : BaseRepository, IAuthorRepository
     }
 
     // ----- Delete Author Data Methods ----- //
-    public async Task DeleteCheepsByAuthorIdAsync(int id)
+    public async Task DeleteMessagesByAuthorIdAsync(int id)
     {
-        var cheeps = await GetCheepsByAuthorAsync(id);
+        var Messages = await GetMessagesByAuthorAsync(id);
 
-        foreach (var cheep in cheeps)
+        foreach (var Message in Messages)
         {
-            // Delete the cheep itself
-            db.Cheeps.Remove(cheep);
+            // Delete the Message itself
+            db.Messages.Remove(Message);
         }
 
         await db.SaveChangesAsync();

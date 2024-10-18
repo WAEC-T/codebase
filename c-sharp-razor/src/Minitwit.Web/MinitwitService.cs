@@ -5,120 +5,120 @@ using Minitwit.Web.Models;
 
 namespace Minitwit.Web;
 
-public interface ICheepService
+public interface IMessageService
 {
-    public Task<ICollection<CheepViewModel>> GetCheepsAsync(int page);
-    public Task<ICollection<CheepViewModel>> GetCheepsFromAuthor(string authorName, int page);
-    public Task<ICollection<CheepViewModel>> GetCheepsFromAuthorAsync(int authorId, int page);
-    public Task<ICollection<CheepViewModel>> GetCheepsFromAuthorAndFollowingAsync(
+    public Task<ICollection<MessageViewModel>> GetMessagesAsync(int page);
+    public Task<ICollection<MessageViewModel>> GetMessagesFromAuthor(string authorName, int page);
+    public Task<ICollection<MessageViewModel>> GetMessagesFromAuthorAsync(int authorId, int page);
+    public Task<ICollection<MessageViewModel>> GetMessagesFromAuthorAndFollowingAsync(
         int authorId,
         int page
     );
 }
 
-public class MinitwitService : ICheepService
+public class MinitwitService : IMessageService
 {
     private readonly IAuthorRepository _authorRepository;
-    private readonly ICheepRepository _cheepRepository;
+    private readonly IMessageRepository _MessageRepository;
 
     public MinitwitService(
-        ICheepRepository cheepRepository,
+        IMessageRepository MessageRepository,
         IAuthorRepository authorRepository
     )
     {
-        _cheepRepository = cheepRepository;
+        _MessageRepository = MessageRepository;
         _authorRepository = authorRepository;
     }
 
-    public async Task<ICollection<CheepViewModel>> GetCheepsAsync(int page)
+    public async Task<ICollection<MessageViewModel>> GetMessagesAsync(int page)
     {
-        // Fetch cheeps for the given page.
-        ICollection<Cheep> cheepDtos = await _cheepRepository.GetCheepsByPageAsync(page);
+        // Fetch Messages for the given page.
+        ICollection<Message> MessageDtos = await _MessageRepository.GetMessagesByPageAsync(page);
 
-        // Extract unique author IDs from the cheeps.
-        var authorIds = cheepDtos.Select(c => c.AuthorId).Distinct();
+        // Extract unique author IDs from the Messages.
+        var authorIds = MessageDtos.Select(c => c.AuthorId).Distinct();
 
-        // Fetch only the authors who authored the fetched cheeps.
+        // Fetch only the authors who authored the fetched Messages.
         ICollection<Author> authors = await _authorRepository.GetAuthorsByIdAsync(authorIds);
 
-        // Initialize a list to hold the CheepViewModels.
-        List<CheepViewModel> cheeps = new List<CheepViewModel>();
+        // Initialize a list to hold the MessageViewModels.
+        List<MessageViewModel> Messages = new List<MessageViewModel>();
 
-        // Process each cheepDto sequentially.
-        foreach (var cheepDto in cheepDtos)
+        // Process each MessageDto sequentially.
+        foreach (var MessageDto in MessageDtos)
         {
-            // Find the author for the current cheep.
-            Author? author = authors.FirstOrDefault(a => a.Id == cheepDto.AuthorId);
+            // Find the author for the current Message.
+            Author? author = authors.FirstOrDefault(a => a.Id == MessageDto.AuthorId);
 
-            // Create and add the CheepViewModel to the list.
-            cheeps.Add(
-                new CheepViewModel(
-                    cheepDto.CheepId,
+            // Create and add the MessageViewModel to the list.
+            Messages.Add(
+                new MessageViewModel(
+                    MessageDto.MessageId,
                     new UserModel(author),
-                    cheepDto.Text,
-                    cheepDto.TimeStamp.ToString("o")
+                    MessageDto.Text,
+                    MessageDto.TimeStamp.ToString("o")
                 )
             );
         }
 
-        return cheeps;
+        return Messages;
     }
 
-    public async Task<ICollection<CheepViewModel>> GetCheepsFromAuthorAsync(int id, int page)
+    public async Task<ICollection<MessageViewModel>> GetMessagesFromAuthorAsync(int id, int page)
     {
-        ICollection<Cheep> cheepDtos = await _authorRepository.GetCheepsByAuthor(id, page);
-        ICollection<CheepViewModel> cheeps = new List<CheepViewModel>();
+        ICollection<Message> MessageDtos = await _authorRepository.GetMessagesByAuthor(id, page);
+        ICollection<MessageViewModel> Messages = new List<MessageViewModel>();
         Author author = await _authorRepository.GetAuthorByIdAsync(id);
 
-        foreach (Cheep cheepDto in cheepDtos)
+        foreach (Message MessageDto in MessageDtos)
         {
-            cheeps.Add(
-                new CheepViewModel(
-                    cheepDto.CheepId,
+            Messages.Add(
+                new MessageViewModel(
+                    MessageDto.MessageId,
                     new UserModel(author),
-                    cheepDto.Text,
-                    cheepDto.TimeStamp.ToString(CultureInfo.InvariantCulture)
+                    MessageDto.Text,
+                    MessageDto.TimeStamp.ToString(CultureInfo.InvariantCulture)
                 )
             );
         }
 
-        return cheeps;
+        return Messages;
     }
 
-    public async Task<ICollection<CheepViewModel>> GetCheepsFromAuthorAndFollowingAsync(
+    public async Task<ICollection<MessageViewModel>> GetMessagesFromAuthorAndFollowingAsync(
         int authorId,
         int page
     )
     {
-        ICollection<Cheep> cheepDtos = await _authorRepository.GetCheepsByAuthorAndFollowing(
+        ICollection<Message> MessageDtos = await _authorRepository.GetMessagesByAuthorAndFollowing(
             authorId,
             page
         );
         ICollection<Author> authors = await _authorRepository.GetFollowingByIdAsync(authorId);
         authors.Add(await _authorRepository.GetAuthorByIdAsync(authorId));
-        ICollection<CheepViewModel> cheeps = new List<CheepViewModel>();
+        ICollection<MessageViewModel> Messages = new List<MessageViewModel>();
 
-        foreach (Cheep cheepDto in cheepDtos)
+        foreach (Message MessageDto in MessageDtos)
         {
-            Author? author = authors.FirstOrDefault(a => a.Id == cheepDto.AuthorId);
+            Author? author = authors.FirstOrDefault(a => a.Id == MessageDto.AuthorId);
 
-            cheeps.Add(
-                new CheepViewModel(
-                    cheepDto.CheepId,
+            Messages.Add(
+                new MessageViewModel(
+                    MessageDto.MessageId,
                     new UserModel(author!),
-                    cheepDto.Text,
-                    cheepDto.TimeStamp.ToString(CultureInfo.InvariantCulture)
+                    MessageDto.Text,
+                    MessageDto.TimeStamp.ToString(CultureInfo.InvariantCulture)
                 )
             );
         }
 
-        return cheeps;
+        return Messages;
     }
 
-    public async Task<ICollection<CheepViewModel>> GetCheepsFromAuthor(string authorName, int page)
+    public async Task<ICollection<MessageViewModel>> GetMessagesFromAuthor(string authorName, int page)
     {
         Author author = await _authorRepository.GetAuthorByNameAsync(authorName);
-        var cheeps = await GetCheepsFromAuthorAsync(author.Id, page);
-        return cheeps;
+        var Messages = await GetMessagesFromAuthorAsync(author.Id, page);
+        return Messages;
     }
 }

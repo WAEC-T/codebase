@@ -12,28 +12,28 @@ namespace Minitwit.Web.Pages;
 
 public class PublicModel : PageModel
 {
-    private readonly ICheepService _service;
-    private readonly ICheepRepository _cheepRepository;
+    private readonly IMessageService _service;
+    private readonly IMessageRepository _MessageRepository;
     private readonly IAuthorRepository _authorRepository;
     private readonly IFollowRepository _followRepository;
-    private readonly IValidator<CreateCheep> _validator;
+    private readonly IValidator<CreateMessage> _validator;
     public required Author user { get; set; }
     private readonly UserManager<Author> _userManager;
-    public required ICollection<CheepViewModel> Cheeps { get; set; }
+    public required ICollection<MessageViewModel> Messages { get; set; }
     public required int totalPages { get; set; }
     public required int currentPage { get; set; }
 
     public PublicModel(
-        ICheepService service,
-        ICheepRepository cheepRepository,
+        IMessageService service,
+        IMessageRepository MessageRepository,
         IAuthorRepository authorRepository,
         IFollowRepository followRepository,
-        IValidator<CreateCheep> validator,
+        IValidator<CreateMessage> validator,
         UserManager<Author> userManager
     )
     {
         _service = service;
-        _cheepRepository = cheepRepository;
+        _MessageRepository = MessageRepository;
         _authorRepository = authorRepository;
         _followRepository = followRepository;
         _validator = validator;
@@ -47,9 +47,9 @@ public class PublicModel : PageModel
     }
 
     [BindProperty]
-    public NewCheep? NewCheep { get; set; }
+    public NewMessage? NewMessage { get; set; }
 
-    public async Task<IActionResult> OnPostCreateCheep()
+    public async Task<IActionResult> OnPostCreateMessage()
     {
         if (!ModelState.IsValid)
         {
@@ -57,31 +57,31 @@ public class PublicModel : PageModel
         }
 
         var author = await _userManager.GetUserAsync(User);
-        var cheep = new CreateCheep(author!.Id, NewCheep!.Text!);
+        var Message = new CreateMessage(author!.Id, NewMessage!.Text!);
 
-        await CreateCheep(cheep);
+        await CreateMessage(Message);
 
         return RedirectToPage("/UserTimeline", new { author = User.Identity?.Name });
     }
 
-    public async Task CreateCheep(CreateCheep newCheep)
+    public async Task CreateMessage(CreateMessage newMessage)
     {
-        var validationResult = await _validator.ValidateAsync(newCheep);
+        var validationResult = await _validator.ValidateAsync(newMessage);
 
         if (!validationResult.IsValid)
         {
             Console.WriteLine(validationResult);
             //Fatal exception
             throw new ValidationException(
-                "The Cheep must be between 5 and 160 characters.(CreateCheep)"
+                "The Message must be between 5 and 160 characters.(CreateMessage)"
             );
         }
 
-        await _cheepRepository.AddCreateCheepAsync(newCheep);
+        await _MessageRepository.AddCreateMessageAsync(newMessage);
     }
 
     public async Task<IActionResult> OnPostReaction(
-        int cheepId,
+        int MessageId,
         int currentPage
     )
     {
@@ -91,7 +91,7 @@ public class PublicModel : PageModel
     }
 
     public async Task<IActionResult> OnPostRemoveReaction(
-        int cheepId,
+        int MessageId,
         int currentPage
     )
     {
@@ -148,21 +148,21 @@ public class PublicModel : PageModel
 
     public async Task InitializeVariables(int page)
     {
-        Cheeps = await _service.GetCheepsAsync(page);
+        Messages = await _service.GetMessagesAsync(page);
 
         user = _userManager.GetUserAsync(User).Result!;
-        totalPages = await _cheepRepository.GetPageCountAsync();
+        totalPages = await _MessageRepository.GetPageCountAsync();
         currentPage = page;
     }
 }
 
-public class NewCheep
+public class NewMessage
 {
     [Required]
     [StringLength(
         160,
         MinimumLength = 5,
-        ErrorMessage = "The Cheep must be between 5 and 160 characters(NewCheep)."
+        ErrorMessage = "The Message must be between 5 and 160 characters(NewMessage)."
     )]
     public string? Text { get; set; }
 }

@@ -14,7 +14,7 @@ namespace Minitwit.Infrastructure;
 
 public sealed class MinitwitDbContext : IdentityDbContext<Author, IdentityRole<int>, int>
 {
-    public DbSet<Cheep> Cheeps { get; set; } = null!;
+    public DbSet<Message> Messages { get; set; } = null!;
 
     public DbSet<Follow> Follows { get; set; } = null!;
 
@@ -95,12 +95,12 @@ public sealed class MinitwitDbContext : IdentityDbContext<Author, IdentityRole<i
             entity.HasOne<Author>().WithMany().HasForeignKey(f => f.FollowedAuthorId);
         });
 
-        modelBuilder.Entity<Cheep>(entity =>
+        modelBuilder.Entity<Message>(entity =>
         {
             entity.ToTable("messages");
-            entity.HasKey(e => e.CheepId);
+            entity.HasKey(e => e.MessageId);
 
-            entity.Property(e => e.CheepId).HasColumnName("message_id");
+            entity.Property(e => e.MessageId).HasColumnName("message_id");
             entity.Property(e => e.AuthorId).HasColumnName("author_id");
             entity.Property(e => e.Text).HasColumnName("text").IsRequired();
             entity.Property(e => e.TimeStamp)
@@ -108,7 +108,7 @@ public sealed class MinitwitDbContext : IdentityDbContext<Author, IdentityRole<i
                 .HasColumnType("timestamp");
         });
 
-        modelBuilder.Entity<Cheep>()
+        modelBuilder.Entity<Message>()
             .HasIndex(c => c.TimeStamp);
 
         modelBuilder.Entity<Latest>(entity =>
