@@ -2,16 +2,16 @@
 
 namespace Minitwit.Core.Repository;
 
-public interface ICheepRepository
+public interface IMessageRepository
 {
-    public Task<ICollection<Cheep>> GetCheepsByPageAsync(int page);
+    public Task<ICollection<Message>> GetMessagesByPageAsync(int page);
 
-    public Task<ICollection<Cheep>> GetCheepsByCountAsync(int count);
+    public Task<ICollection<Message>> GetMessagesByCountAsync(int count);
 
-    public Task<ICollection<Cheep>> GetCheepsFromAuthorByCountAsync(int authorId, int count);
+    public Task<ICollection<Message>> GetMessagesFromAuthorByCountAsync(int authorId, int count);
 
-    public Task AddCheepAsync(Cheep cheepDto);
-    public Task<Cheep> AddCreateCheepAsync(CreateCheep cheep);
-    public Task<int> GetCheepCountAsync();
+    public Task AddMessageAsync(Message MessageDto);
+    public Task<Message> AddCreateMessageAsync(CreateMessage Message);
+    public Task<int> GetMessageCountAsync();
     public Task<int> GetPageCountAsync();
 }

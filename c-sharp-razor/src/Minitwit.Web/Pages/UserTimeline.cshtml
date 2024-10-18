@@ -7,9 +7,9 @@
 @model Minitwit.Razor.Pages.UserTimelineModel
 @inject SignInManager<Author> SignInManager
 @inject UserManager<Author> UserManager
-@inject IValidator<CreateCheep> Validator
+@inject IValidator<CreateMessage> Validator
 @inject IAuthorRepository AuthorRepository
-@inject ICheepRepository CheepRepository
+@inject IMessageRepository MessageRepository
 
 @{
     ViewData["Title"] = "Chirp!";
@@ -21,18 +21,18 @@
                 <h2> @routeName's Timeline </h2>
 
                 @if (SignInManager.IsSignedIn(User)) {
-                    @await Html.PartialAsync("Shared/_CheepBox", new NewCheep {Text = ""})
+                    @await Html.PartialAsync("Shared/_MessageBox", new NewMessage {Text = ""})
                 }
 
-                @if (!Model.Cheeps!.Any() || Model.Cheeps == null)
+                @if (!Model.Messages!.Any() || Model.Messages == null)
     {
                 <div>
-                    <p>This user has no cheeps so far.</p>
+                    <p>This user has no Messages so far.</p>
                 </div>
     }
     else
     {
-                @await Html.PartialAsync("Shared/_CheepList", Model)
+                @await Html.PartialAsync("Shared/_MessageList", Model)
     }
             </div>
 

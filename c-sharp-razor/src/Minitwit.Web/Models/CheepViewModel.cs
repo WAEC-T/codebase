@@ -2,8 +2,8 @@
 
 namespace Minitwit.Web.Models;
 
-public record CheepViewModel(
-    int CheepId,
+public record MessageViewModel(
+    int MessageId,
     UserModel User,
     string Message,
     string Timestamp

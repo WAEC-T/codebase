@@ -4,91 +4,91 @@ using Minitwit.Core.Repository;
 
 namespace Minitwit.Infrastructure.Repository;
 
-public class CheepRepository : BaseRepository, ICheepRepository
+public class MessageRepository : BaseRepository, IMessageRepository
 {
-    public CheepRepository(MinitwitDbContext DbContext)
+    public MessageRepository(MinitwitDbContext DbContext)
         : base(DbContext) { }
 
-    public async Task<ICollection<Cheep>> GetCheepsByPageAsync(int page)
+    public async Task<ICollection<Message>> GetMessagesByPageAsync(int page)
     {
-        //Use EF to get the specified page of cheeps from the database
-        ICollection<Cheep> cheeps = await db
-            .Cheeps.OrderByDescending(c => c.TimeStamp)
+        //Use EF to get the specified page of Messages from the database
+        ICollection<Message> Messages = await db
+            .Messages.OrderByDescending(c => c.TimeStamp)
             .Skip(PageSize * (page - 1))
             .Take(PageSize)
             .ToListAsync();
 
-        return cheeps;
+        return Messages;
     }
 
-    public async Task<ICollection<Cheep>> GetCheepsByCountAsync(int count)
+    public async Task<ICollection<Message>> GetMessagesByCountAsync(int count)
     {
-        ICollection<Cheep> cheeps = await db
-            .Cheeps.OrderByDescending(c => c.TimeStamp)
+        ICollection<Message> Messages = await db
+            .Messages.OrderByDescending(c => c.TimeStamp)
             .Take(count)
             .AsNoTracking()
             .ToListAsync();
 
-        return cheeps;
+        return Messages;
     }
 
-    public async Task<ICollection<Cheep>> GetCheepsFromAuthorByCountAsync(int authorId, int count)
+    public async Task<ICollection<Message>> GetMessagesFromAuthorByCountAsync(int authorId, int count)
     {
-        //Use EF to get the specified count of cheeps from an author from the database
-        ICollection<Cheep> cheeps = await db
-            .Cheeps.Where(c => c.AuthorId == authorId)
+        //Use EF to get the specified count of Messages from an author from the database
+        ICollection<Message> Messages = await db
+            .Messages.Where(c => c.AuthorId == authorId)
             .OrderByDescending(c => c.TimeStamp)
             .Take(count)
             .ToListAsync();
 
-        return cheeps;
+        return Messages;
     }
 
-    public async Task<int> GetCheepCountAsync()
+    public async Task<int> GetMessageCountAsync()
     {
-        //Use EF to get the total number of cheeps from the database
-        return await db.Cheeps.CountAsync();
+        //Use EF to get the total number of Messages from the database
+        return await db.Messages.CountAsync();
     }
 
     public async Task<int> GetPageCountAsync()
     {
-        return await GetCheepCountAsync() / PageSize + 1;
+        return await GetMessageCountAsync() / PageSize + 1;
     }
 
-    public async Task DeleteCheepByIdAsync(int cheepId)
+    public async Task DeleteMessageByIdAsync(int MessageId)
     {
-        //Delete the specified cheep from the database
-        Cheep? cheep = await db.Cheeps.FindAsync(cheepId);
-        if (cheep != null)
+        //Delete the specified Message from the database
+        Message? Message = await db.Messages.FindAsync(MessageId);
+        if (Message != null)
         {
-            db.Cheeps.Remove(cheep);
+            db.Messages.Remove(Message);
         }
         else
         {
-            throw new Exception("Cheep with id " + cheepId + " not found");
+            throw new Exception("Message with id " + MessageId + " not found");
         }
 
         await db.SaveChangesAsync();
     }
 
-    public async Task AddCheepAsync(Cheep cheep)
+    public async Task AddMessageAsync(Message Message)
     {
-        await db.Cheeps.AddAsync(cheep);
+        await db.Messages.AddAsync(Message);
         await db.SaveChangesAsync();
-        Console.WriteLine("Cheep added async");
+        Console.WriteLine("Message added async");
     }
 
-    public async Task<Cheep> AddCreateCheepAsync(CreateCheep cheep)
+    public async Task<Message> AddCreateMessageAsync(CreateMessage Message)
     {
-        Cheep entity = new Cheep()
+        Message entity = new Message()
         {
-            CheepId = new int(),
-            Text = cheep.Text,
+            MessageId = new int(),
+            Text = Message.Text,
             TimeStamp = DateTime.Now,
-            AuthorId = cheep.AuthorId
+            AuthorId = Message.AuthorId
         };
 
-        await AddCheepAsync(entity);
+        await AddMessageAsync(entity);
 
         return entity;
     }

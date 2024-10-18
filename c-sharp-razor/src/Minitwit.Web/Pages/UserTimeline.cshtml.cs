@@ -11,19 +11,19 @@ namespace Minitwit.Razor.Pages;
 
 public class UserTimelineModel : PageModel
 {
-    private readonly ICheepService _service;
+    private readonly IMessageService _service;
     private readonly UserManager<Author> _userManager;
     private readonly IAuthorRepository _authorRepository;
     private readonly SignInManager<Author> _signInManager;
 
-    public ICollection<CheepViewModel>? Cheeps { get; set; }
+    public ICollection<MessageViewModel>? Messages { get; set; }
 
     public required Author? user { get; set; }
     public required int currentPage { get; set; }
     public required int totalPages { get; set; }
 
     public UserTimelineModel(
-        ICheepService service,
+        IMessageService service,
         SignInManager<Author> signInManager,
         UserManager<Author> userManager,
         IAuthorRepository authorRepository
@@ -57,10 +57,10 @@ public class UserTimelineModel : PageModel
 
         Author timelineAuthor = await _authorRepository.GetAuthorByNameAsync(author);
 
-        await LoadCheeps(user, timelineAuthor, currentPage);
+        await LoadMessages(user, timelineAuthor, currentPage);
     }
 
-    private async Task LoadCheeps(Author signedInAuthor, Author timelineAuthor, int page)
+    private async Task LoadMessages(Author signedInAuthor, Author timelineAuthor, int page)
     {
         try
         {
@@ -69,7 +69,7 @@ public class UserTimelineModel : PageModel
                 && signedInAuthor.UserName == timelineAuthor.UserName
             )
             {
-                Cheeps = await _service.GetCheepsFromAuthorAndFollowingAsync(
+                Messages = await _service.GetMessagesFromAuthorAndFollowingAsync(
                     signedInAuthor.Id,
                     page
                 );
@@ -79,13 +79,13 @@ public class UserTimelineModel : PageModel
             }
             else
             {
-                Cheeps = await _service.GetCheepsFromAuthorAsync(timelineAuthor.Id, page);
+                Messages = await _service.GetMessagesFromAuthorAsync(timelineAuthor.Id, page);
                 totalPages = await _authorRepository.GetPageCountByAuthor(timelineAuthor.Id);
             }
         }
         catch (Exception)
         {
-            Cheeps = new List<CheepViewModel>();
+            Messages = new List<MessageViewModel>();
         }
     }
 }

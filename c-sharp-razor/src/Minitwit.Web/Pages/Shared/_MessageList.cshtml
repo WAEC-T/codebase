@@ -7,36 +7,36 @@
 @inject IAuthorRepository AuthorRepository
 @model dynamic
 
-<ul id="messagelist" class="cheeps">
+<ul id="messagelist" class="Messages">
     
-    @foreach (CheepViewModel cheep in Model.Cheeps)
+    @foreach (MessageViewModel Message in Model.Messages)
     {
         <li>
-            <div class="cheep-view">
-                <div class="cheep-info">
+            <div class="Message-view">
+                <div class="Message-info">
                     <strong>
                         
-                        <a href="/@cheep.User.Username">@cheep.User.Username</a>
-                        <p>Followers: @AuthorRepository.GetFollowersByIdAsync(cheep.User.Id).Result.Count()</p>
+                        <a href="/@Message.User.Username">@Message.User.Username</a>
+                        <p>Followers: @AuthorRepository.GetFollowersByIdAsync(Message.User.Id).Result.Count()</p>
                     </strong>
-                    <p class="cheep-message">
-                        @cheep.Message
+                    <p class="Message-message">
+                        @Message.Message
                     </p>
 
-                    <small>&mdash; @cheep.Timestamp</small>
+                    <small>&mdash; @Message.Timestamp</small>
                 </div>
 
-                @if (SigninManager.IsSignedIn(User) && cheep.User.Username != User.Identity?.Name)
+                @if (SigninManager.IsSignedIn(User) && Message.User.Username != User.Identity?.Name)
                 {
-                    if (!await FollowRepository.IsFollowingAsync(Model.user.Id, cheep.User.Id))
+                    if (!await FollowRepository.IsFollowingAsync(Model.user.Id, Message.User.Id))
                     {
-                        <form asp-page="public" asp-page-handler="Follow" method="post" asp-route-CurrentPage="@Model.currentPage" asp-route-Author2Follow="@cheep.User.Id">
+                        <form asp-page="public" asp-page-handler="Follow" method="post" asp-route-CurrentPage="@Model.currentPage" asp-route-Author2Follow="@Message.User.Id">
                             <input type="submit" value="Follow"/>
                         </form>
                     }
                     else
                     {
-                        <form asp-page="public" asp-page-handler="Unfollow" method="post" asp-route-CurrentPage="@Model.currentPage" asp-route-Author2Unfollow="@cheep.User.Id">
+                        <form asp-page="public" asp-page-handler="Unfollow" method="post" asp-route-CurrentPage="@Model.currentPage" asp-route-Author2Unfollow="@Message.User.Id">
                             <input type="submit" value="Unfollow"/>
                         </form>
                     }

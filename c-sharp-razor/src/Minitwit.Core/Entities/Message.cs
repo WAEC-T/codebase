@@ -4,17 +4,17 @@ using Microsoft.EntityFrameworkCore;
 namespace Minitwit.Core.Entities;
 
 /// <summary>
-/// This class represents cheeps, created by the users of the _Chirp!_ application.
-/// Cheeps are small messages,5 to 160 characters in length.
+/// This class represents Messages, created by the users of the _Chirp!_ application.
+/// Messages are small messages,5 to 160 characters in length.
 /// It's the only way for users to communicate with each other.
-/// Cheeps hold the reactions given to them.
+/// Messages hold the reactions given to them.
 /// </summary>
 
-[Index(nameof(CheepId), IsUnique = true)]
-public class Cheep
+[Index(nameof(MessageId), IsUnique = true)]
+public class Message
 {
     [Required]
-    public int CheepId { get; set; }
+    public int MessageId { get; set; }
 
     [Required]
     public int AuthorId { get; set; }

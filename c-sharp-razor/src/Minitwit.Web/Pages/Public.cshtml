@@ -8,8 +8,8 @@
 
 @inject SignInManager<Author> SignInManager
 @inject UserManager<Author> UserManager
-@inject IValidator<CreateCheep> Validator
-@inject ICheepRepository CheepRepository
+@inject IValidator<CreateMessage> Validator
+@inject IMessageRepository MessageRepository
 
 @{
     ViewData["Title"] = "Chirp!";
@@ -20,15 +20,15 @@
     <h2> Public Timeline </h2>
     @if (SignInManager.IsSignedIn(User))
     {
-        @await Html.PartialAsync("Shared/_CheepBox", new NewCheep())
+        @await Html.PartialAsync("Shared/_MessageBox", new NewMessage())
     }
-    @if (Model.Cheeps?.Any() == true)
+    @if (Model.Messages?.Any() == true)
     {
-        @await Html.PartialAsync("Shared/_CheepList", Model)
+        @await Html.PartialAsync("Shared/_MessageList", Model)
     }
     else
     {
-        <em>There are no cheeps so far.</em>
+        <em>There are no Messages so far.</em>
     }
 </div>
 

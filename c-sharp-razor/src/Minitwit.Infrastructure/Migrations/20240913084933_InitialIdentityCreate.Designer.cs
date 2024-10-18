@@ -210,14 +210,14 @@ namespace Minitwit.Infrastructure.Migrations
                     b.ToTable("users", (string)null);
                 });
 
-            modelBuilder.Entity("Minitwit.Core.Entities.Cheep", b =>
+            modelBuilder.Entity("Minitwit.Core.Entities.Message", b =>
                 {
-                    b.Property<int>("CheepId")
+                    b.Property<int>("MessageId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer")
                         .HasColumnName("message_id");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("CheepId"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("MessageId"));
 
                     b.Property<int>("AuthorId")
                         .HasColumnType("integer")
@@ -234,9 +234,9 @@ namespace Minitwit.Infrastructure.Migrations
                         .HasColumnType("text")
                         .HasColumnName("pub_date");
 
-                    b.HasKey("CheepId");
+                    b.HasKey("MessageId");
 
-                    b.HasIndex("CheepId")
+                    b.HasIndex("MessageId")
                         .IsUnique();
 
                     b.HasIndex("TimeStamp");
