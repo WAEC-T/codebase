@@ -9,7 +9,7 @@ import (
 
 	"github.com/gorilla/mux"
 
-	auth "go-gorilla/src/internal/auth"
+	"go-gorilla/src/internal/auth"
 	"go-gorilla/src/internal/config"
 	"go-gorilla/src/internal/db"
 	"go-gorilla/src/internal/models"

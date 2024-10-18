@@ -48,7 +48,7 @@ func SetRouteHandlers(r *gin.Engine) {
 	// r.GET("/api/latest", getLatestHandler)
 
 	// Start the server
-	r.Run(":8081")
+	r.Run(":5000")
 }
 
 func LoadEnvVars() string {
