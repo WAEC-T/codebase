@@ -1,14 +1,15 @@
 services:
-  app:
-    build:
-      context: .
-      shm_size: "128m"
-    container_name: mini-x
-    networks:
-      - main
+  rust-actix:
+    image: waect/rust-actix
+    build: .
+    container_name: rust-actix
     ports:
       - "5000:5000"
     env_file:
       - ../.env.local
-    # environment:
-    #   - DATABASE_URL=postgresql://user:pass@localhost:5432/waect
+    networks:
+      - waect-network
+
+networks:
+  waect-network:
+    external: true
