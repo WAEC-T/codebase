@@ -42,12 +42,12 @@ public class ProgramOptions
 
         builder.Services.AddAuthentication().AddCookie();
     }
-
+    
     public static void AddDatabase(WebApplicationBuilder builder)
     {   
         string dbUser = Environment.GetEnvironmentVariable("POSTGRES_USER") ?? "user";
         string dbPassword = Environment.GetEnvironmentVariable("POSTGRES_PASSWORD") ?? "pass";
-        string dbHost = "10.26.42.4"; // Environment.GetEnvironmentVariable("POSTGRES_HOST") ?? "local_postgres";
+        string dbHost = Environment.GetEnvironmentVariable("POSTGRES_HOST") ?? "local_postgres";
         string dbPort = Environment.GetEnvironmentVariable("POSTGRES_PORT") ?? "5432";
         string dbName = Environment.GetEnvironmentVariable("POSTGRES_DB") ?? "waect";
         
