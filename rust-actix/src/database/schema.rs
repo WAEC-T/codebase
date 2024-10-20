@@ -19,7 +19,7 @@ diesel::table! {
         message_id -> Int4,
         author_id -> Int4,
         text -> Text,
-        pub_date -> Text,
+        pub_date -> Timestamp,
         flagged -> Int4,
     }
 }
@@ -33,4 +33,11 @@ diesel::table! {
     }
 }
 
-diesel::allow_tables_to_appear_in_same_query!(followers, latest, messages, users,);
+diesel::joinable!(messages -> users (author_id));
+
+diesel::allow_tables_to_appear_in_same_query!(
+    followers,
+    latest,
+    messages,
+    users,
+);

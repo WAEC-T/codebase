@@ -1,10 +1,9 @@
-use crate::schema::{followers, messages};
+use crate::database::schema::{followers, messages, users};
+use chrono::NaiveDateTime;
 use diesel::prelude::*;
 
-use super::schema::users;
-
 #[derive(Queryable, Selectable)]
-#[diesel(table_name = crate::schema::users)]
+#[diesel(table_name = crate::database::schema::users)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 #[derive(QueryableByName)]
 pub struct Users {
@@ -23,7 +22,7 @@ pub struct NewUser<'a> {
 }
 
 #[derive(Queryable, Selectable, Insertable)]
-#[diesel(table_name = crate::schema::followers)]
+#[diesel(table_name = crate::database::schema::followers)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 #[derive(QueryableByName)]
 pub struct Followers {
@@ -38,15 +37,14 @@ pub struct NewFollower<'a> {
     pub whom_id: &'a i32,
 }
 
-#[derive(Queryable, Selectable, Insertable)]
-#[diesel(table_name = crate::schema::messages)]
+#[derive(Queryable, QueryableByName, Selectable, Insertable)]
+#[diesel(table_name = crate::database::schema::messages)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
-#[derive(QueryableByName)]
 pub struct Messages {
     pub message_id: i32,
     pub author_id: i32,
     pub text: String,
-    pub pub_date: String,
+    pub pub_date: NaiveDateTime,
     pub flagged: i32,
 }
 
@@ -55,7 +53,7 @@ pub struct Messages {
 pub struct NewMessage<'a> {
     pub author_id: &'a i32,
     pub text: &'a str,
-    pub pub_date: &'a String,
+    pub pub_date: &'a NaiveDateTime,
     pub flagged: &'a i32,
 }
 
