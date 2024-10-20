@@ -2,18 +2,7 @@ FROM alpine:edge as BUILDER
 
 WORKDIR /usr/src/waect-rust
 
-RUN apk update
-RUN apk add --no-cache rust
-RUN apk add --no-cache cargo
-RUN apk add --no-cache libpq-dev
-
-# Copy over the Cargo.toml files to the shell project
-COPY Cargo.toml ./
-
-# Build and cache the dependencies
-RUN mkdir src && echo "fn main() {}" > src/main.rs
-RUN cargo build --release
-RUN rm src/main.rs
+RUN apk update && apk add --no-cache rust cargo libpq-dev
 
 COPY . .
 
@@ -23,13 +12,10 @@ FROM alpine:edge
 
 WORKDIR /usr/src/waect-rust
 
-COPY --from=BUILDER /usr/src/waect-rust/target/release ./
+COPY --from=BUILDER /usr/src/waect-rust/target/release/waect-rust ./
 
 COPY src/frontend/static/ ./src/frontend/static/
-RUN apk update
-RUN apk add libc6-compat
-RUN apk add libgcc
-RUN apk add libpq
+RUN apk update && apk add libc6-compat libgcc libpq
 
 EXPOSE 5000
 
