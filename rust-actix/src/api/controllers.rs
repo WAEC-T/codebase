@@ -1,6 +1,6 @@
-use crate::{api::model::*, database::repository::{establish_connection, get_user_by_name, set_latest, get_latest, create_user, get_public_messages, get_timeline, create_msg, get_followers, follow, unfollow}};
+use crate::{api::model::*, database::repository::{create_msg, create_user, establish_connection, follow, get_followers, get_latest, get_public_messages, get_timeline, get_user_by_name, set_latest, unfollow}, utils::datetime::convert_naive_to_utc};
 use actix_web::{web, HttpResponse};
-use chrono::Utc;
+use chrono:: Utc;
 use pwhash::bcrypt;
 use diesel::PgConnection;
 
@@ -58,9 +58,7 @@ pub async fn list_feed_messages(amount: web::Query<MessageAmount>, query: web::Q
         .map(|(msg, user)| Message {
             content: msg.text,
             user: user.username,
-            pub_date: chrono::DateTime::parse_from_rfc3339(&msg.pub_date)
-                .unwrap()
-                .to_utc(),
+            pub_date: convert_naive_to_utc(msg.pub_date),
         })
         .collect();
 
@@ -77,9 +75,7 @@ pub async fn list_user_messages(username: String, amount: web::Query<MessageAmou
             .map(|(msg, user)| Message {
                 content: msg.text,
                 user: user.username,
-                pub_date: chrono::DateTime::parse_from_rfc3339(&msg.pub_date)
-                    .unwrap()
-                    .to_utc(),
+                pub_date: convert_naive_to_utc(msg.pub_date)
             })
             .collect();
 
@@ -94,7 +90,7 @@ pub async fn create_user_message(username: String, msg: MessageContent, query: w
     update_latest(conn, query);
 
     if let Some(user_id) = get_user_id(&username) {
-        let _ = create_msg(conn, &user_id, &msg.content, Utc::now().to_rfc3339(), &0);
+        let _ = create_msg(conn, &user_id, &msg.content, Utc::now(), &0);
         HttpResponse::NoContent().json("")
     } else {
         HttpResponse::NotFound().json("")

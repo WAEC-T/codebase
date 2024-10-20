@@ -4,11 +4,14 @@ use crate::database::repository::{create_msg, create_user, establish_connection,
 use crate::database::models::{Messages, Users};
 use crate::frontend::flash_messages::*;
 use crate::frontend::template_structs::*;
+use crate::utils::datetime::convert_naive_to_utc;
 use actix_web::{http::{header, StatusCode}, web::{self, Redirect}, get, post, HttpMessage, HttpRequest, HttpResponse, Responder};
 use askama_actix::Template;
 use chrono::Utc;
 use md5::{Digest, Md5};
 use pwhash::bcrypt;
+
+const PAGE_MESSAGES_LIMIT:i32 = 30;
 
 fn get_user_id(username: &str) -> i32 {
     let diesel_conn = &mut establish_connection();
@@ -75,9 +78,7 @@ fn format_messages(messages: Vec<(Messages, Users)>) -> Vec<MessageTemplate> {
             text: msg.text,
             username: user.username,
             gravatar_url: gravatar_url(&user.email),
-            pub_date: chrono::DateTime::parse_from_rfc3339(&msg.pub_date)
-                .unwrap()
-                .to_utc(),
+            pub_date: convert_naive_to_utc(msg.pub_date),
         };
         messages_for_template.push(message)
     }
@@ -88,7 +89,7 @@ fn format_messages(messages: Vec<(Messages, Users)>) -> Vec<MessageTemplate> {
 async fn timeline(flash: Option<FlashMessages>, user: Option<Identity>) -> impl Responder {
     if let Some(user) = get_user(user) {
         let diesel_conn = &mut establish_connection();
-        let messages = format_messages(get_timeline(diesel_conn, user.user_id, 32));
+        let messages = format_messages(get_timeline(diesel_conn, user.user_id, PAGE_MESSAGES_LIMIT));
 
         let rendered = TimelineTemplate {
             messages,
@@ -116,7 +117,7 @@ async fn public_timeline(
 ) -> impl Responder {
     let user = get_user(user);
     let diesel_conn = &mut establish_connection();
-    let messages = get_public_messages(diesel_conn, 32);
+    let messages = get_public_messages(diesel_conn, PAGE_MESSAGES_LIMIT);
     let messages_for_template = format_messages(messages);
 
     TimelineTemplate {
@@ -145,7 +146,7 @@ async fn user_timeline(
         if let Some(user) = user.clone() {
             followed = is_following(conn, profile_user.user_id, user.user_id)
         }
-        let messages = format_messages(get_user_timeline(conn, profile_user.user_id, 30));
+        let messages = format_messages(get_user_timeline(conn, profile_user.user_id, PAGE_MESSAGES_LIMIT));
         let rendered = TimelineTemplate {
             messages,
             request_endpoint: "user_timeline",
@@ -229,7 +230,7 @@ async fn add_message(
 ) -> impl Responder {
     if let Some(user) = user {
         let conn = &mut establish_connection();
-        let timestamp = Utc::now().to_rfc3339();
+        let timestamp = Utc::now();
         let user_id = user.id().unwrap().parse::<i32>().unwrap();
         let _ = create_msg(conn, &user_id, &msg.text, timestamp, &0);
         add_flash(session, "Your message was recorded");

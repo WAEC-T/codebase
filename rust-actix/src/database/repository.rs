@@ -1,6 +1,8 @@
 use std::env;
 use crate::database::models::*;
 use crate::database::schema;
+use chrono::DateTime;
+use chrono::Utc;
 use diesel::pg::PgConnection;
 use diesel::sql_types::Integer;
 use diesel::{prelude::*, sql_query, Connection as Conn};
@@ -11,8 +13,6 @@ fn load_db_url_from_env() -> Result<String, Box<dyn Error>> {
     dotenvy::from_path("../.env.local")?;
 
     let database_url = env::var("DATABASE_URL")?;
-
-    print!("{}",database_url);
 
     Ok(database_url)
 }
@@ -58,7 +58,7 @@ pub fn create_msg(
     conn: &mut PgConnection,
     author_id: &i32,
     text: &str,
-    pub_date: String,
+    pub_date: DateTime<Utc>,
     flagged: &i32,
 ) -> Messages {
     use schema::messages;
@@ -66,7 +66,7 @@ pub fn create_msg(
     let new_message = NewMessage {
         author_id,
         text,
-        pub_date: &pub_date,
+        pub_date: &pub_date.naive_utc(),
         flagged,
     };
 
