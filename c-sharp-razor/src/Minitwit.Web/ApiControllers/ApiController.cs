@@ -255,9 +255,9 @@ public class ApiController : ControllerBase
             {
                 await CreateUser(username, $"{username}@user.com", "password");
             }
-
+            
             Author author = await _authorRepository.GetAuthorByNameAsync(username);
-            var authorFollowers = await _authorRepository.GetFollowersByIdAsync(author.Id);
+            var authorFollowers = await _authorRepository.GetFollowingByIdAsync(author.Id);
             for (int i = 0; i < authorFollowers.Count; i++)
             {
                 if (i > no - 1)

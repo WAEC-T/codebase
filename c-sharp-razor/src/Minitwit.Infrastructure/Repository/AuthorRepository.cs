@@ -182,7 +182,8 @@ public class AuthorRepository : BaseRepository, IAuthorRepository
     }
 
     public async Task<ICollection<Author>> GetFollowingByIdAsync(int id)
-    {
+    {   
+        // function works
         // Query to retrieve the IDs of authors followed by the specified author
         var followingAuthorIds = await db
             .Follows.Where(f => f.FollowingAuthorId == id)

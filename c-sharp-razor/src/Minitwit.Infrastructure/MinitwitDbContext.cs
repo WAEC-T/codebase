@@ -33,7 +33,7 @@ public sealed class MinitwitDbContext : IdentityDbContext<Author, IdentityRole<i
             // Get PostgreSQL environment variables
             string username = Environment.GetEnvironmentVariable("POSTGRES_USER") ?? "user";
             string password = Environment.GetEnvironmentVariable("POSTGRES_PASSWORD") ?? "pass";
-            string host = Environment.GetEnvironmentVariable("POSTGRES_HOST") ?? "192.168.8.175"; // 
+            string host = "192.168.0.146"; // Environment.GetEnvironmentVariable("POSTGRES_HOST") ?? "192.168.0.146" 
             string port = Environment.GetEnvironmentVariable("POSTGRES_PORT") ?? "5432";
             string database = Environment.GetEnvironmentVariable("POSTGRES_DB") ?? "waect";
 
@@ -86,11 +86,11 @@ public sealed class MinitwitDbContext : IdentityDbContext<Author, IdentityRole<i
         {
             entity.ToTable("followers");
             entity.HasKey(f => new { f.FollowingAuthorId, f.FollowedAuthorId });
-
+            
             // Mapping columns
-            entity.Property(f => f.FollowedAuthorId).HasColumnName("who_id");
-            entity.Property(f => f.FollowingAuthorId).HasColumnName("whom_id");
-
+            entity.Property(f => f.FollowingAuthorId).HasColumnName("who_id");
+            entity.Property(f => f.FollowedAuthorId).HasColumnName("whom_id");
+            
             entity.HasOne<Author>().WithMany().HasForeignKey(f => f.FollowingAuthorId);
             entity.HasOne<Author>().WithMany().HasForeignKey(f => f.FollowedAuthorId);
         });
