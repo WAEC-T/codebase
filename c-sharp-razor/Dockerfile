@@ -32,7 +32,7 @@ COPY --from=publish /app/publish .
 
 # Set environment to Production
 ENV ASPNETCORE_ENVIRONMENT=Production
-ENV ASPNETCORE_URLS=http://0.0.0.0:5000
+ENV ASPNETCORE_URLS=http://0.0.0.0:5022
 
 # Run the application
 ENTRYPOINT ["dotnet", "Minitwit.Web.dll"]

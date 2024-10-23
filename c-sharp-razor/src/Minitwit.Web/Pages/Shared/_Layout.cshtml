@@ -8,12 +8,14 @@
 <head>
     <title>@ViewData["Title"]</title>
     <link href="/css/style.css" rel="stylesheet" type="text/css" />
-    <link rel="icon" type="image/png" href="/image/BITtrace_white-03.png">
+    <link rel="icon" type="image/png" href="/image/BITtrace_Logo_black_tab.png">
     @RenderSection("Scripts", required: false)
 </head>
 <body>
 <div class=page>
-    <h1>BitTrace</h1>
+    <h1>
+        <img src="image/BITtrace_Logo_white_150ppi.png" alt="BitTrace Logo" style="height: 70px;">
+    </h1>
     
     <div class=navigation>
         @if (SignInManager.IsSignedIn(User) && User.Identity != null)

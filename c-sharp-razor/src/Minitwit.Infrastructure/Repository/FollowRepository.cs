@@ -35,9 +35,4 @@ public class FollowRepository : BaseRepository, IFollowRepository
 
         return isFollowing;
     }
-
-    public async Task<bool> HasFollowersAsync(int authorId)
-    {
-        return await db.Follows.AnyAsync(e => e.FollowedAuthorId == authorId);
-    }
 }
