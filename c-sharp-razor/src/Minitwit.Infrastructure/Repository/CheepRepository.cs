@@ -55,22 +55,6 @@ public class MessageRepository : BaseRepository, IMessageRepository
         return await GetMessageCountAsync() / PageSize + 1;
     }
 
-    public async Task DeleteMessageByIdAsync(int MessageId)
-    {
-        //Delete the specified Message from the database
-        Message? Message = await db.Messages.FindAsync(MessageId);
-        if (Message != null)
-        {
-            db.Messages.Remove(Message);
-        }
-        else
-        {
-            throw new Exception("Message with id " + MessageId + " not found");
-        }
-
-        await db.SaveChangesAsync();
-    }
-
     public async Task AddMessageAsync(Message Message)
     {
         await db.Messages.AddAsync(Message);

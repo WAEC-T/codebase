@@ -218,14 +218,6 @@ public class AuthorRepository : BaseRepository, IAuthorRepository
         await _followRepository.DeleteFollowAsync(follow);
     }
 
-    public async Task RemoveFollow(Author? followingAuthor, Author? followedAuthor)
-    {
-        Follow follow = await db.Follows.FirstOrDefaultAsync(e =>
-            e.FollowedAuthorId == followedAuthor!.Id && e.FollowingAuthorId == followingAuthor!.Id
-        )!;
-        await _followRepository.DeleteFollowAsync(follow);
-    }
-
     // ----- Delete Author Data Methods ----- //
     public async Task DeleteMessagesByAuthorIdAsync(int id)
     {
