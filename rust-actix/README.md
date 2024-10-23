@@ -17,7 +17,7 @@ cargo build
 After it has successfully build and no errors occoured run the project.
 
 ```bashrc
-cargo run --bin mini-x
+cargo run --bin waect-rust
 ```
 
 In the case of of dependencies not being installed run - do not run unless errors are encountered

@@ -17,8 +17,8 @@ CREATE TABLE IF NOT EXISTS messages (
   message_id SERIAL PRIMARY KEY,
   author_id INTEGER NOT NULL,
   text TEXT NOT NULL,
-  pub_date TIMESTAMP,
-  flagged INTEGER,
+  pub_date TIMESTAMP NOT NULL ,
+  flagged INTEGER NOT NULL,
   FOREIGN KEY (author_id) REFERENCES users (user_id)
 );
 

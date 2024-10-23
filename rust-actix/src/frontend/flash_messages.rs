@@ -1,11 +1,5 @@
-use actix_session::Session;
-use actix_session::SessionExt;
-
-use actix_web::dev;
-use actix_web::error::ErrorBadRequest;
-use actix_web::Error;
-use actix_web::FromRequest;
-use actix_web::HttpRequest;
+use actix_session::{Session,SessionExt};
+use actix_web::{dev,error::ErrorBadRequest,Error,FromRequest,HttpRequest};
 use futures::future::{err, ok, Ready};
 use serde::Deserialize;
 
