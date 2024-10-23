@@ -1,0 +1,51 @@
+﻿@using Minitwit.Core.Entities
+@using Microsoft.AspNetCore.Identity
+@inject SignInManager<Author> SignInManager
+@inject UserManager<Author> UserManager
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>@ViewData["Title"]</title>
+    <link href="/css/style.css" rel="stylesheet" type="text/css" />
+    <link rel="icon" type="image/png" href="/image/BITtrace_Logo_black_tab.png">
+    @RenderSection("Scripts", required: false)
+</head>
+<body>
+<div class=page>
+    <h1>
+        <img src="image/BITtrace_Logo_white_150ppi.png" alt="BitTrace Logo" style="height: 70px;">
+    </h1>
+    
+    <div class=navigation>
+        @if (SignInManager.IsSignedIn(User) && User.Identity != null)
+        {
+            <div>
+
+                <a href="/@(User.Identity.Name)">My timeline</a> |
+
+                <a href="/">Public timeline</a> |
+                <form id="logoutForm" class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Page("/Index", new { area = "" })">
+                    <button id="logout" type="submit" class="nav-link btn btn-link text-dark border-0">Logout</button>
+                </form>
+            </div>
+        }
+        else
+        {
+            <div>
+                <a href="/">public timeline</a> |
+                <a class="nav-link text-dark" id="register" asp-area="Identity" asp-page="/Account/Register">sign up</a>
+                <a class="nav-link text-dark" id="login" asp-area="Identity" asp-page="/Account/Login">sign in</a>
+            </div>
+        }
+    </div>
+    <div class=body>
+        @RenderBody()
+    </div>
+    <div class=footer>
+        BitTrace &mdash; An ASP.NET Application
+    </div>
+</div>
+
+</body>
+</html>
