@@ -16,9 +16,6 @@ import (
 )
 
 func API_Follow(w http.ResponseWriter, r *http.Request) {
-	//Log
-	fmt.Println("Follow handler invoked")
-
 	//Get username
 	vars := mux.Vars(r)
 	username := vars["username"]
@@ -75,7 +72,6 @@ func API_Follow(w http.ResponseWriter, r *http.Request) {
 			// Convert follow_user_id to string and follow the user
 			follower_userIDStr := strconv.Itoa(follow_user_id)
 			db.FollowUser(userIDStr, follower_userIDStr)
-			fmt.Println("User followed:", follow_username)
 			w.WriteHeader(http.StatusNoContent)
 			return
 		}
@@ -93,7 +89,6 @@ func API_Follow(w http.ResponseWriter, r *http.Request) {
 			// Convert unfollow_user_id to string and unfollow the user
 			unfollower_userIDStr := strconv.Itoa(unfollow_user_id)
 			db.UnfollowUser(userIDStr, unfollower_userIDStr)
-			fmt.Println("User unfollowed:", unfollow_username)
 			w.WriteHeader(http.StatusNoContent)
 			return
 		}
@@ -125,13 +120,9 @@ func API_Follow(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-
-	fmt.Println("Retrieved followers for", username)
 }
 
 func API_GetLatestHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("Get latest handler invoked ")
-
 	count, err := db.GetLatest()
 	if err != nil {
 		return
@@ -169,7 +160,6 @@ func API_UpdateLatestHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func API_Messages(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("Messages handler invoked")
 	//Update latest
 	API_UpdateLatestHandler(w, r)
 
@@ -235,13 +225,11 @@ func API_Messages_per_user(w http.ResponseWriter, r *http.Request) {
 		}
 
 		db.AddMessage(rv.Content, user_id)
-		fmt.Println("Message posted", user_id)
 		w.WriteHeader(http.StatusNoContent)
 	}
 }
 
 func API_Register(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("Register handler invoked")
 	//Update latest
 	API_UpdateLatestHandler(w, r)
 
@@ -253,7 +241,6 @@ func API_Register(w http.ResponseWriter, r *http.Request) {
 
 	var rv models.RegisterData
 	err := json.NewDecoder(r.Body).Decode(&rv)
-	fmt.Println(r.Body)
 	if err != nil {
 		fmt.Println("Error decoding request body: ", err)
 		w.WriteHeader(http.StatusBadRequest)
@@ -263,7 +250,6 @@ func API_Register(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "POST" {
 		hash := md5.Sum([]byte(rv.Pwd))
 		db.RegisterUser(rv.Username, rv.Email, hash)
-		fmt.Println("User registered successfully", rv.Username)
 		w.WriteHeader(http.StatusNoContent)
 	}
 	if config.DB.Error != nil {

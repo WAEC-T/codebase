@@ -25,7 +25,6 @@ func CheckValueInMap(maps []map[interface{}]interface{}, value interface{}) bool
 }
 
 func ConnectDB(uri string) (*gorm.DB, error) {
-	fmt.Println("Connecting to the database...")
 	db, err := gorm.Open(postgres.Open(uri), &gorm.Config{NamingStrategy: schema.NamingStrategy{SingularTable: true}})
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to database: %w", err)
@@ -168,8 +167,6 @@ func AddMessage(text string, author_id int) error {
 	if err != nil {
 		return fmt.Errorf("error formatting time: %v", err)
 	}
-
-	fmt.Println("timestamp:", currentTime)
 
 	newMessage := models.Messages{
 		AuthorID: author_id,
