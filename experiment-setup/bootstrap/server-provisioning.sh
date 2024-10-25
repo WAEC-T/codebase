@@ -1,9 +1,9 @@
 #!/bin/sh
 
-ENV_FILE="../../.env.production"
-REMOTE_USER="username_rbpi_server"
-REMOTE_HOST="hostname_rbpi_server"
-REMOTE_PATH="/path/of/our/root/project/rbpisv"
+# ENV_FILE=".env.production"
+# REMOTE_USER="username_rbpi_server"
+# REMOTE_HOST="hostname_rbpi_server"
+# REMOTE_PATH="/home/waect"
 
 check_command() {
     if [ $? -ne 0 ]; then
@@ -33,16 +33,16 @@ check_command "Docker Compose installation"
 chmod +x /usr/local/bin/docker-compose
 check_command "Making Docker Compose executable"
 
-DOCKER_IMAGES="waect/rust-actix waect/go-gorilla waect/python-flask"
+# DOCKER_IMAGES="waect/rust-actix waect/go-gorilla waect/python-flask"
 
-for IMAGE in $DOCKER_IMAGES; do
-    echo "Pulling Docker image: $IMAGE"
-    docker pull "$IMAGE"
-    check_command "Pulling $IMAGE"
-done
+# for IMAGE in $DOCKER_IMAGES; do
+#     echo "Pulling Docker image: $IMAGE"
+#     docker pull "$IMAGE"
+#     check_command "Pulling $IMAGE"
+# done
 
-echo "Copying .env.production file to remote server..."
-scp "$ENV_FILE" "$REMOTE_USER@$REMOTE_HOST:$REMOTE_PATH"
-check_command "Copying .env.production file"
+# echo "Copying .env.production file to remote server..."
+# scp "$ENV_FILE" "$REMOTE_USER@$REMOTE_HOST:$REMOTE_PATH"
+# check_command "Copying .env.production file"
 
-echo "Provisioning complete..."
+# echo "Provisioning complete..."
