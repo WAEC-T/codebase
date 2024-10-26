@@ -19,10 +19,9 @@ jobs:
         run: |
           apk update
           apk add --no-cache make docker-compose bash py3-pip
-          pip install --user virtualenv  # Install virtualenv in user space
-          python3 -m virtualenv venv  # Create the virtual environment
+          python3 -m venv venv  # Create a virtual environment
           ./venv/bin/pip install --upgrade pip  # Upgrade pip inside the virtual environment
-          ./venv/bin/pip install -r tests/requirements.txt
+          ./venv/bin/pip install --break-system-packages -r tests/requirements.txt
 
       # Step 2: Checkout the repository
       - name: Checkout code
