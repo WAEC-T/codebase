@@ -1,10 +1,11 @@
+# All of the applications within our project
 ALL_SERVICES = python-flask c-sharp-razor go-gorilla ruby-sinatra rust-actix javascript-express go-gin
 
 COMPOSE_FILE_STANDARD = docker-compose.yml
 TEST_COMMAND = pytest tests/test_api_endpoints.py
 LOCAL_DATABASE = ./database/docker-compose.yml
 DATABASE_TABLES = users, followers, messages, latest
-DELAY_TEST_EXECUTION_SECONDS = 3
+DELAY_TEST_EXECUTION_SECONDS = 20
 
 # echo colors \o/ >.<
 WHITE = \033[0;37m
@@ -16,34 +17,41 @@ YELLOW = \033[1;33m
 GREEN = \033[0;32m
 RESET = \033[0m
 
+
+# Add command to start our dev-database and run in background (w. no output)
 .PHONY: start-local-db
 start-local-db:
 	@echo "$(BLUE)Starting the database container...$(RESET)"
 	@docker-compose -f $(LOCAL_DATABASE) up -d > /dev/null 2>&1
 
+# Add command to start our dev-database and run in background (w. no output)
 .PHONY: stop-local-db
 stop-local-db:
 	@echo "\n$(BLUE)Stopping and removing the database container...$(RESET)"
 	@docker-compose -f $(LOCAL_DATABASE) stop > /dev/null 2>&1
 	@docker-compose -f $(LOCAL_DATABASE) rm -f database > /dev/null 2>&1
 
+# Add command to start our dev-database and run in background (w. no output)
 .PHONY: clean-db
 clean-db:
 	@echo "$(PINK)Cleaning the database...$(RESET)"
 	@export PGPASSWORD=pass
 	@docker-compose -f $(LOCAL_DATABASE) exec database psql -U user -d waect -c "TRUNCATE TABLE $(DATABASE_TABLES) > /dev/null 2>&1;"
 
+# Add command to start the given service and run in background (w. no output)
 .PHONY: start-service
 start-service:
 	@echo "$(CYAN)Spinning service and running tests...$(RESET) \n"
 	@docker-compose -f ./$(SERVICE)/$(COMPOSE_FILE_STANDARD) up -d > /dev/null 2>&1
 
+# Add command to stop the given service and run in background (w. no output)
 .PHONY: stop-service
 stop-service:
 	@echo "\n$(CYAN)Stopping and removing $(SERVICE)..$(RESET)"
 	@docker-compose -f ./$(SERVICE)/$(COMPOSE_FILE_STANDARD) stop > /dev/null 2>&1
 	@docker-compose -f ./$(SERVICE)/$(COMPOSE_FILE_STANDARD) rm -f > /dev/null 2>&1
 
+# Add command to start the given service and db, and run 'test-api-endpoints.py' against it
 .PHONY: test-single-service
 test-single-service:
 	@echo "\n$(BLUE)=====================================$(RESET)"
@@ -61,6 +69,7 @@ test-single-service:
 		fi; \
 	fi
 
+# Add command to start all services and db, and run 'test-api-endpoints.py' against all of them
 .PHONY: test-all
 test-all: start-local-db
 	@for service in $(ALL_SERVICES); do \
@@ -69,7 +78,8 @@ test-all: start-local-db
 	@$(MAKE) -s stop-local-db
 	@echo "$(GREEN)All services tested!$(RESET)"
 
-.PHONY: test-service
+# Add command to start the given services and db, and run 'test-api-endpoints.py' against them
+.PHONY: test-services
 test-service: start-local-db
 	@services=$$(echo "$(MAKECMDGOALS)" | tr ' ' '\n' | grep -v '^test-service$$'); \
 	for service in $$services; do \
