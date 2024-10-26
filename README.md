@@ -15,3 +15,5 @@ WAEC Project Code Base
 ```bashrc
 psql -h localhost -U user -d waect
 ```
+
+CI TEST
