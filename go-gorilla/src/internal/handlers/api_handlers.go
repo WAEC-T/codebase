@@ -32,7 +32,7 @@ func API_Follow(w http.ResponseWriter, r *http.Request) {
 
 	//Get userID
 	user_id, err := db.GetUserIDByUsername(username)
-	if err != nil {
+	if err != nil || user_id == -1 {
 		fmt.Println("Error getting user ID", err)
 		w.WriteHeader(http.StatusNotFound)
 		return
@@ -63,7 +63,7 @@ func API_Follow(w http.ResponseWriter, r *http.Request) {
 		if rv.Follow != "" {
 			follow_username := rv.Follow
 			follow_user_id, err := db.GetUserIDByUsername(follow_username)
-			if err != nil {
+			if err != nil || user_id == -1 {
 				fmt.Println("Follow user not found or invalid user ID:", follow_username)
 				w.WriteHeader(http.StatusNotFound)
 				return
@@ -80,7 +80,7 @@ func API_Follow(w http.ResponseWriter, r *http.Request) {
 		if rv.Unfollow != "" {
 			unfollow_username := rv.Unfollow
 			unfollow_user_id, err := db.GetUserIDByUsername(unfollow_username)
-			if err != nil {
+			if err != nil || user_id == -1 {
 				fmt.Println("Unfollow user not found or invalid user ID:", unfollow_username)
 				w.WriteHeader(http.StatusNotFound)
 				return
@@ -106,15 +106,19 @@ func API_Follow(w http.ResponseWriter, r *http.Request) {
 
 		// Append the usernames to the followerNames slice
 		for _, follower := range followers {
-			followerNames = append(followerNames, string(follower.Username))
+			followerNames = append(followerNames, follower.Username)
 		}
 
-		// Set response header as JSON
+		// Wrap the response in an object with a key "followers"
+		response := map[string][]string{
+			"follows": followerNames,
+		}
+
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 
-		// Encode and return followers as JSON
-		if err := json.NewEncoder(w).Encode(followerNames); err != nil {
+		// Encode the wrapped object
+		if err := json.NewEncoder(w).Encode(response); err != nil {
 			fmt.Println("Error encoding followers as JSON:", err)
 			w.WriteHeader(http.StatusInternalServerError)
 			return
@@ -196,9 +200,9 @@ func API_Messages_per_user(w http.ResponseWriter, r *http.Request) {
 	}
 
 	user_id, err := db.GetUserIDByUsername(username)
-	if err != nil {
+	if err != nil || user_id == -1 {
 		fmt.Println("Error getting user ID", err)
-		w.WriteHeader(http.StatusForbidden)
+		w.WriteHeader(http.StatusNotFound)
 		return
 	}
 
