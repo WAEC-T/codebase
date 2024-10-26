@@ -18,7 +18,7 @@ jobs:
       - name: Set up Alpine environment
         run: |
           apk update
-          apk add --no-cache docker-compose bash py3-pip
+          apk add --no-cache docker-compose make bash py3-pip
           pip install pytest
 
       # Step 2: Checkout the repository
