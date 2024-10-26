@@ -18,7 +18,8 @@ jobs:
       - name: Set up Alpine environment
         run: |
           apk update
-          apk add --no-cache docker-compose make bash py3-pip
+          apk add --no-cache make docker-compose bash py3-pip python3-virtualenv
+          python3 -m venv venv
           . venv/bin/activate
           pip install -r tests/requirements.txt
 
