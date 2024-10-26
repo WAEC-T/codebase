@@ -148,7 +148,6 @@ public class ApiController : ControllerBase
         [FromQuery] int no = 100
     )
     {
-
         // Checks authorization
         if (NotReqFromSimulator(Request))
         {
@@ -162,12 +161,12 @@ public class ApiController : ControllerBase
 
         try
         {
-            if (await _authorRepository.GetAuthorByNameAsync(username) == null)
+            Author author = await _authorRepository.GetAuthorByNameAsync(username);
+            if (author == null)
             {
-                await CreateUser(username, $"{username}@user.com", "password");
+                return NotFound($"User '{username}' not found.");
             }
 
-            Author author = await _authorRepository.GetAuthorByNameAsync(username);
             int authorId = author.Id;
             ICollection<Message> Messages = await _MessageRepository.GetMessagesFromAuthorByCountAsync(
                 authorId,
@@ -188,7 +187,7 @@ public class ApiController : ControllerBase
                 msgsPrivateGetLogFilePath
             );
 
-            return NotFound();
+            return StatusCode(500, "An error occurred while processing the request.");
         }
     }
 
