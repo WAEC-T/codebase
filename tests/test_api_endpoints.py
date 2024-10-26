@@ -15,18 +15,34 @@ HEADERS = {'Connection': 'close',
            f'Authorization': f'Basic {ENCODED_CREDENTIALS}'}
 
 # Get the database URL from the environment variable
-DATABASE_URL = "postgresql://user:pass@localhost:5432/waect" #os.getenv("DATABASE_URL")
+DATABASE_URL = "postgresql://user:pass@database/waect" # os.getenv("DATABASE_URL")
 
 print(DATABASE_URL)
 
-def clean_database():
+def clean_database(truncate_all:bool = False):
     with psycopg2.connect(DATABASE_URL) as conn:
         with conn.cursor() as cur:
-            cur.execute("TRUNCATE TABLE users CASCADE;")
-            cur.execute("TRUNCATE TABLE messages CASCADE;")
-            cur.execute("TRUNCATE TABLE followers CASCADE;")
+            tables_to_truncate = [
+                'users', 'messages', 'followers', 'AspNetRoles', 'AspNetRoleClaims', 'AspNetUserClaims', 'AspNetUserLogins',
+                'AspNetUserRoles', 'AspNetUserTokens']
+
+            for table in tables_to_truncate:
+                cur.execute("""
+                    SELECT EXISTS (
+                        SELECT FROM information_schema.tables
+                        WHERE table_schema = 'public'
+                        AND table_name = %s
+                    );
+                """, (table,))
+
+                exists = cur.fetchone()[0]
+
+                if exists:
+                    cur.execute(f'TRUNCATE TABLE "{table}" CASCADE;')
+                    print(f'Table {table} truncated')
+
             conn.commit()
-    
+
 def create_new_session():
     session = requests.Session()
     session.headers.update({
@@ -213,7 +229,6 @@ def test_cleaning_the_db():
     response = session.get(url, params=query)
     assert response.status_code == 200
     
-    clean_database()
-    
+    clean_database(truncate_all=True)
     response = session.get(url, params=query)
     assert response.status_code == 404
