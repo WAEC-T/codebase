@@ -19,7 +19,8 @@ jobs:
         run: |
           apk update
           apk add --no-cache docker-compose make bash py3-pip
-          pip install -r codebase/tests/requirements.txt
+          . venv/bin/activate
+          pip install -r tests/requirements.txt
 
       # Step 2: Checkout the repository
       - name: Checkout code
