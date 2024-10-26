@@ -19,7 +19,7 @@ jobs:
         run: |
           apk update
           apk add --no-cache docker-compose make bash py3-pip
-          pip install pytest
+          pip install -r requirements.txt
 
       # Step 2: Checkout the repository
       - name: Checkout code
