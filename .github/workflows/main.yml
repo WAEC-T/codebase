@@ -1,0 +1,30 @@
+name: CI Pipeline
+
+on:
+  pull_request:
+    branches:
+      - main  # Adjust this as needed
+
+jobs:
+  run-tests:
+    runs-on: ubuntu-latest  # Underlying runner, but we'll run everything inside an Alpine container
+
+    container:
+      image: docker:23.0.6-dind-alpine3.19  # Use Docker-in-Docker Alpine image
+      options: --privileged  # Necessary for Docker-in-Docker to work
+
+    steps:
+      # Step 1: Install required dependencies in Alpine container
+      - name: Set up Alpine environment
+        run: |
+          apk update
+          apk add --no-cache docker-compose bash py3-pip
+          pip install pytest
+
+      # Step 2: Checkout the repository
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Step 3: Run the makefile command to spin up services and run tests
+      - name: Run tests for go-gorilla service
+        run: make test-service go-gorilla
