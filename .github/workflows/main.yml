@@ -27,25 +27,30 @@ jobs:
           ./venv/bin/pip install --upgrade pip
           ./venv/bin/pip install --no-cache-dir -r tests/requirements.txt
 
-      # Step 3: Start the database and service using Docker Compose
-      - name: Start Services
-        run: |
-          docker-compose -f ./database/docker-compose.yml up -d
-          docker-compose -f ./go-gorilla/docker-compose.yml up -d
+      # Step 3: Start the database separately and verify it
+      - name: Start Database
+        run: docker-compose -f ./database/docker-compose.yml up -d
 
-      # Step 4: Inspect Docker Network to Verify Connections
+      - name: Verify Database is Running and Networked
+        run: docker network inspect waect-network
+
+      # Step 4: Start go-gorilla service
+      - name: Start go-gorilla Service
+        run: docker-compose -f ./go-gorilla/docker-compose.yml up -d
+
+      # Step 5: Inspect Docker Network to Verify Connections
       - name: Inspect Docker Network
         run: docker network inspect waect-network
 
-      # Step 5: Wait for services to be ready
+      # Step 6: Wait for services to be ready
       - name: Wait for Database and Service to be Ready
         run: sleep 30
 
-      # Step 6: Run the tests directly from the root
+      # Step 7: Run the tests directly from the root
       - name: Run Tests
         run: ./venv/bin/pytest tests/test_api_endpoints.py
 
-      # Step 7: Clean up containers after the test
+      # Step 8: Clean up containers after the test
       - name: Clean up
         run: |
           docker-compose -f ./database/docker-compose.yml down
