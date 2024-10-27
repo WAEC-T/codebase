@@ -13,6 +13,10 @@ jobs:
       # Step 1: Checkout the repository
       - name: Checkout code
         uses: actions/checkout@v3
+        
+      # Step to print environment variables
+      - name: Print environment variables
+        run: printenv
 
       # Step 2: Set up dependencies
       - name: Set up environment
@@ -34,14 +38,6 @@ jobs:
       # Step 6: Start the go-gorilla service and connect to the shared network
       - name: Start go-gorilla Service
         run: docker compose -f ./go-gorilla/docker-compose.yml up -d
-
-        # Step 7: Wait for go-gorilla Service to be Ready
-      - name: Wait for go-gorilla to be Ready
-        run: |
-          until curl -s http://localhost:5000/health; do
-            echo "Waiting for go-gorilla service..."
-            sleep 5
-          done
 
       # Step 7: Inspect Docker Network to Verify Both Services Are Connected
       - name: Inspect Docker Network (Both Services)
