@@ -4,7 +4,7 @@ COMPOSE_FILE_STANDARD = docker-compose.yml
 TEST_COMMAND = pytest tests/test_api_endpoints.py
 LOCAL_DATABASE = ./database/docker-compose.yml
 DATABASE_TABLES = users, followers, messages, latest
-DELAY_TEST_EXECUTION_SECONDS = 3
+DELAY_TEST_EXECUTION_SECONDS = 20
 
 # echo colors \o/ >.<
 WHITE = \033[0;37m
