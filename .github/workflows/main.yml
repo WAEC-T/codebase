@@ -13,10 +13,6 @@ jobs:
       # Step 1: Checkout the repository
       - name: Checkout code
         uses: actions/checkout@v3
-        
-      # Step to print environment variables
-      - name: Print environment variables
-        run: printenv
 
       # Step 2: Set up dependencies
       - name: Set up environment

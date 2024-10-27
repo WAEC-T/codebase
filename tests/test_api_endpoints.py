@@ -90,8 +90,6 @@ def test_register_c():
     assert response.json()['latest'] == 6
 
 def test_latest():
-    print("DATABASE_URL: ", DATABASE_URL)
-    print("BASE_URL: ", BASE_URL)
     session = create_new_session()
     # post something to update LATEST
     url = f"{BASE_URL}/register"
