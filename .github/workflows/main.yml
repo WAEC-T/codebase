@@ -32,8 +32,11 @@ jobs:
         run: docker network inspect waect-network
 
       # Step 8: Run the tests directly from the root
-      - name: Run Tests
-        run: ./venv/bin/pytest tests/test_api_endpoints.py
+      - name: Setup python env
+        run: source venv/bin/activate
+        
+      - name: Run tests
+        run: python -m pytest
 
       # Step 9: Clean up containers after the test
       - name: Clean up
