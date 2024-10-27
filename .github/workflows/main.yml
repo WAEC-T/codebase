@@ -33,9 +33,12 @@ jobs:
           docker-compose -f ./database/docker-compose.yml up -d
           docker-compose -f ./go-gorilla/docker-compose.yml up -d
 
+      - name: Inspect Docker Network
+        run: docker network inspect waect-network
+
       # Step 4: Wait for services to be ready
       - name: Wait for Database and Service to be Ready
-        run: sleep 30
+        run: sleep 10
 
       # Step 5: Run the tests directly from the root
       - name: Run Tests
