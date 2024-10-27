@@ -5,7 +5,7 @@ import psycopg2
 import requests
 from contextlib import closing
 
-BASE_URL = "http://localhost:5000/api"
+BASE_URL = "http://go-gorilla:5000/api"
 USERNAME = 'simulator'
 PWD = 'super_safe!'
 CREDENTIALS = ':'.join([USERNAME, PWD]).encode('ascii')
@@ -15,7 +15,7 @@ HEADERS = {'Connection': 'close',
            f'Authorization': f'Basic {ENCODED_CREDENTIALS}'}
 
 # Get the database URL from the environment variable
-DATABASE_URL = "postgresql://user:pass@localhost:5432/waect"
+DATABASE_URL = "postgresql://user:pass@database:5432/waect"
 
 
 print(DATABASE_URL)

@@ -18,7 +18,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Step 3: Install required dependencies in Alpine container
+      # Step 2: Install required dependencies in Alpine container
       - name: Set up Alpine environment
         run: |
           apk update
