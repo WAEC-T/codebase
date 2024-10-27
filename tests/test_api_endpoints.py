@@ -18,8 +18,8 @@ HEADERS = {'Connection': 'close',
 DATABASE_URL = "postgresql://user:pass@localhost:5432/waect"
 
 
-print(DATABASE_URL)
-
+print("DATABASE_URL: ", DATABASE_URL)
+print("BASE_URL: ", BASE_URL)
 def clean_database():
     with psycopg2.connect(DATABASE_URL) as conn:
         with conn.cursor() as cur:
