@@ -20,4 +20,5 @@ services:
     
 networks:
   waect-network:
-    external: true 
+    name: waect-network
+    driver: bridge
