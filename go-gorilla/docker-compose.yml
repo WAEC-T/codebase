@@ -10,10 +10,12 @@ services:
       - "5000:5000"
     networks:
       - waect-network
+    depends_on:
+      database:
+        condition: service_healthy
 
 networks:
   waect-network:
-    name: waect-network
     driver: bridge
     external: true
   
