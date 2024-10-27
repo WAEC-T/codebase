@@ -22,11 +22,15 @@ jobs:
       - name: Set up Alpine environment
         run: |
           apk update
-          apk add --no-cache make docker-compose bash py3-pip
+          apk add --no-cache make docker-compose bash py3-pip python3-dev build-base  # Ensure build tools are available
           python3 -m venv venv  # Create a virtual environment
           ./venv/bin/pip install --upgrade pip  # Upgrade pip inside the virtual environment
-          ./venv/bin/pip install --break-system-packages -r tests/requirements.txt
+          ./venv/bin/pip install --no-cache-dir -r tests/requirements.txt  # Install requirements
 
-      # Step 3: Run the makefile command to spin up services and run tests
+      # Step 3: Export the PATH to include the virtual environment
+      - name: Set up Python environment variables
+        run: echo "PATH=$PWD/venv/bin:$PATH" >> $GITHUB_ENV
+
+      # Step 4: Run the makefile command to spin up services and run tests
       - name: Run tests for go-gorilla service
-        run: make test-all 
+        run: make test-all
