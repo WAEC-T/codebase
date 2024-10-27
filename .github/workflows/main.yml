@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
 
     container:
-      image: alpine:latest  # Use Alpine as the base container
+      image: alpine:edge  # Use Alpine as the base container
       options: --privileged  # Necessary for Docker operations
       volumes:
         - /var/run/docker.sock:/var/run/docker.sock  # Mount the Docker socket
@@ -30,11 +30,18 @@ jobs:
           ./venv/bin/pip install --upgrade pip
           ./venv/bin/pip install --no-cache-dir -r tests/requirements.txt
 
-      # Step 3: Start the database service only
+      # Step 3: Create the external Docker network if it doesn't exist
+      - name: Create waect-network
+        run: |
+          if ! docker network inspect waect-network > /dev/null 2>&1; then
+            docker network create waect-network;
+          fi
+
+      # Step 4: Start the database service only
       - name: Start Database Service
         run: docker-compose -f ./database/docker-compose.yml up -d
 
-      # Step 4: Inspect Docker Network to Verify Database Connection
+      # Step 5: Inspect Docker Network to Verify Database Connection
       - name: Inspect Docker Network (Database)
         run: docker network inspect waect-network
 
@@ -46,11 +53,11 @@ jobs:
       - name: Inspect Docker Network (Both Services)
         run: docker network inspect waect-network
 
-      # Step 9: Run the tests directly from the root
+      # Step 8: Run the tests directly from the root
       - name: Run Tests
         run: ./venv/bin/pytest tests/test_api_endpoints.py
 
-      # Step 10: Clean up containers after the test
+      # Step 9: Clean up containers after the test
       - name: Clean up
         run: |
           docker-compose -f ./database/docker-compose.yml down
