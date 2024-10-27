@@ -52,4 +52,3 @@ jobs:
         run: |
           docker compose -f ./database/docker-compose.yml down
           docker compose -f ./go-gorilla/docker-compose.yml down
-          docker network rm waect-network
