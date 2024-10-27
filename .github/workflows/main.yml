@@ -15,16 +15,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Step 3: Create the external Docker network if it doesn't exist
-      - name: Create waect-network
-        run: |
-          if ! docker network inspect waect-network > /dev/null 2>&1; then
-            docker network create waect-network;
-          fi
-
       # Step 4: Start the database service only
       - name: Start Database Service
-        run: docker-compose -f ./database/docker-compose.yml up -d
+        run: docker-compose ./database/docker-compose.yml up -d
 
       # Step 5: Inspect Docker Network to Verify Database Connection
       - name: Inspect Docker Network (Database)
