@@ -17,9 +17,6 @@ HEADERS = {'Connection': 'close',
 # Get the database URL from the environment variable
 DATABASE_URL = "postgresql://user:pass@localhost:5432/waect"
 
-
-print("DATABASE_URL: ", DATABASE_URL)
-print("BASE_URL: ", BASE_URL)
 def clean_database():
     with psycopg2.connect(DATABASE_URL) as conn:
         with conn.cursor() as cur:
@@ -93,6 +90,8 @@ def test_register_c():
     assert response.json()['latest'] == 6
 
 def test_latest():
+    print("DATABASE_URL: ", DATABASE_URL)
+    print("BASE_URL: ", BASE_URL)
     session = create_new_session()
     # post something to update LATEST
     url = f"{BASE_URL}/register"
