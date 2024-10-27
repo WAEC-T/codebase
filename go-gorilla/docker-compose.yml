@@ -13,6 +13,5 @@ services:
 
 networks:
   waect-network:
-    driver: bridge
     external: true
   
