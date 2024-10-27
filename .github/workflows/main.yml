@@ -27,18 +27,11 @@ jobs:
           ./venv/bin/pip install --upgrade pip
           ./venv/bin/pip install --no-cache-dir -r tests/requirements.txt
 
-      # Step 3: Start the database separately and verify it
-      - name: Start Database
-        run: docker-compose -f ./database/docker-compose.yml up -d
+      # Step 3: Start the services together using combined compose command
+      - name: Start Services Together
+        run: docker-compose -f ./database/docker-compose.yml -f ./go-gorilla/docker-compose.yml up -d
 
-      - name: Verify Database is Running and Networked
-        run: docker network inspect waect-network
-
-      # Step 4: Start go-gorilla service
-      - name: Start go-gorilla Service
-        run: docker-compose -f ./go-gorilla/docker-compose.yml up -d
-
-      # Step 5: Inspect Docker Network to Verify Connections
+      # Step 4: Inspect Docker Network to Verify Connections
       - name: Inspect Docker Network
         run: docker network inspect waect-network
 
