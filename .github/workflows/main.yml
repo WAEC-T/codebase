@@ -24,8 +24,8 @@ jobs:
       # Step 2: Install Docker CLI and other dependencies
       - name: Set up Environment
         run: |
-          sudo apt-get update
-          sudo apt-get install -y docker-compose python3-pip python3-venv make build-essential
+          apk update
+          apk add --no-cache docker docker-compose bash py3-pip python3-dev build-base make
           python3 -m venv venv
           ./venv/bin/pip install --upgrade pip
           ./venv/bin/pip install --no-cache-dir -r tests/requirements.txt
@@ -37,7 +37,7 @@ jobs:
       # Step 4: Inspect Docker Network to Verify Database Connection
       - name: Inspect Docker Network (Database)
         run: docker network inspect waect-network
-        
+
       # Step 6: Start the go-gorilla service
       - name: Start go-gorilla Service
         run: docker-compose -f ./go-gorilla/docker-compose.yml up -d
