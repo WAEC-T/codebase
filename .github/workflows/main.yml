@@ -17,7 +17,7 @@ jobs:
 
       # Step 4: Start the database service only
       - name: Start Database Service
-        run: docker-compose ./database/docker-compose.yml up -d
+        run: docker compose -f ./database/docker-compose.yml up -d
 
       # Step 5: Inspect Docker Network to Verify Database Connection
       - name: Inspect Docker Network (Database)
@@ -25,7 +25,7 @@ jobs:
 
       # Step 6: Start the go-gorilla service
       - name: Start go-gorilla Service
-        run: docker-compose -f ./go-gorilla/docker-compose.yml up -d
+        run: docker compose -f ./go-gorilla/docker-compose.yml up -d
 
       # Step 7: Inspect Docker Network to Verify Both Services Are Connected
       - name: Inspect Docker Network (Both Services)
