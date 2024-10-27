@@ -18,7 +18,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Step 2: Install required dependencies in Alpine container
+      # Step 2: Create the external network if it does not exist
+      - name: Create external network
+        run: docker network create waect-network || true
+
+      # Step 3: Install required dependencies in Alpine container
       - name: Set up Alpine environment
         run: |
           apk update
@@ -27,10 +31,16 @@ jobs:
           ./venv/bin/pip install --upgrade pip  # Upgrade pip inside the virtual environment
           ./venv/bin/pip install --no-cache-dir -r tests/requirements.txt  # Install requirements
 
-      # Step 3: Export the PATH to include the virtual environment
+      # Step 4: Export the PATH to include the virtual environment
       - name: Set up Python environment variables
         run: echo "PATH=$PWD/venv/bin:$PATH" >> $GITHUB_ENV
 
-      # Step 4: Run the makefile command to spin up services and run tests
+      # Step 5: Run the makefile command to spin up services and run tests
       - name: Run tests for go-gorilla service
         run: make test-service go-gorilla
+
+      # Step 6: Clean up the services after tests
+      - name: Stop and remove all containers
+        run: |
+          docker-compose -f ./database/docker-compose.yml down
+          docker-compose -f ./go-gorilla/docker-compose.yml down

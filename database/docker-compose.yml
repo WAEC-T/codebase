@@ -13,6 +13,11 @@ services:
       - "5432:5432"
     networks:
       - waect-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d waect"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     
 networks:
   waect-network:
