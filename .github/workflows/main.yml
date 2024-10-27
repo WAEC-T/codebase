@@ -10,16 +10,18 @@ jobs:
     runs-on: ubuntu-latest
 
     container:
-      image: docker:dind
-      options: --privileged
+      image: docker:latest  # Use Docker's official image
+      options: --privileged  # Necessary for Docker operations
+      volumes:
+        - /var/run/docker.sock:/var/run/docker.sock  # Mount the Docker socket
 
     steps:
       # Step 1: Checkout the repository
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Step 2: Set up dependencies
-      - name: Set up Alpine environment
+      # Step 2: Install dependencies inside the container
+      - name: Set up Environment
         run: |
           apk update
           apk add --no-cache make docker-compose bash py3-pip python3-dev build-base
@@ -27,7 +29,7 @@ jobs:
           ./venv/bin/pip install --upgrade pip
           ./venv/bin/pip install --no-cache-dir -r tests/requirements.txt
 
-      # Step 3: Start the services together using combined compose command
+      # Step 3: Start the services using combined compose command
       - name: Start Services Together
         run: docker-compose -f ./database/docker-compose.yml -f ./go-gorilla/docker-compose.yml up -d
 
@@ -35,16 +37,14 @@ jobs:
       - name: Inspect Docker Network
         run: docker network inspect waect-network
 
-      # Step 6: Wait for services to be ready
+      # Step 5: Wait for services to be ready
       - name: Wait for Database and Service to be Ready
         run: sleep 30
 
-      # Step 7: Run the tests directly from the root
+      # Step 6: Run the tests directly from the root
       - name: Run Tests
         run: ./venv/bin/pytest tests/test_api_endpoints.py
 
-      # Step 8: Clean up containers after the test
+      # Step 7: Clean up containers after the test
       - name: Clean up
-        run: |
-          docker-compose -f ./database/docker-compose.yml down
-          docker-compose -f ./go-gorilla/docker-compose.yml down
+        run: docker-compose -f ./database/docker-compose.yml -f ./go-gorilla/docker-compose.yml down
