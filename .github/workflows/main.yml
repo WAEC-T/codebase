@@ -10,39 +10,42 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    
       # Step 1: Checkout the repository
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Step 4: Start the database service only
+      # Step 2: Set up dependencies
+      - name: Set up environment
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y make docker-compose bash python3-pip python3-venv
+          python3 -m venv venv
+          ./venv/bin/pip install --upgrade pip
+          ./venv/bin/pip install --no-cache-dir -r tests/requirements.txt
+
+      # Step 4: Start the database service and connect to the shared network
       - name: Start Database Service
-        run: docker compose -f ./database/docker-compose.yml up -d
+        run: docker compose -f ./database/docker-compose.yml up -d --network waect-network
 
       # Step 5: Inspect Docker Network to Verify Database Connection
       - name: Inspect Docker Network (Database)
         run: docker network inspect waect-network
 
-      # Step 6: Start the go-gorilla service
+      # Step 6: Start the go-gorilla service and connect to the shared network
       - name: Start go-gorilla Service
-        run: docker compose -f ./go-gorilla/docker-compose.yml up -d
+        run: docker compose -f ./go-gorilla/docker-compose.yml up -d --network waect-network
 
       # Step 7: Inspect Docker Network to Verify Both Services Are Connected
       - name: Inspect Docker Network (Both Services)
         run: docker network inspect waect-network
 
-      # Step 7: Setup Python Environment
-      - name: Setup python env
-        run: |
-          python -m venv venv
-          source venv/bin/activate
-          pip install -r requirements.txt
-        
+      # Step 8: Run the tests directly from the root
       - name: Run tests
-        run: python -m pytest
+        run: ./venv/bin/python -m pytest
 
-      # Step 9: Clean up containers after the test
+      # Step 9: Clean up containers and network after the test
       - name: Clean up
         run: |
-          docker-compose -f ./database/docker-compose.yml down
-          docker-compose -f ./go-gorilla/docker-compose.yml down
+          docker compose -f ./database/docker-compose.yml down
+          docker compose -f ./go-gorilla/docker-compose.yml down
+          docker network rm waect-network
