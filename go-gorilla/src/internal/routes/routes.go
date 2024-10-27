@@ -1,9 +1,9 @@
 package routes
 
 import (
-	"gorilla-minitwit/src/internal/db"
-	"gorilla-minitwit/src/internal/handlers"
-	"gorilla-minitwit/src/internal/helpers"
+	"go-gorilla/src/internal/db"
+	"go-gorilla/src/internal/handlers"
+	"go-gorilla/src/internal/helpers"
 	"net/http"
 	"os"
 	"strings"
@@ -53,7 +53,8 @@ func SetupRouting() template.FuncMap {
 }
 
 func SetRouteHandlers(r *mux.Router) {
-	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("../../static"))))
+	//UI
+	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 	r.HandleFunc("/public", handlers.Public_timeline)
 	r.HandleFunc("/register", handlers.Register)
 	r.HandleFunc("/login", handlers.Login)
@@ -63,6 +64,13 @@ func SetRouteHandlers(r *mux.Router) {
 	r.HandleFunc("/{username}/follow", handlers.Follow_user)
 	r.HandleFunc("/{username}", handlers.User_timeline)
 	r.HandleFunc("/{username}/unfollow", handlers.Unfollow_user)
+
+	//API
+	r.HandleFunc("/api/msgs", handlers.API_Messages).Methods("GET").Name("Messages")
+	r.HandleFunc("/api/msgs/{username}", handlers.API_Messages_per_user).Methods("GET", "POST").Name("Messages per user")
+	r.HandleFunc("/api/fllws/{username}", handlers.API_Follow).Methods("GET", "POST").Name("Follow")
+	r.HandleFunc("/api/register", handlers.API_Register).Methods("POST").Name("Follow")
+	r.HandleFunc("/api/latest", handlers.API_GetLatestHandler).Methods("GET").Name("Get latest")
 }
 
 func LoadEnvVars() string {
