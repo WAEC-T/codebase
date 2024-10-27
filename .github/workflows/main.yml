@@ -23,6 +23,7 @@ jobs:
           ./venv/bin/pip install --upgrade pip
           ./venv/bin/pip install --no-cache-dir -r tests/requirements.txt
 
+
       # Step 5: Run tests
       - name: Run tests
         run: |
