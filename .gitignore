@@ -1,4 +1,4 @@
 .DS_Store
 .env
 venv
-.env.local
+.env.prod
