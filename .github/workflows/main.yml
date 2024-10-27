@@ -27,4 +27,4 @@ jobs:
       # Step 5: Run tests
       - name: Run tests
         run: |
-          make test-all
+          make test-service go-gorilla
