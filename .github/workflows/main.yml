@@ -35,6 +35,14 @@ jobs:
       - name: Start go-gorilla Service
         run: docker compose -f ./go-gorilla/docker-compose.yml up -d
 
+        # Step 7: Wait for go-gorilla Service to be Ready
+      - name: Wait for go-gorilla to be Ready
+        run: |
+          until curl -s http://localhost:5000/health; do
+            echo "Waiting for go-gorilla service..."
+            sleep 5
+          done
+
       # Step 7: Inspect Docker Network to Verify Both Services Are Connected
       - name: Inspect Docker Network (Both Services)
         run: docker network inspect waect-network
