@@ -31,9 +31,12 @@ jobs:
       - name: Inspect Docker Network (Both Services)
         run: docker network inspect waect-network
 
-      # Step 8: Run the tests directly from the root
+      # Step 7: Setup Python Environment
       - name: Setup python env
-        run: source venv/bin/activate
+        run: |
+          python -m venv venv
+          source venv/bin/activate
+          pip install -r requirements.txt
         
       - name: Run tests
         run: python -m pytest
