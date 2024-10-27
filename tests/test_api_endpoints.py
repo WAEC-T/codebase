@@ -15,7 +15,7 @@ HEADERS = {'Connection': 'close',
            f'Authorization': f'Basic {ENCODED_CREDENTIALS}'}
 
 # Get the database URL from the environment variable
-DATABASE_URL = "postgresql://user:pass@database:5432/waect"
+DATABASE_URL = "postgresql://user:pass@host.docker.internal:5432/waect"
 
 
 print(DATABASE_URL)
