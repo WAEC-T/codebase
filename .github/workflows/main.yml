@@ -33,4 +33,4 @@ jobs:
 
       # Step 4: Run the makefile command to spin up services and run tests
       - name: Run tests for go-gorilla service
-        run: make test-all
+        run: make test-service go-gorilla
