@@ -9,7 +9,14 @@ jobs:
   run-tests:
     runs-on: ubuntu-latest
 
+    container:
+      image: alpine:latest  # Use Alpine as the base container
+      options: --privileged  # Necessary for Docker operations
+      volumes:
+        - /var/run/docker.sock:/var/run/docker.sock  # Mount the Docker socket
+
     steps:
+    
       # Step 1: Checkout the repository
       - name: Checkout code
         uses: actions/checkout@v3
@@ -30,11 +37,7 @@ jobs:
       # Step 4: Inspect Docker Network to Verify Database Connection
       - name: Inspect Docker Network (Database)
         run: docker network inspect waect-network
-
-      # Step 5: Wait for Database to be Ready
-      - name: Wait for Database to be Ready
-        run: sleep 20
-
+        
       # Step 6: Start the go-gorilla service
       - name: Start go-gorilla Service
         run: docker-compose -f ./go-gorilla/docker-compose.yml up -d
@@ -42,10 +45,6 @@ jobs:
       # Step 7: Inspect Docker Network to Verify Both Services Are Connected
       - name: Inspect Docker Network (Both Services)
         run: docker network inspect waect-network
-
-      # Step 8: Wait for Services to be Ready
-      - name: Wait for go-gorilla Service to be Ready
-        run: sleep 20
 
       # Step 9: Run the tests directly from the root
       - name: Run Tests
