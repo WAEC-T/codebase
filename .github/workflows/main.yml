@@ -14,7 +14,11 @@ jobs:
       options: --privileged  # Necessary for Docker-in-Docker to work
 
     steps:
-      # Step 1: Install required dependencies in Alpine container
+      # Step 1: Checkout the repository
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Step 2: Install required dependencies in Alpine container
       - name: Set up Alpine environment
         run: |
           apk update
@@ -22,10 +26,6 @@ jobs:
           python3 -m venv venv  # Create a virtual environment
           ./venv/bin/pip install --upgrade pip  # Upgrade pip inside the virtual environment
           ./venv/bin/pip install --break-system-packages -r tests/requirements.txt
-
-      # Step 2: Checkout the repository
-      - name: Checkout code
-        uses: actions/checkout@v3
 
       # Step 3: Run the makefile command to spin up services and run tests
       - name: Run tests for go-gorilla service
