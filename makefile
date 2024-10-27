@@ -1,12 +1,11 @@
 ALL_SERVICES = python-flask c-sharp-razor go-gorilla ruby-sinatra rust-actix javascript-express go-gin
 
 COMPOSE_FILE_STANDARD = docker-compose.yml
-TEST_COMMAND = pytest tests/test_api_endpoints.py
+TEST_COMMAND = pytest -q tests/test_api_endpoints.py
 LOCAL_DATABASE = ./database/docker-compose.yml
 DATABASE_TABLES = users, followers, messages, latest
-DELAY_TEST_EXECUTION_SECONDS = 20
+DELAY_TEST_EXECUTION_SECONDS = 30
 
-# echo colors \o/ >.<
 WHITE = \033[0;37m
 CYAN = \033[0;36m
 PINK = \033[0;35m
@@ -15,6 +14,7 @@ RED = \033[0;31m
 YELLOW = \033[1;33m
 GREEN = \033[0;32m
 RESET = \033[0m
+
 
 .PHONY: start-local-db
 start-local-db:
@@ -69,7 +69,7 @@ test-all: start-local-db
 	@$(MAKE) -s stop-local-db
 	@echo "$(GREEN)All services tested!$(RESET)"
 
-.PHONY: test-service
+.PHONY: test-services
 test-service: start-local-db
 	@services=$$(echo "$(MAKECMDGOALS)" | tr ' ' '\n' | grep -v '^test-service$$'); \
 	for service in $$services; do \
