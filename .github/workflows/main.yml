@@ -18,7 +18,7 @@ jobs:
       - name: Set up environment
         run: |
           sudo apt-get update
-          sudo apt-get install -y make docker-compose bash python3-pip python3-venv
+          sudo apt-get install -y make docker-compose python3-pip python3-venv
           python3 -m venv venv
           ./venv/bin/pip install --upgrade pip
           ./venv/bin/pip install --no-cache-dir -r tests/requirements.txt
