@@ -5,7 +5,7 @@ import psycopg2
 import requests
 from contextlib import closing
 
-BASE_URL = "http://go-gorilla:5000/api"
+BASE_URL = "http://localhost:5000/api"
 USERNAME = 'simulator'
 PWD = 'super_safe!'
 CREDENTIALS = ':'.join([USERNAME, PWD]).encode('ascii')
