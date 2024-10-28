@@ -22,9 +22,28 @@ jobs:
           python3 -m venv venv
           ./venv/bin/pip install --upgrade pip
           ./venv/bin/pip install --no-cache-dir -r tests/requirements.txt
+      # Step 4: Start the database service and connect to the shared network
+      - name: Start Database Service
+        run: docker compose -f ./database/docker-compose.yml up -d
 
+      # Step 5: Inspect Docker Network to Verify Database Connection
+      - name: Inspect Docker Network (Database)
+        run: docker network inspect waect-network
 
-      # Step 5: Run tests
+      # Step 6: Start the go-gorilla service and connect to the shared network
+      - name: Start go-gorilla Service
+        run: docker compose -f ./go-gorilla/docker-compose.yml up -d
+
+      # Step 7: Inspect Docker Network to Verify Both Services Are Connected
+      - name: Inspect Docker Network (Both Services)
+        run: docker network inspect waect-network
+
+      # Step 8: Run the tests directly from the root
       - name: Run tests
+        run: ./venv/bin/python -m pytest
+
+      # Step 9: Clean up containers and network after the test
+      - name: Clean up
         run: |
-          make test-service go-gorilla
+          docker compose -f ./database/docker-compose.yml down
+          docker compose -f ./go-gorilla/docker-compose.yml down
