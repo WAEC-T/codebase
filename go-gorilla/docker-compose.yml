@@ -1,0 +1,17 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: go-gorilla
+    env_file:
+      - ../.env.local
+    ports:
+      - "5000:5000"
+    networks:
+      - waect-network
+
+networks:
+  waect-network:
+    external: true
+    attachable: false

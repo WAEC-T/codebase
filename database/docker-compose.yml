@@ -6,13 +6,17 @@ services:
       POSTGRES_DB: waect
       POSTGRES_USER: user
       POSTGRES_PASSWORD: pass
-      DB_HOST: host.docker.internals
     volumes:
       - ./schema.sql:/docker-entrypoint-initdb.d/schema.sql
     ports:
       - "5432:5432"
     networks:
       - waect-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d waect"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     
 networks:
   waect-network:

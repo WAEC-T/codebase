@@ -6,7 +6,6 @@ LOCAL_DATABASE = ./database/docker-compose.yml
 DATABASE_TABLES = users, followers, messages, latest
 DELAY_TEST_EXECUTION_SECONDS = 3
 
-# echo colors \o/ >.<
 WHITE = \033[0;37m
 CYAN = \033[0;36m
 PINK = \033[0;35m
@@ -15,6 +14,7 @@ RED = \033[0;31m
 YELLOW = \033[1;33m
 GREEN = \033[0;32m
 RESET = \033[0m
+
 
 .PHONY: start-local-db
 start-local-db:
@@ -50,7 +50,7 @@ test-single-service:
 	@echo "$(PINK)Testing service: $(YELLOW)$(SERVICE)...$(RESET)"
 	@echo "$(BLUE)=====================================$(RESET) \n"
 	@if [ -d "$(SERVICE)" ] && [ -f "$(SERVICE)/$(COMPOSE_FILE_STANDARD)" ]; then \
-		$(MAKE) -s start-service SERVICE=$(SERVICE) && sleep $(DELAY_TEST_EXECUTION_SECONDS); \
+		$(MAKE) -s start-service SERVICE=$(SERVICE); \
 		$(TEST_COMMAND); \
 		$(MAKE) -s stop-service SERVICE=$(SERVICE); \
 	else \
@@ -69,7 +69,7 @@ test-all: start-local-db
 	@$(MAKE) -s stop-local-db
 	@echo "$(GREEN)All services tested!$(RESET)"
 
-.PHONY: test-service
+.PHONY: test-services
 test-service: start-local-db
 	@services=$$(echo "$(MAKECMDGOALS)" | tr ' ' '\n' | grep -v '^test-service$$'); \
 	for service in $$services; do \

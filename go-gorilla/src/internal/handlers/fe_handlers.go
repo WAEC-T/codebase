@@ -4,9 +4,9 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"fmt"
-	"gorilla-minitwit/src/internal/config"
-	"gorilla-minitwit/src/internal/db"
-	"gorilla-minitwit/src/internal/helpers"
+	"go-gorilla/src/internal/config"
+	"go-gorilla/src/internal/db"
+	"go-gorilla/src/internal/helpers"
 
 	"html"
 	"net"
@@ -100,10 +100,9 @@ func Reload(w http.ResponseWriter, r *http.Request, message string, template str
 // publicTimeline displays the latest messages of all users.
 func Public_timeline(w http.ResponseWriter, r *http.Request) {
 	user, userID, err := GetUser(r)
-	fmt.Println("user_id:", userID)
 	if err != nil {
 		// Log the error and handle the user not being logged in
-		fmt.Println("public timeline: error retrieving user:", err)
+		fmt.Println("public timeline: error retrieving user:", userID, err)
 	}
 
 	// Fetch public messages
@@ -224,7 +223,6 @@ func Login(w http.ResponseWriter, r *http.Request) {
 			panic("This is not allowed happen!")
 		}
 		session.Values["user_id"] = user_id
-		fmt.Println("Setting user_id for session: ", session.Values["user_id"])
 		session.Save(r, w)
 		SetFlash(w, r, "You were logged in")
 		http.Redirect(w, r, "/public", http.StatusSeeOther)
@@ -249,9 +247,7 @@ func Logout(w http.ResponseWriter, r *http.Request) {
 }
 
 func Timeline(w http.ResponseWriter, r *http.Request) {
-	_, ip, _ := net.SplitHostPort(r.RemoteAddr)
-	fmt.Println("We got a visitor from: ", ip)
-
+	net.SplitHostPort(r.RemoteAddr)
 	user, user_id, err := GetUser(r)
 	if err != nil || helpers.IsNil(user) {
 		http.Redirect(w, r, "/public", http.StatusFound)
@@ -363,7 +359,6 @@ func Unfollow_user(w http.ResponseWriter, r *http.Request) {
 // """Display's a users tweets."""
 func User_timeline(w http.ResponseWriter, r *http.Request) {
 	user, user_id, err := GetUser(r)
-	fmt.Println("user_id: ", user_id)
 	if err != nil || helpers.IsNil(user) {
 		SetFlash(w, r, "You need to login before you can see the user's timeline")
 		http.Redirect(w, r, "/login", http.StatusSeeOther)

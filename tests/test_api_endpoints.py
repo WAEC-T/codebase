@@ -15,9 +15,7 @@ HEADERS = {'Connection': 'close',
            f'Authorization': f'Basic {ENCODED_CREDENTIALS}'}
 
 # Get the database URL from the environment variable
-DATABASE_URL = "postgresql://user:pass@localhost:5432/waect" #os.getenv("DATABASE_URL")
-
-print(DATABASE_URL)
+DATABASE_URL = "postgresql://user:pass@localhost:5432/waect"
 
 def clean_database():
     with psycopg2.connect(DATABASE_URL) as conn:
@@ -35,6 +33,13 @@ def create_new_session():
         'Authorization': f'Basic {ENCODED_CREDENTIALS}'
     })
     return session
+
+def verify_database_is_clean():
+    with psycopg2.connect(DATABASE_URL) as conn:
+        with conn.cursor() as cur:
+            for table in ["users", "messages", "followers"]:
+                cur.execute(f"SELECT COUNT(*) FROM {table};")
+                assert cur.fetchone()[0] == 0, f"Table {table} is not empty!"
 
 def test_register():
     clean_database()
@@ -214,6 +219,7 @@ def test_cleaning_the_db():
     assert response.status_code == 200
     
     clean_database()
-    
+    verify_database_is_clean()
+
     response = session.get(url, params=query)
     assert response.status_code == 404
