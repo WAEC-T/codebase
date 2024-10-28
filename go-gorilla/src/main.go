@@ -21,7 +21,7 @@ func main() {
 	 *----------------------*/
 	uri := routes.LoadEnvVars()
 
-	/*-------------------
+	/*---------------------
 	 * Connect to DB
 	 *----------------------*/
 	config.DB, err = db.ConnectDB(uri) // Ensure this matches the function name in the db package
