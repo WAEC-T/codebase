@@ -57,7 +57,7 @@ jobs:
         run: |
           if git diff --name-only HEAD^ HEAD | grep -q "^${{ matrix.service }}/"; then
             echo "service_changed=true" >> $GITHUB_ENV
-
+          fi  
       # Step 4: Run tests conditionally
       - name: Run tests
         if: env.service_changed == 'true'
