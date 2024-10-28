@@ -18,7 +18,10 @@ jobs:
       - name: Set up environment
         run: |
           sudo apt-get update
-          sudo apt-get install -y make docker-compose python3-pip python3-venv
+          sudo apt-get install -y make docker-compose-plugin python3-pip python3-venv
+          sudo curl -L "https://github.com/docker/compose/releases/download/v2.27.1/docker-compose-linux-x86_64" -o /usr/local/bin/docker-compose
+          sudo chmod +x /usr/local/bin/docker-compose
+          docker-compose version
           python3 -m venv venv
           ./venv/bin/pip install --upgrade pip
           ./venv/bin/pip install --no-cache-dir -r tests/requirements.txt
