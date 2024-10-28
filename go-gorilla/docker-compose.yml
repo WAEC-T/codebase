@@ -14,4 +14,4 @@ services:
 networks:
   waect-network:
     external: true
-  
+    attachable: false
