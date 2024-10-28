@@ -50,7 +50,11 @@ test-single-service:
 	@echo "$(PINK)Testing service: $(YELLOW)$(SERVICE)...$(RESET)"
 	@echo "$(BLUE)=====================================$(RESET) \n"
 	@if [ -d "$(SERVICE)" ] && [ -f "$(SERVICE)/$(COMPOSE_FILE_STANDARD)" ]; then \
-		$(MAKE) -s start-service SERVICE=$(SERVICE) && sleep $(DELAY_TEST_EXECUTION_SECONDS); \
+		$(MAKE) -s start-service SERVICE=$(SERVICE) \
+		until curl -s http://localhost:5000/ > /dev/null; do \
+		echo "$(CYAN)Waiting for the service to be ready...$(RESET)"; \
+		sleep 5; \
+		done; \
 		$(TEST_COMMAND); \
 		docker network inspect waect-network
 		$(MAKE) -s stop-service SERVICE=$(SERVICE); \
