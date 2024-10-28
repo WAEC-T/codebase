@@ -1,0 +1,49 @@
+[
+    {
+        "Name": "waect-network",
+        "Id": "3b6e81f35e9d0f4324e0e285ef5b9d156e5e09551633b621b2e8975f3714428f",
+        "Created": "2024-10-28T09:52:14.365398905Z",
+        "Scope": "local",
+        "Driver": "bridge",
+        "EnableIPv6": false,
+        "IPAM": {
+            "Driver": "default",
+            "Options": null,
+            "Config": [
+                {
+                    "Subnet": "172.18.0.0/16",
+                    "Gateway": "172.18.0.1"
+                }
+            ]
+        },
+        "Internal": false,
+        "Attachable": false,
+        "Ingress": false,
+        "ConfigFrom": {
+            "Network": ""
+        },
+        "ConfigOnly": false,
+        "Containers": {
+            "06a49095f694ccd0308a7ae42049741943bf66a9fc999f278a649aad56e04a96": {
+                "Name": "database",
+                "EndpointID": "ae25c9f1b3aa0e387245d5a12dbf86e6161961e087216f7bb9ca3e3fac47d1d4",
+                "MacAddress": "02:42:ac:12:00:02",
+                "IPv4Address": "172.18.0.2/16",
+                "IPv6Address": ""
+            },
+            "0e4ac3075d5b1918c12ed1ce8cb3b6dd56f8069af98f286c2c91ae0b019ceffa": {
+                "Name": "go-gorilla",
+                "EndpointID": "133940321f45d7dd32e133b73073e27d2c19aecbf91900de508066ca4d7227c1",
+                "MacAddress": "02:42:ac:12:00:03",
+                "IPv4Address": "172.18.0.3/16",
+                "IPv6Address": ""
+            }
+        },
+        "Options": {},
+        "Labels": {
+            "com.docker.compose.network": "waect-network",
+            "com.docker.compose.project": "database",
+            "com.docker.compose.version": "2.27.1"
+        }
+    }
+]
