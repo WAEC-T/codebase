@@ -27,5 +27,4 @@ jobs:
       # Step 5: Run tests
       - name: Run tests
         run: |
-          source ./venv/bin/activate
           make test-service go-gorilla
