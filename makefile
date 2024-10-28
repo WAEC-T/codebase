@@ -51,10 +51,6 @@ test-single-service:
 	@echo "$(BLUE)=====================================$(RESET) \n"
 	@if [ -d "$(SERVICE)" ] && [ -f "$(SERVICE)/$(COMPOSE_FILE_STANDARD)" ]; then \
 		$(MAKE) -s start-service SERVICE=$(SERVICE); \
-		until curl -s http://go-gorilla:5000/ > /dev/null; do \
-			echo "$(CYAN)Waiting for the service to be ready...$(RESET)"; \
-			sleep 5; \
-		done; \
 		docker network inspect waect-network; \
 		$(TEST_COMMAND); \
 		$(MAKE) -s stop-service SERVICE=$(SERVICE); \
