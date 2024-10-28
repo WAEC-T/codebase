@@ -79,6 +79,7 @@ test-service: start-local-db
 			echo "$(RED)Service $$service is not defined as a base service and is not valid.$(RESET)"; \
 		fi; \
 	done; \
+	docker network inspect waect-network
 	echo "$(GREEN)[$$services] tested$(RESET)" | tr '\n' ', ';
 	@$(MAKE) -s stop-local-db
 
