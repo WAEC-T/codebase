@@ -4,7 +4,7 @@ COMPOSE_FILE_STANDARD = docker-compose.yml
 TEST_COMMAND = pytest -q tests/test_api_endpoints.py
 LOCAL_DATABASE = ./database/docker-compose.yml
 DATABASE_TABLES = users, followers, messages, latest
-DELAY_TEST_EXECUTION_SECONDS = 30
+DELAY_TEST_EXECUTION_SECONDS = 3
 
 WHITE = \033[0;37m
 CYAN = \033[0;36m
@@ -51,7 +51,7 @@ test-single-service:
 	@echo "$(BLUE)=====================================$(RESET) \n"
 	@if [ -d "$(SERVICE)" ] && [ -f "$(SERVICE)/$(COMPOSE_FILE_STANDARD)" ]; then \
 		$(MAKE) -s start-service SERVICE=$(SERVICE); \
-		until curl -s http://localhost:5000/ > /dev/null; do \
+		until curl -s http://go-gorilla:5000/ > /dev/null; do \
 			echo "$(CYAN)Waiting for the service to be ready...$(RESET)"; \
 			sleep 5; \
 		done; \
