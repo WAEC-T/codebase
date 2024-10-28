@@ -38,6 +38,6 @@ jobs:
       # Step 5: Run tests
       - name: Run tests
         run: |
-          # Activate python venv needed here for the tests to run
+          # Activate python venv - needed here for the tests to run
           source ./venv/bin/activate
           make test-all
