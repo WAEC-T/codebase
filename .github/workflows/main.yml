@@ -2,8 +2,6 @@ name: CI Pipeline
 
 on:
   pull_request:
-    branches:
-      - main  # Adjust this as needed
     paths:
       - 'python-flask/**'
       - 'c-sharp-razor/**'
@@ -22,6 +20,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # Fetch full history to ensure access to previous commits
 
       - name: Check if root files changed
         id: check-root
@@ -90,6 +90,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # Ensure full commit history is available
 
       - name: Check if service requires testing
         id: check-changes
