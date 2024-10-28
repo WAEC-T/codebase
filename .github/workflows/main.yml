@@ -28,8 +28,9 @@ jobs:
       - name: Check if root files changed
         id: check-root
         run: |
-          # Get the list of changed files
-          changed_files=$(git diff --name-only HEAD^ HEAD)
+          # Get the list of changed files by comparing against the base branch
+          git fetch origin main
+          changed_files=$(git diff --name-only origin/main...HEAD)
 
           # Check if any of the changed files are outside the known service directories
           for file in $changed_files; do
@@ -99,7 +100,7 @@ jobs:
       - name: Check if service requires testing
         id: check-changes
         run: |
-          if git diff --name-only HEAD^ HEAD | grep -q "^${{ matrix.service }}/"; then
+          if git diff --name-only origin/main...HEAD | grep -q "^${{ matrix.service }}/"; then
             echo "service_changed=true" >> $GITHUB_ENV
           else
             echo "service_changed=false" >> $GITHUB_ENV
