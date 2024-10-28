@@ -55,8 +55,8 @@ test-single-service:
 		echo "$(CYAN)Waiting for the service to be ready...$(RESET)"; \
 		sleep 5; \
 		done; \
+		docker network inspect waect-network \
 		$(TEST_COMMAND); \
-		docker network inspect waect-network
 		$(MAKE) -s stop-service SERVICE=$(SERVICE); \
 	else \
 		if [ ! -d "$(SERVICE)" ]; then \
