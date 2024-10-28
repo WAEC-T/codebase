@@ -32,11 +32,11 @@ jobs:
           python3 -m venv venv
           ./venv/bin/pip install --upgrade pip
           ./venv/bin/pip install --no-cache-dir -r tests/requirements.txt
+          source ./venv/bin/activate
 
 
 
       # Step 5: Run tests
       - name: Run tests
         run: |
-          source ./venv/bin/activate
           make test-all
