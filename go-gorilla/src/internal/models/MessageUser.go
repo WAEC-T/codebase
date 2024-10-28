@@ -1,12 +1,11 @@
 package models
 
 type MessageUser struct {
-	MessageID int `gorm:"primaryKey"`
-	AuthorID  int
-	Text      string
-	Pub_date  string
-	Flagged   int
-	UserID    int `gorm:"primaryKey"`
-	Username  string
-	Email     string
+	MessageID int    `json:"message_id"`
+	AuthorID  int    `json:"author_id"`
+	Text      string `json:"content"`
+	PubDate   string `json:"pub_date"`
+	Flagged   int    `json:"flagged"`
+	Username  string `json:"user"`
+	Email     string `json:"email"`
 }
