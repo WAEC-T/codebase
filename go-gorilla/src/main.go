@@ -16,7 +16,7 @@ var err error
 
 func main() {
 
-	/*-----------------------
+	/*------------------------
 	 * Load env vars
 	 *----------------------*/
 	uri := routes.LoadEnvVars()
