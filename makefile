@@ -51,7 +51,6 @@ test-single-service:
 	@echo "$(BLUE)=====================================$(RESET) \n"
 	@if [ -d "$(SERVICE)" ] && [ -f "$(SERVICE)/$(COMPOSE_FILE_STANDARD)" ]; then \
 		$(MAKE) -s start-service SERVICE=$(SERVICE); \
-		docker network inspect waect-network; \
 		$(TEST_COMMAND); \
 		$(MAKE) -s stop-service SERVICE=$(SERVICE); \
 	else \
