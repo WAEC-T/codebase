@@ -4,7 +4,7 @@ name: Build and Push Docker Image WEAC Codebase
 on:
   push:
     branches:
-      - cd-build-push
+      - test-cd
     paths:
       - 'python-flask/**'
       - 'c-sharp-razor/**'
@@ -35,10 +35,15 @@ jobs:
       - name: Determine if Service Needs Build
         id: check_changes
         run: |
-          if git diff --name-only HEAD^ HEAD | grep -q "^${{ matrix.service }}/"; then
-            echo "service_changed=true" >> $GITHUB_ENV
+          if git rev-parse HEAD^ >/dev/null 2>&1; then
+            if git diff --name-only HEAD^ HEAD | grep -q "^${{ matrix.service }}/"; then
+              echo "service_changed=true" >> $GITHUB_ENV
+            else
+              echo "service_changed=false" >> $GITHUB_ENV
+            fi
           else
-            echo "service_changed=false" >> $GITHUB_ENV
+            echo "No previous commit found, skipping check."
+            echo "service_changed=true" >> $GITHUB_ENV
           fi
 
       - name: Set up Docker Buildx
@@ -62,14 +67,20 @@ jobs:
             echo "found=false" >> $GITHUB_ENV
           fi
 
+      - name: Install Docker Compose
+        if: env.found == 'true'
+        run: |
+          curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+          chmod +x /usr/local/bin/docker-compose
+
       - name: Build and Push Docker Image
         if: env.found == 'true'
         run: |
           cd ${{ matrix.service }}
           docker-compose build
-          docker tag ${{ matrix.service }}_app: latest simonharwick97822/${{ matrix.service }}_app:latest
+          docker tag ${{ matrix.service }}_web:latest simonharwick97822/${{ matrix.service }}:latest
 
       - name: Push Docker Image
         if: env.found == 'true'
         run: |
-          docker push simonharwick97822/${{ matrix.service }}_app:latest
+          docker push simonharwick97822/${{ matrix.service }}:latest
