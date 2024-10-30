@@ -4,7 +4,7 @@ name: Build and Push Docker Image WEAC Codebase
 on:
   push:
     branches:
-      - feat/cd-build-push
+      - main
     paths:
       - 'python-flask/**'
       - 'c-sharp-razor/**'
