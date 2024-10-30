@@ -4,7 +4,7 @@ name: Build and Push Docker Image WEAC Codebase
 on:
   push:
     branches:
-      - test-cd
+      - feat/cd-build-push
     paths:
       - 'python-flask/**'
       - 'c-sharp-razor/**'
@@ -54,8 +54,8 @@ jobs:
         if: env.service_changed == 'true'
         uses: docker/login-action@v2
         with:
-          username: ${{ secrets.DOCKER_USERNAME }} # github username
-          password: ${{ secrets.DOCKER_PASSWORD }} # github password
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Check if Dockerfile exists
         if: env.service_changed == 'true'
@@ -78,9 +78,15 @@ jobs:
         run: |
           cd ${{ matrix.service }}
           docker-compose build
+          COMMIT_SHA=$(git rev-parse --short HEAD)
+          TIMESTAMP=$(date +%Y%m%d%H%M%S)
           docker tag ${{ matrix.service }}_web:latest simonharwick97822/${{ matrix.service }}:latest
+          docker tag ${{ matrix.service }}_web:latest simonharwick97822/${{ matrix.service }}:commit-sha-${COMMIT_SHA}-${TIMESTAMP}
 
       - name: Push Docker Image
         if: env.found == 'true'
         run: |
+          COMMIT_SHA=$(git rev-parse --short HEAD)
+          TIMESTAMP=$(date +%Y%m%d%H%M%S)
           docker push simonharwick97822/${{ matrix.service }}:latest
+          docker push simonharwick97822/${{ matrix.service }}:pr-$commit-sha-${COMMIT_SHA}-${TIMESTAMP}
