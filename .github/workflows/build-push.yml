@@ -39,6 +39,7 @@ jobs:
             if git diff --name-only HEAD^ HEAD | grep -q "^${{ matrix.service }}/"; then
               echo "service_changed=true" >> $GITHUB_ENV
             else
+              echo "Files in service directory not changed, skipping build."
               echo "service_changed=false" >> $GITHUB_ENV
             fi
           else
