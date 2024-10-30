@@ -34,18 +34,16 @@ jobs:
         with:
           fetch-depth: '2'
 
-      - name: Determine if Service Needs Build
+      - name: Determine if Service Needs Build Compared to Main
         id: check_changes
         run: |
-          if git rev-parse HEAD^ >/dev/null 2>&1; then
-            if git diff --name-only HEAD^ HEAD | grep -q "^${{ matrix.service }}/"; then
-              echo "service_changed=true" >> $GITHUB_ENV
-            else
-              echo "Files in service directory not changed, skipping build."
-              echo "service_changed=false" >> $GITHUB_ENV
-            fi
+          git fetch origin main
+
+          if git diff --name-only origin/main...HEAD | grep -q "^${{ matrix.service }}/"; then
+            echo "Changes detected in ${matrix.service} compared to main."
+            echo "service_changed=true" >> $GITHUB_ENV
           else
-            echo "No previous commit found, skipping check."
+            echo "No changes detected in ${matrix.service} compared to main."
             echo "service_changed=false" >> $GITHUB_ENV
           fi
 
