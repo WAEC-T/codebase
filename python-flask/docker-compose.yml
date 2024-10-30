@@ -1,17 +1,20 @@
 services:
-  python-flask:
-    image: waect/python-flask
-    build: .
-    container_name: python-flask
-    ports:
-      - "5000:5000"
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: flask_app
     env_file:
       - ../.env.local
     volumes:
       - .:/app
+    ports:
+      - "5000:5000"
     networks:
       - waect-network
 
 networks:
   waect-network:
+    name: waect-network
+    driver: bridge
     external: true
