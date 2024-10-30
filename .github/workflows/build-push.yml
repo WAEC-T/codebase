@@ -78,9 +78,13 @@ jobs:
         run: |
           cd ${{ matrix.service }}
           docker-compose build
+          IMAGE_NAME="waect/${{ matrix.service }}"
+          echo "Built image name: ${IMAGE_NAME}"
+          
+          docker images
+          
           COMMIT_SHA=$(git rev-parse --short HEAD)
           TIMESTAMP=$(date +%Y%m%d%H%M)
-          IMAGE_NAME="waect/${{ matrix.service }}"
               
           docker tag ${IMAGE_NAME}:latest simonharwick97822/${{ matrix.service }}:latest
           docker tag ${IMAGE_NAME}:latest simonharwick97822/${{ matrix.service }}:commit-sha-${COMMIT_SHA}-${TIMESTAMP}
