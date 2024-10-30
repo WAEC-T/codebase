@@ -32,7 +32,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
         with:
-          fetch-depth: '0'
+          fetch-depth: '2'
 
       - name: Determine if Service Needs Build Compared to Main
         id: check_changes
