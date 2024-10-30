@@ -43,7 +43,7 @@ jobs:
             fi
           else
             echo "No previous commit found, skipping check."
-            echo "service_changed=true" >> $GITHUB_ENV
+            echo "service_changed=false" >> $GITHUB_ENV
           fi
 
       - name: Set up Docker Buildx
@@ -89,6 +89,6 @@ jobs:
         if: env.found == 'true'
         run: |
           COMMIT_SHA=$(git rev-parse --short HEAD)
-          TIMESTAMP=$(date +%Y%m%d%H%M%S)
+          TIMESTAMP=$(date +%Y%m%d%H%M)
           docker push simonharwick97822/${{ matrix.service }}:latest
           docker push simonharwick97822/${{ matrix.service }}:commit-sha-${COMMIT_SHA}-${TIMESTAMP}
