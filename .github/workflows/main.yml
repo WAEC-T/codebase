@@ -1,0 +1,134 @@
+name: CI Pipeline
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'python-flask/**'
+      - 'c-sharp-razor/**'
+      - 'rust-actix/**'
+      - 'ruby-sinatra/**'
+      - 'javascript-express/**'
+      - 'go-gin/**'
+      - 'go-gorilla/**'
+      - '/**'
+
+jobs:
+  check-root-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      root_changed: ${{ steps.set-flags.outputs.root_changed }}
+      service_changed: ${{ steps.set-flags.outputs.service_changed }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Check if root files or any service changed
+        id: set-flags
+        run: |
+          # Initialize flags
+          root_changed="false"
+          any_service_changed="false"
+
+          # Get the list of changed files by comparing against the base branch
+          git fetch origin main
+          changed_files=$(git diff --name-only origin/main...HEAD)
+
+          # Check if any of the changed files are outside the known service directories
+          for file in $changed_files; do
+            if [[ ! "$file" =~ ^(python-flask/|c-sharp-razor/|rust-actix/|ruby-sinatra/|javascript-express/|go-gin/|go-gorilla/|\.github/) ]]; then
+              root_changed="true"
+              echo "Root-level file changed: $file"
+            fi
+            if [[ "$file" =~ ^(python-flask/|c-sharp-razor/|rust-actix/|ruby-sinatra/|javascript-express/|go-gin/|go-gorilla/) ]]; then
+              any_service_changed="true"
+              echo "Service-level file changed: $file"
+            fi
+          done
+
+          # Set outputs
+          echo "::set-output name=root_changed::$root_changed"
+          echo "::set-output name=service_changed::$any_service_changed"
+
+  run-all-tests:
+    runs-on: ubuntu-latest
+    needs: check-root-changes
+    if: ${{ needs.check-root-changes.outputs.root_changed == 'true' }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Set up environment and run all tests if root changed
+        run: |
+          echo "ROOT_CHANGED: ${{ needs.check-root-changes.outputs.root_changed }}"
+          echo "SERVICE_CHANGED: ${{ needs.check-root-changes.outputs.service_changed }}"
+          # Set up environment
+          sudo apt-get update
+          sudo apt-get install -y make python3-pip python3-venv
+          sudo curl -L "https://github.com/docker/compose/releases/download/v2.27.1/docker-compose-linux-x86_64" -o /usr/local/bin/docker-compose
+          sudo chmod +x /usr/local/bin/docker-compose
+
+          # Set up Python virtual environment
+          python3 -m venv venv
+          ./venv/bin/pip install --upgrade pip
+          ./venv/bin/pip install --no-cache-dir -r tests/requirements.txt
+
+          # Run all tests
+          source ./venv/bin/activate
+          make test-all
+
+  run-service-tests:
+    runs-on: ubuntu-latest
+    needs: check-root-changes
+    if: ${{ needs.check-root-changes.outputs.service_changed == 'true' && needs.check-root-changes.outputs.root_changed == 'false' }}
+    strategy:
+      matrix:
+        service:
+          - python-flask
+          - c-sharp-razor
+          - rust-actix
+          - ruby-sinatra
+          - javascript-express
+          - go-gin
+          - go-gorilla
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Check if this service requires testing
+        id: service-check
+        run: |
+          if git diff --name-only origin/main...HEAD | grep -q "^${{ matrix.service }}/"; then
+            echo "::set-output name=service_changed::true"
+            echo "Service-specific changes detected for ${{ matrix.service }}"
+          else
+            echo "::set-output name=service_changed::false"
+            echo "No changes detected for ${{ matrix.service }}; skipping tests."
+          fi
+
+      - name: Set up environment and run tests if service changed
+        if: ${{ steps.service-check.outputs.service_changed == 'true' }}
+        run: |
+          # Set up environment
+          sudo apt-get update
+          sudo apt-get install -y make python3-pip python3-venv
+          sudo curl -L "https://github.com/docker/compose/releases/download/v2.27.1/docker-compose-linux-x86_64" -o /usr/local/bin/docker-compose
+          sudo chmod +x /usr/local/bin/docker-compose
+          sudo ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
+          docker-compose version
+
+          # Set up Python virtual environment
+          python3 -m venv venv
+          ./venv/bin/pip install --upgrade pip
+          ./venv/bin/pip install --no-cache-dir -r tests/requirements.txt
+
+          # Run service-specific tests
+          source ./venv/bin/activate
+          make test-service ${{ matrix.service }}
