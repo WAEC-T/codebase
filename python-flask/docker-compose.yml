@@ -4,7 +4,7 @@ services:
     build: .
     container_name: python-flask
     ports:
-      - "5000:500"
+      - "5000:5000"
     env_file:
       - ../.env.local
     volumes:
