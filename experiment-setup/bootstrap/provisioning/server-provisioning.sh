@@ -30,7 +30,7 @@ service docker start # if this guy don't work then we have a problem
 
 echo "Pulling the images!"
 
-DOCKER_IMAGES="dudustri/waect-rust-actix alpine:edge" #list the images here
+DOCKER_IMAGES="simonharwick97822/rust-actix:latest simonharwick97822/python-flask:latest" #list the images here
 
 for IMAGE in $DOCKER_IMAGES; do
     echo "Pulling Docker image: $IMAGE"
