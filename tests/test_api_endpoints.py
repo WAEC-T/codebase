@@ -36,6 +36,13 @@ def create_new_session():
     })
     return session
 
+def verify_database_is_clean():
+    with psycopg2.connect(DATABASE_URL) as conn:
+        with conn.cursor() as cur:
+            for table in ["users", "messages", "followers"]:
+                cur.execute(f"SELECT COUNT(*) FROM {table};")
+                assert cur.fetchone()[0] == 0, f"Table {table} is not empty!"
+
 def test_register():
     clean_database()
     session = create_new_session()
@@ -214,6 +221,7 @@ def test_cleaning_the_db():
     assert response.status_code == 200
     
     clean_database()
-    
+    verify_database_is_clean()
+
     response = session.get(url, params=query)
     assert response.status_code == 404

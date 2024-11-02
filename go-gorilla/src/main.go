@@ -1,10 +1,9 @@
 package main
 
 import (
-	"fmt"
-	"gorilla-minitwit/src/internal/config"
-	"gorilla-minitwit/src/internal/db"
-	"gorilla-minitwit/src/internal/routes"
+	"go-gorilla/src/internal/config"
+	"go-gorilla/src/internal/db"
+	"go-gorilla/src/internal/routes"
 	"log"
 	"net/http"
 	"text/template"
@@ -35,7 +34,7 @@ func main() {
 	*----------------------*/
 	funcMap := routes.SetupRouting()
 
-	config.Tpl, err = template.New("timeline.html").Funcs(funcMap).ParseGlob("../templates/*.html")
+	config.Tpl, err = template.New("timeline.html").Funcs(funcMap).ParseGlob("templates/*.html")
 	if err != nil {
 		log.Fatalf("Error parsing template: %v", err)
 	}
@@ -45,8 +44,6 @@ func main() {
 	*----------------------*/
 	r := mux.NewRouter()
 	routes.SetRouteHandlers(r)
-
-	fmt.Println("Listening on port 5000...")
 	err = http.ListenAndServe(":5000", r)
 	if err != nil {
 		log.Fatalf("Failed to start server: %v", err)
