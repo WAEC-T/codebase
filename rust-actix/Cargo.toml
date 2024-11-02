@@ -1,6 +1,6 @@
 [package]
-name = "mini-x"
-version = "0.1.0"
+name = "waect-rust"
+version = "0.1.1"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
@@ -17,8 +17,7 @@ serde = "1.0.196"
 pwhash = "1"
 actix-identity = "0.7.0"
 md-5 = "0.10.6"
-diesel = { version = "2.1.0", features = ["postgres"] }
-dotenvy = "0.15"
+diesel = { version = "2.1.0", features = ["chrono", "postgres"] }
 futures = "0.3.30"
 simple-logging = "2.0.2"
 log = "0.4.21"
