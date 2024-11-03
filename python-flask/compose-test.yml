@@ -1,10 +1,11 @@
 services:
   python-flask:
     image: waect/python-flask:latest
-    env_file:
-      - ./.env.production
+    build: .
     ports:
       - "5000:5000"
+    env_file:
+      - ./.env.local
     networks:
       - waect-network
 
