@@ -1,6 +1,6 @@
 services:
   python-flask:
-    image: 
+    image: simonharwick97822/python-flask:latest
     build: .
     container_name: python-flask
     ports:
