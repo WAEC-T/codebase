@@ -84,7 +84,7 @@ jobs:
         if: env.service_changed == 'true'
         id: check_file
         run: |
-          if [ -d "./${{ matrix.service }}" ] && [ -f "./${{ matrix.service }}/compose-prod.yml" ]; then
+          if [ -d "./${{ matrix.service }}" ] && [ -f "./${{ matrix.service }}/Dockerfile" ]; then
             echo "found=true" >> $GITHUB_ENV
           else
             echo "found=false" >> $GITHUB_ENV

@@ -3,8 +3,8 @@ services:
     image: waect/python-flask
     build: .
     container_name: python-flask
-    environment:
-      - AWS_DATABASE_URL
+    env_file:
+      - ../.env.local
     volumes:
       - .:/app
     ports:
