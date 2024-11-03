@@ -100,11 +100,11 @@ jobs:
         if: env.found == 'true'
         run: |
           cd ${{ matrix.service }}
-          docker-compose build
           IMAGE_NAME="waect/${{ matrix.service }}"
-          echo "Built image name: ${IMAGE_NAME}"
+          COMMIT_SHA=$(git rev-parse --short HEAD)
+          TIMESTAMP=$(date +%Y%m%d%H%M)
           
-          docker images
+          docker-compose -f docker-compose-prod.yml build --build-arg AWS_POSTGRES_DB=${{ secrets.AWS_DATABASE_URL }}
           
           COMMIT_SHA=$(git rev-parse --short HEAD)
           TIMESTAMP=$(date +%Y%m%d%H%M)
