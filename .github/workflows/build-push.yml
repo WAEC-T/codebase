@@ -47,7 +47,7 @@ jobs:
 
       - name: Get Changed Files
         id: changed-files
-        uses: tj-actions/changed-files@v34
+        uses: tj-actions/changed-files@v45
         with:
           files: |
             python-flask/**
@@ -58,6 +58,8 @@ jobs:
             go-gin/**
             go-gorilla/**
 
+        timeout-minutes:
+        continue-on-error: false
       - name: Determine if Service Needs Build
         id: check_changes
         run: |
@@ -108,7 +110,7 @@ jobs:
           
           COMMIT_SHA=$(git rev-parse --short HEAD)
           TIMESTAMP=$(date +%Y%m%d%H%M)
-              
+          
           docker tag ${IMAGE_NAME}:latest simonharwick97822/${{ matrix.service }}:latest
           docker tag ${IMAGE_NAME}:latest simonharwick97822/${{ matrix.service }}:commit-sha-${COMMIT_SHA}-${TIMESTAMP}
 
