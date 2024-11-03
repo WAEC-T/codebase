@@ -1,6 +1,6 @@
 ALL_SERVICES = python-flask c-sharp-razor go-gorilla ruby-sinatra rust-actix javascript-express go-gin
 
-COMPOSE_FILE_STANDARD = docker-compose.yml
+COMPOSE_FILE_STANDARD = compose-test.yml
 TEST_COMMAND = pytest tests/test_api_endpoints.py
 LOCAL_DATABASE = ./database/docker-compose.yml
 DATABASE_TABLES = users, followers, messages, latest
