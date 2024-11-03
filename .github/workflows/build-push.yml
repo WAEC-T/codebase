@@ -101,10 +101,8 @@ jobs:
         run: |
           cd ${{ matrix.service }}
           IMAGE_NAME="waect/${{ matrix.service }}"
-          COMMIT_SHA=$(git rev-parse --short HEAD)
-          TIMESTAMP=$(date +%Y%m%d%H%M)
           
-          docker-compose -f compose-prod.yml build --build-arg AWS_POSTGRES_DB=${{ secrets.AWS_DATABASE_URL }}
+          docker build -f Dockerfile -t ${IMAGE_NAME}:latest .
           
           COMMIT_SHA=$(git rev-parse --short HEAD)
           TIMESTAMP=$(date +%Y%m%d%H%M)
