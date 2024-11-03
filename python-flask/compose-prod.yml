@@ -1,17 +1,11 @@
 services:
   python-flask:
-    image: waect/python-flask
+    image: 
     build: .
     container_name: python-flask
     ports:
       - "5000:5000"
     env_file:
-      - ../.env.local
+      - ../.env.prod
     volumes:
       - .:/app
-    networks:
-      - waect-network
-
-networks:
-  waect-network:
-    external: true

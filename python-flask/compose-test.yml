@@ -7,3 +7,7 @@ services:
       - "5000:5000"
     networks:
       - waect-network
+
+networks:
+  waect-network:
+    external: true
