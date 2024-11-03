@@ -2,8 +2,6 @@ name: CI Pipeline
 
 on:
   pull_request:
-    branches:
-      - main
     paths:
       - 'python-flask/**'
       - 'c-sharp-razor/**'
@@ -12,6 +10,7 @@ on:
       - 'javascript-express/**'
       - 'go-gin/**'
       - 'go-gorilla/**'
+      - 'database/**'
       - '/**'
 
 jobs:
