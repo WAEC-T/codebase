@@ -15,5 +15,9 @@ def generate_output(otii_project, device):
         minimum, maximum, avg = recording.get_complete_channel_statistics(device, channel)
         print(f"{channel.name}: {minimum}, {maximum}, {avg}", flush=True)
 
-def save_data(df, recording_name, out_path):
-    df.to_csv(Path(out_path, f"{recording_name}.csv"))
+def save_sequential_time(dataframe_api , dataframe_page, recording_name, out_path):
+    dataframe_api.to_json(Path(out_path,f"sequential_time_api_{recording_name}.json"), orient="records", lines=True)
+    dataframe_page.to_json(Path(out_path,f"sequential_time_page_{recording_name}.json"), orient="records", lines=True)
+
+def save_data(dataframe, recording_name, out_path):
+    dataframe.to_csv(Path(out_path, f"{recording_name}.csv"))
