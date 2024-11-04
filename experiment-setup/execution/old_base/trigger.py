@@ -41,9 +41,9 @@ def configure_multimeter(otii_app):
     device.enable_channel(Channel.MAIN_VOLTAGE)
     device.enable_channel(Channel.MAIN_POWER)
 
-    device.set_channel_samplerate(Channel.MAIN_CURRENT, 10000)
-    device.set_channel_samplerate(Channel.MAIN_VOLTAGE, 10000)
-    device.set_channel_samplerate(Channel.MAIN_POWER, 10000)
+    device.set_channel_samplerate(Channel.MAIN_CURRENT, 50000)
+    device.set_channel_samplerate(Channel.MAIN_VOLTAGE, 50000)
+    device.set_channel_samplerate(Channel.MAIN_POWER, 50000)
 
     # Get the active project
     project = otii_app.get_active_project()

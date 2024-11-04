@@ -1,13 +1,14 @@
 # run_experiment.py
 import asyncio
-import requests
 import sys
 from datetime import datetime
 from pathlib import Path
 
-from otti_config import create_otii_app, configure_multimeter
-from data_collection import collect_data, generate_output, save_data
-from orchestration import trigger_clients
+from otii_config import create_otii_app, configure_multimeter
+from data_collection import collect_data, generate_output, save_data, save_sequential_time
+from orchestration import clean_database, manage_server_docker_service, trigger_clients
+from client.host_sequence.scenario_api import run_api_seq_scenario
+from client.host_sequence.scenario_page import run_page_seq_scenario
 
 # Check the static addresses when preparing the setup!
 SERVER_URL = "http://10.0.0.4:5000"
@@ -15,34 +16,44 @@ CLIENT_1_URL = "http://10.0.0.3:5001/trigger"
 CLIENT_2_URL = "http://10.0.0.2:5001/trigger"
 CLIENT_3_URL = "http://10.0.0.5:5001/trigger"
 
-async def main(otii_project, device, out_path):
-    print("Clearing DB on remote server...", flush=True)
-    r = requests.get(f"{SERVER_URL}/cleardb")
+SERVICES = ["rust-actix", "python-flask"]
 
-    if r.ok:
+async def main(otii_project, device, out_path, service, run_mode="standard"):
+    print("Clearing DB on remote server...", flush=True)
+
+    reset = clean_database()
+
+    if reset:
         print("Starting scenario on three clients...", flush=True)
         start_time = datetime.now()
-        client_urls = [CLIENT_1_URL, CLIENT_2_URL, CLIENT_3_URL]
 
         otii_project.start_recording()
-
-        results = trigger_clients()
-        # TODO: add here functionality to not only print but to check if it is ok! Otherwise try to trigger it again.
-        print(results, flush=True)
+        if run_mode == "standard":
+            client_urls = [CLIENT_1_URL, CLIENT_2_URL, CLIENT_3_URL]
+            result_clients_trigger = trigger_clients(client_urls)
+            print(result_clients_trigger, flush=True)
+        elif run_mode == "sequential":
+            time_seq_api_df = await asyncio.create_task(run_api_seq_scenario(service, start_time))
+            time_seq_page_df = await asyncio.create_task(run_page_seq_scenario(service, start_time))
 
         otii_project.stop_recording()
 
         t_delta = datetime.now() - start_time
         print(f"Scenario took {t_delta}", flush=True)
-        print("Done with scenario...", flush=True)
+        print(f"Done with scenario {run_mode}...", flush=True)
 
         # Collect and save data
         df, recording_name = collect_data(otii_project, device)
         save_data(df, recording_name, out_path)
+        if time_seq_api_df and time_seq_page_df:
+            save_sequential_time(time_seq_api_df, time_seq_page_df, recording_name, out_path)
         generate_output(otii_project, device)
 
 if __name__ == "__main__":
     out_path = Path(sys.argv[1])
     otii_project, device = configure_multimeter(create_otii_app())
-    for _ in range(10):
-        asyncio.run(main(otii_project, device, out_path))
+    for service in SERVICES:
+        service_started = manage_server_docker_service(SERVER_URL.removeprefix("http://"), service);
+        if service_started:
+            for _ in range(10):
+                asyncio.run(main(otii_project, device, out_path, service))
