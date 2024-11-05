@@ -1,104 +1,148 @@
 import requests
 import time
-import pandas as pd 
-from utils import clean_database
+import pandas as pd
+from const_data import register_data, login_data, message_data
+from utils import clean_database, print_info_call
+
+import sys
 
 BASE_URL = "http://localhost:5000"
-BASE_DELAY = 0.2
-
-register_data = {
-    "username": "vegeta",
-    "email": "vegeta@waect.com",
-    "password": "waect123",
-    "password2": "waect123"
-}
-
-register_data_kakaroto = {
-    "username": "goku",
-    "email": "goku@waect.com",
-    "password": "waect123",
-    "password2": "waect123"
-}
-
-login_data = {
-    "username": "vegeta",
-    "password": "waect123"
-}
-message_data = {
-    "text": "O melhor guerreiro não é aquele que sempre ganha, mas o que mantém o seu orgulho mesmo na derrota."
-}
+BASE_DELAY = 1.8
+ITER_NUM = 20  # iteration number for each endpoint call has to be <= 400
 
 session = requests.Session()
 
-def request_endpoint(path, method="get", data=None):
+# Store sessions for each user
+user_sessions = {}
+
+
+def request_endpoint(path, method="get", data=None, user_session=None):
     url = f"{BASE_URL}{path}"
     start = time.time()
-    response = session.request(method=method, url=url, data=data)
+    response = (user_session or session).request(method=method, url=url, data=data)
     end = time.time()
-    print(f"Request to {url} | Status: {response.status_code} | start: {start} | end: {end}")
-    return {"endpoint": path, "response": response.status_code, "text":response.text, "start": start, "end": end, "delta": end - start}
+    print(f"Request to {url:<50} | Status: {response.status_code:<3}  | start: {start:<20.6f} | end: {end:<20.6f}")
+    return {"endpoint": path, "response": response.status_code, "text": response.text, "start": start, "end": end,
+            "delta": end - start}
 
 
 def sequential_interval_scenario(service, start, iter):
+    # set main user
+    main_user = register_data[0]["username"]
+
     # 1. Access Public Timeline
-    public_page = request_endpoint("/public")
+    print_info_call("Page", service, "Public Timeline", ITER_NUM)
+    public_page_response = [request_endpoint("/public") for _ in range(ITER_NUM)]
     time.sleep(BASE_DELAY)
 
-    # 2. Register 2 new super saiyajin users
-    register_1 = request_endpoint("/register", method="post", data=register_data)
-    time.sleep(BASE_DELAY)
-    register_2 = request_endpoint("/register", method="post", data=register_data_kakaroto)
-    time.sleep(BASE_DELAY)
-
-    # 3. Login with vegeta credentials
-    login = request_endpoint("/login", method="post", data=login_data)
-    time.sleep(BASE_DELAY)
-
-    # 4. Access user timeline
-    user_timeline = request_endpoint("/vegeta")
+    # 2. Register all 400 users
+    print_info_call("Page", service, "Register", ITER_NUM)
+    register_response = []
+    for user in register_data[:ITER_NUM]:
+        response = request_endpoint("/register", method="post", data=user)
+        register_response.append(response)
+        # Create a session for each user after registration
+        user_sessions[user["username"]] = requests.Session()
     time.sleep(BASE_DELAY)
 
-    # 5. Follow kakaroto - YIKES
-    follow = request_endpoint("/goku/follow")
+    # 3. Login with all 400 users
+    print_info_call("Page", service, "Login", ITER_NUM)
+    login_response = []
+    for user in login_data[:ITER_NUM][::-1]:
+        user_session = user_sessions[user["username"]]
+        response = request_endpoint("/login", method="post", data=user, user_session=user_session)
+        login_response.append(response)
     time.sleep(BASE_DELAY)
 
-    # 6. Post a new message
-    add_message = request_endpoint("/add_message", method="post", data=message_data)
+    # 4. main user follows all other users
+    print_info_call("Page", service, "Follow", ITER_NUM)
+    follow_response = []
+    main_user_session = user_sessions[main_user]
+    for user in login_data[1:ITER_NUM]:  # Start from the second user to avoid self-following
+        whom_username = user["username"]
+        response = request_endpoint(f"/{whom_username}/follow", user_session=main_user_session)
+        follow_response.append(response)
     time.sleep(BASE_DELAY)
 
-    # 7. Unfollow kakaroto - YAY
-    unfollow = request_endpoint("/goku/unfollow")
+    # 5. User 1 posts a message
+    print_info_call("Page", service, "Post Message", ITER_NUM)
+    message_response = [
+        request_endpoint("/add_message", method="post", data=message_data, user_session=main_user_session) for _ in
+        range(ITER_NUM)]
     time.sleep(BASE_DELAY)
 
-    # 8. Access Timeline again (logged-in user)
-    user_timeline_redirect = request_endpoint("/")
+    # 6. Access public timeline
+    print_info_call("Page", service, "Public Timeline Redirect", ITER_NUM)
+    public_timeline_redirect_response = [request_endpoint("/public") for _ in range(ITER_NUM)]
     time.sleep(BASE_DELAY)
 
-    # 9. Logout
-    logout = request_endpoint("/logout")
+    # 7. Access user timeline
+    print_info_call("Page", service, "User Timeline", ITER_NUM)
+    user_timeline_response = [request_endpoint(f"/{main_user}", user_session=main_user_session) for _ in range(ITER_NUM)]
+    time.sleep(BASE_DELAY)
+
+    # 8. Unfollow all users
+    print_info_call("Page", service, "Unfollow", ITER_NUM)
+    unfollow_response = []
+    for user in login_data[1:ITER_NUM]:
+        whom_username = user["username"]
+        response = request_endpoint(f"/{whom_username}/unfollow", user_session=main_user_session)
+        unfollow_response.append(response)
+    time.sleep(BASE_DELAY)
+
+    # 9. Logout all users
+    print_info_call("Page", service, "Logout", ITER_NUM)
+    logout_response = []
+    for user in login_data[:ITER_NUM]:
+        user_session = user_sessions[user["username"]]
+        response = request_endpoint("/logout", user_session=user_session)
+        logout_response.append(response)
+    time.sleep(BASE_DELAY)
 
     print(f"Finished page sequence for service {service} - iteration {iter}!", flush=True)
 
-    return [f"{service}-page-{start}-{iter}", public_page, register_1, register_2, login, user_timeline, follow, add_message, unfollow, user_timeline_redirect, logout]
+    return [f"{service}-page-{start}-{iter}",
+            public_page_response,
+            register_response,
+            login_response,
+            follow_response,
+            message_response,
+            public_timeline_redirect_response,
+            user_timeline_response,
+            unfollow_response,
+            logout_response]
+
 
 def run_page_seq_scenario(service, start):
-    data = []
-    for i in range(20):
-        iteration_data = sequential_interval_scenario(service, start, i)
-        data.append(iteration_data)
-        clean_database()
+    # Run the scenario only once
+    data = [sequential_interval_scenario(service, start, 0)]
+
+    # Clean the database after the run
+    clean_database()
 
     df = pd.DataFrame(data, columns=[
-        "Experiment ID", 
-        "Public Page", 
-        "Register 1", 
-        "Register 2", 
-        "Login", 
-        "User Timeline", 
-        "Follow", 
-        "Add Message", 
-        "Unfollow", 
-        "User Timeline Redirect", 
-        "Logout"
+        "ExperimentID",
+        "PublicPageResponse",
+        "RegisterResponse",
+        "LoginResponse",
+        "FollowResponse",
+        "AddMessageResponse",
+        "PublicTimelineRedirectResponse",
+        "UserTimelineResponse",
+        "UnfollowResponse",
+        "LogoutResponse"
     ])
     return df
+
+
+if __name__ == "__main__":
+    if len(sys.argv) != 3:
+        print("Usage: python script.py <service> <start>")
+        sys.exit(1)
+
+    service = sys.argv[1]
+    start = int(sys.argv[2])
+
+    # Run the scenario
+    df = run_page_seq_scenario(service, start)
+    print(df)
