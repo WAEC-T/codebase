@@ -120,16 +120,3 @@ def run_api_seq_scenario(service, start):
                                      "ApiLatestResponse"
                                      ])
     return df
-
-
-if __name__ == "__main__":
-    if len(sys.argv) != 3:
-        print("Usage: python script.py <service> <start>")
-        sys.exit(1)
-
-    service = sys.argv[1]
-    start = int(sys.argv[2])
-
-    # Run the scenario
-    df = run_api_seq_scenario(service, start)
-    print(df)
