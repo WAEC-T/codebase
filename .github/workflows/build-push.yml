@@ -98,18 +98,9 @@ jobs:
           IMAGE_NAME="simonharwick97822/${{ matrix.service }}"
           COMMIT_SHA=$(git rev-parse --short HEAD)
           TIMESTAMP=$(date +%Y%m%d%H%M)
-          
-          # Build and push the image with multiple tags
-          docker buildx build --platform linux/arm/v7 \
+
+          # Build and push the image for multiple platforms (ARM and AMD64)
+          docker buildx build --platform linux/amd64,linux/arm/v7,linux/arm64 \
             -t ${IMAGE_NAME}:latest \
             -t ${IMAGE_NAME}:commit-sha-${COMMIT_SHA}-${TIMESTAMP} \
             --push .
-
-      - name: Push Docker Image
-        if: env.found == 'true'
-        # && github.event_name == 'push'
-        run: |
-          COMMIT_SHA=$(git rev-parse --short HEAD)
-          TIMESTAMP=$(date +%Y%m%d%H%M)
-          docker push simonharwick97822/${{ matrix.service }}:latest
-          docker push simonharwick97822/${{ matrix.service }}:commit-sha-${COMMIT_SHA}-${TIMESTAMP}
