@@ -1,13 +1,4 @@
-FROM alpine:edge
-
-# Install Python, pip, and PostgreSQL development tools
-RUN apk add --no-cache python3 py3-pip postgresql-dev gcc musl-dev linux-headers
-
-# Create a Python virtual environment
-RUN python3 -m venv /opt/venv
-
-# Set the virtual environment path
-ENV PATH="/opt/venv/bin:$PATH"
+FROM python:3.10-slim
 
 # Set the working directory
 WORKDIR /app
