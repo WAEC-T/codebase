@@ -1,5 +1,5 @@
 FROM alpine:edge as BUILDER
-
+# for testing
 WORKDIR /usr/src/waect-rust
 
 RUN apk update && apk add --no-cache rust cargo libpq-dev
