@@ -16,4 +16,7 @@ def clean_database():
         return True
     except Exception as e:
         print(f"Database cleaning failed: {e}")
-        return False 
+        return False
+
+def print_info_call(scenario, service, endpoint, iter_num):
+    print(f"Starting {scenario} sequence for service {service} - Call: {endpoint} with {iter_num} requests")
