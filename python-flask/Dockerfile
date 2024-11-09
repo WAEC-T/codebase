@@ -4,7 +4,12 @@ WORKDIR /app
 
 RUN apk add --no-cache python3 py3-pip gcc musl-dev postgresql-dev
 
+
 COPY requirements.txt requirements.txt
+# create a vertial environment
+RUN python3 -m venv venv
+# activate the virtual environment
+RUN source venv/bin/activate
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . /app
