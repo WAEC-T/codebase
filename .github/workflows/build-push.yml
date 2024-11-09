@@ -100,7 +100,7 @@ jobs:
           TIMESTAMP=$(date +%Y%m%d%H%M)
 
           # Build and push the image for multiple platforms (ARM and AMD64)
-          docker buildx build --platform linux/arm/v7,linux/arm64 \
+          docker buildx build --platform linux/arm64 \
             -t ${IMAGE_NAME}:latest \
             -t ${IMAGE_NAME}:commit-sha-${COMMIT_SHA}-${TIMESTAMP} \
             --push .

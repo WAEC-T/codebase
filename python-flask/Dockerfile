@@ -1,5 +1,5 @@
 FROM alpine:edge
-
+# tesing dockerfile
 WORKDIR /app
 
 RUN apk add --no-cache python3 py3-pip gcc musl-dev postgresql-dev
