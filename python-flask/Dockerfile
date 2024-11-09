@@ -2,13 +2,12 @@ FROM alpine:edge
 # tesing dockerfile
 WORKDIR /app
 
-RUN apk add --no-cache python3 py3-pip gcc musl-dev postgresql-dev
-
+RUN apk add --no-cache python3
 
 COPY requirements.txt requirements.txt
-# create a vertial environment
+
+# create a vertial environment and install the requirements
 RUN python3 -m venv venv
-# activate the virtual environment
 RUN source venv/bin/activate
 RUN venv/bin/pip install --no-cache-dir -r requirements.txt
 
