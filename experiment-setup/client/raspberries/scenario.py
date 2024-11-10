@@ -426,5 +426,19 @@ def start_scenario():
     scenario()
     return f"Done running scenario on {socket.gethostname()}."
 
+@app.route('/hi')
+def hi_from_the_other_side():
+    return '''
+        <html>
+            <head><title>Greeting</title></head>
+            <body>
+                <h1 style="font-size: 50px; font-weight: bold; text-align: center;">
+                    HIIIIIIIIIIIIIIII\n\n\n
+                    <img src="https://media.licdn.com/dms/image/D4D12AQHbQuI_73aT4Q/article-cover_image-shrink_600_2000/0/1655701130683?e=2147483647&v=beta&t=xCEyY8jX-xYtPhJBmz4QJaTKnanVxTgNC6S6YY6fA4Q" alt="JUSTDOIT" style="width:700px; height:auto; margin-top:20px;">
+                </h1>
+            </body>
+        </html>
+    '''
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5001)
