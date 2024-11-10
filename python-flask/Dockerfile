@@ -2,7 +2,7 @@ FROM alpine:edge
 # tesing dockerfile
 WORKDIR /app
 
-RUN apk add --no-cache python3 py3-pip postgresql-dev gcc musl-dev # psycopg2-binar py3-pip gcc musl-dev
+RUN apk add --no-cache python3 py3-pip postgresql-dev gcc musl-dev python3-dev # psycopg2-binar py3-pip gcc musl-dev
 
 COPY requirements.txt requirements.txt
 # create a vertial environment
