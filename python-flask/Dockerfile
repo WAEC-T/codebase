@@ -17,4 +17,4 @@ COPY . /app
 EXPOSE 5000
 ENV FLASK_APP=wsgi.py
 
-CMD ["./venv/bin/gunicorn", "--bind", "0.0.0.0:5000", "wsgi:app"]
+CMD ["venv/bin/gunicorn", "--bind", "0.0.0.0:5000", "wsgi:app"]
