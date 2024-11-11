@@ -2,7 +2,7 @@ import psycopg2
 from dotenv import load_dotenv
 import os
 
-load_dotenv("../../../.env.local")
+load_dotenv("../../../.env.prod")
 DATABASE_URL = os.environ.get("DATABASE_URL")
 
 def clean_database():

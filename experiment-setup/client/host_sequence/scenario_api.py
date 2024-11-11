@@ -2,13 +2,13 @@ import requests
 import time
 import pandas as pd
 from utils import clean_database, print_info_call
-from const_data import api_register_data, message_data, api_fllw_data, api_unfllw_data
+from const_data import api_register_data, api_message_data, api_fllw_data, api_unfllw_data
 import sys
 
-BASE_URL = "http://localhost:5000/api"
+BASE_URL = "http://172.20.10.5:5000/api"
 AUTH_HEADER = {"Authorization": "Basic c2ltdWxhdG9yOnN1cGVyX3NhZmUh"}
-BASE_DELAY = 1.8
-ITER_NUM = 20 # iteration number for each endpoint call has to be <= 400
+BASE_DELAY = 2.8
+ITER_NUM = 2 # iteration number for each endpoint call has to be <= 400
 
 user_sessions = {}
 api_latest_query = {"latest": 1}
@@ -21,6 +21,7 @@ def request_endpoint(path, method="get", data=None, params=None, user_session=No
     start = time.time()
     response = (user_session or session).request(method=method, url=url, json=data, params=params, headers=AUTH_HEADER)
     end = time.time()
+    # print(response.text)
     print(f"Request to {url:<40} | Status: {response.status_code:<3} | start: {start:<20.6f} | end: {end:<20.6f}")
     return {"endpoint": path, "response": response.status_code, "text": response.text, "start": start, "end": end,
             "delta": end - start}
@@ -29,6 +30,10 @@ def request_endpoint(path, method="get", data=None, params=None, user_session=No
 def sequential_interval_scenario(service, start, iter):
     # set main user
     main_user = api_register_data[0]["username"]
+
+    # 0. Access Public Timeline request endpoint Initial Call
+    print_info_call("API", service, "Retrieve public messages. Initial Call. Not counted", 1)
+    request_endpoint("/msgs", params=api_latest_query)
 
     # 1. Register all users
     print_info_call("API", service, "Register", ITER_NUM)
@@ -43,7 +48,7 @@ def sequential_interval_scenario(service, start, iter):
     print_info_call("API", service, "Post messages", ITER_NUM)
     main_user_session = user_sessions[main_user]
     api_message_response = [
-        request_endpoint(f"/msgs/{main_user}", method="post", data=message_data, params=api_latest_query) for _ in range(ITER_NUM)
+        request_endpoint(f"/msgs/{main_user}", method="post", data=api_message_data, params=api_latest_query) for _ in range(ITER_NUM)
     ]
     time.sleep(BASE_DELAY)
 
@@ -120,3 +125,16 @@ def run_api_seq_scenario(service, start):
                                      "ApiLatestResponse"
                                      ])
     return df
+
+
+if __name__ == "__main__":
+    if len(sys.argv) != 3:
+        print("Usage: python script.py <service> <start>")
+        sys.exit(1)
+
+    service = sys.argv[1]
+    start = int(sys.argv[2])
+
+    # Run the scenario
+    df = run_api_seq_scenario(service, start)
+    print(df)

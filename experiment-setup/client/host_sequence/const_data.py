@@ -808,6 +808,10 @@ message_data = {
     "text": "O melhor guerreiro não é aquele que sempre ganha, mas o que mantém o seu orgulho mesmo na derrota."
 }
 
+api_message_data = {
+    "content": "O melhor guerreiro não é aquele que sempre ganha, mas o que mantém o seu orgulho mesmo na derrota."
+}
+
 api_register_data = [
 {'username': 'user1', 'email': 'user1@waect.com', 'pwd': 'waect123', 'pwd2': 'waect123'},
 {'username': 'user2', 'email': 'user2@waect.com', 'pwd': 'waect123', 'pwd2': 'waect123'},

@@ -6,9 +6,9 @@ from utils import clean_database, print_info_call
 
 import sys
 
-BASE_URL = "http://localhost:5000"
-BASE_DELAY = 1.8
-ITER_NUM = 20  # iteration number for each endpoint call has to be <= 400
+BASE_URL = "http://172.20.10.5:5000"
+BASE_DELAY = 2.8
+ITER_NUM = 2 # iteration number for each endpoint call has to be <= 399
 
 session = requests.Session()
 
@@ -30,6 +30,11 @@ def sequential_interval_scenario(service, start, iter):
     # set main user
     main_user = register_data[0]["username"]
 
+    # 0. Access Public Timeline request endpoint
+    print_info_call("Page", service, "Public Timeline. Initial Call. Not counted", 1)
+    request_endpoint("/public")
+
+    time.sleep(BASE_DELAY)
     # 1. Access Public Timeline
     print_info_call("Page", service, "Public Timeline", ITER_NUM)
     public_page_response = [request_endpoint("/public") for _ in range(ITER_NUM)]
@@ -133,3 +138,15 @@ def run_page_seq_scenario(service, start):
         "LogoutResponse"
     ])
     return df
+
+if __name__ == "__main__":
+    if len(sys.argv) != 3:
+        print("Usage: python script.py <service> <start>")
+        sys.exit(1)
+
+    service = sys.argv[1]
+    start = int(sys.argv[2])
+
+    # Run the scenario
+    df = run_page_seq_scenario(service, start)
+    print(df)
