@@ -1,13 +1,12 @@
 FROM alpine:edge
-# tesing dockerfile
 WORKDIR /app
 
+# install dependencies
 RUN apk add --no-cache python3 py3-pip postgresql-dev gcc musl-dev python3-dev # psycopg2-binar py3-pip gcc musl-dev
 
+# run requirements
 COPY requirements.txt requirements.txt
-# create a vertial environment
 RUN python3 -m venv venv
-# activate the virtual environment
 RUN ./venv/bin/pip install --upgrade pip
 RUN source venv/bin/activate
 RUN venv/bin/pip install --no-cache-dir -r requirements.txt
