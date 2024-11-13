@@ -235,6 +235,7 @@ jobs:
           docker buildx build --platform linux/arm64 \
             -t ${IMAGE_NAME}:latest \
             -t ${IMAGE_NAME}:commit-sha-${COMMIT_SHA}-${TIMESTAMP} \
+            .
 
       - name: Build and Push Docker Image
         if: ${{ env.found == 'true' && github.event_name == 'push' && github.ref == 'refs/heads/main' }}
