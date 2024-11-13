@@ -37,14 +37,14 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
-          fetch-depth: 2
+          fetch-depth: 0
 
       - name: Check if root files or any service changed
         id: set-flags
         run: |
           # Initialize flags
           root_changed="false"
-          any_service_changed="false"
+          any_service_changed="true"
 
           # Get the list of changed files by comparing against the base branch
           git fetch origin main
@@ -53,7 +53,7 @@ jobs:
           # Check if any of the changed files are outside the known service directories
           for file in $changed_files; do
             if [[ ! "$file" =~ ^(python-flask/|c-sharp-razor/|rust-actix/|ruby-sinatra/|javascript-express/|go-gin/|go-gorilla/|\.github/) ]]; then
-              root_changed="true"
+              root_changed="false"
               echo "Root-level file changed: $file"
             fi
             if [[ "$file" =~ ^(python-flask/|c-sharp-razor/|rust-actix/|ruby-sinatra/|javascript-express/|go-gin/|go-gorilla/) ]]; then
@@ -75,7 +75,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
-          fetch-depth: 2
+          fetch-depth: 0
 
       - name: Set up environment and run all tests if root changed
         run: |
@@ -115,7 +115,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
-          fetch-depth: 2
+          fetch-depth: 0
 
       - name: Check if this service requires testing
         id: service-check
