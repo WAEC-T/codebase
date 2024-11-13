@@ -52,7 +52,7 @@ test-single-service:
 	@if [ -d "$(SERVICE)" ] && [ -f "$(SERVICE)/$(COMPOSE_FILE_STANDARD)" ]; then \
 		$(MAKE) -s start-service SERVICE=$(SERVICE) && sleep $(DELAY_TEST_EXECUTION_SECONDS); \
 		set -e; \
-		$(TEST_COMMAND); \
+		$(TEST_COMMAND) && \
 		$(MAKE) -s stop-service SERVICE=$(SERVICE); \
 	else \
 		if [ ! -d "$(SERVICE)" ]; then \
