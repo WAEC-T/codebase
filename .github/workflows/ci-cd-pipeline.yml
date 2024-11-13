@@ -75,11 +75,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
+          ref: fix/cd-build-amd64-armv7
           fetch-depth: 0
 
       # - name: Set up environment configuration
       - name: Set up environment configuration
-        uses: self./.github/workflows/set-configuration.yml@fix/cd-build-amd64-armv7
+        uses: self/./.github/workflows/set-configuration.yml@fix/cd-build-amd64-armv7
         with:
           venv-requirements: 'tests/requirements.txt'
 
@@ -123,6 +124,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
+          ref: fix/cd-build-amd64-armv7
           fetch-depth: 0
 
       - name: Check if this service requires testing
@@ -138,7 +140,7 @@ jobs:
 
       # - name: Set up environment configuration
       - name: Set up environment configuration
-        uses: ./.github/workflows/set-configuration.yml@fix/cd-build-amd64-armv7
+        uses: self/./.github/workflows/set-configuration.yml@fix/cd-build-amd64-armv7
         with:
           venv-requirements: 'tests/requirements.txt'
 
