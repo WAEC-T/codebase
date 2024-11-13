@@ -77,25 +77,20 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Set up environment using reusable workflow
-        uses: ./.github/workflows/set-configuration.yml@fix/cd-build-amd64-armv7
-        with:
-          venv-requirements: 'tests/requirements.txt'
-
       - name: Set up environment and run all tests if root changed
         run: |
-#          echo "ROOT_CHANGED: ${{ needs.check-root-changes.outputs.root_changed }}"
-#          echo "SERVICE_CHANGED: ${{ needs.check-root-changes.outputs.service_changed }}"
-#          # Set up environment
-#          sudo apt-get update
-#          sudo apt-get install -y make python3-pip python3-venv
-#          sudo curl -L "https://github.com/docker/compose/releases/download/v2.27.1/docker-compose-linux-x86_64" -o /usr/local/bin/docker-compose
-#          sudo chmod +x /usr/local/bin/docker-compose
-#
-#          # Set up Python virtual environment
-#          python3 -m venv venv
-#          ./venv/bin/pip install --upgrade pip
-#          ./venv/bin/pip install --no-cache-dir -r tests/requirements.txt
+          echo "ROOT_CHANGED: ${{ needs.check-root-changes.outputs.root_changed }}"
+          echo "SERVICE_CHANGED: ${{ needs.check-root-changes.outputs.service_changed }}"
+          # Set up environment
+          sudo apt-get update
+          sudo apt-get install -y make python3-pip python3-venv
+          sudo curl -L "https://github.com/docker/compose/releases/download/v2.27.1/docker-compose-linux-x86_64" -o /usr/local/bin/docker-compose
+          sudo chmod +x /usr/local/bin/docker-compose
+
+          # Set up Python virtual environment
+          python3 -m venv venv
+          ./venv/bin/pip install --upgrade pip
+          ./venv/bin/pip install --no-cache-dir -r tests/requirements.txt
 
           # Run all tests
           source ./venv/bin/activate
@@ -133,26 +128,21 @@ jobs:
             echo "No changes detected for ${{ matrix.service }}; skipping tests."
           fi
 
-      - name: Set up environment using reusable workflow
-        uses: ./.github/workflows/set-configuration.yml@fix/cd-build-amd64-armv7
-        with:
-          venv-requirements: 'tests/requirements.txt'
-
       - name: Set up environment and run tests if service changed
         if: ${{ steps.service-check.outputs.service_changed == 'true' }}
         run: |
-#          # Set up environment
-#          sudo apt-get update
-#          sudo apt-get install -y make python3-pip python3-venv
-#          sudo curl -L "https://github.com/docker/compose/releases/download/v2.27.1/docker-compose-linux-x86_64" -o /usr/local/bin/docker-compose
-#          sudo chmod +x /usr/local/bin/docker-compose
-#          sudo ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
-#          docker-compose version
-#
-#          # Set up Python virtual environment
-#          python3 -m venv venv
-#          ./venv/bin/pip install --upgrade pip
-#          ./venv/bin/pip install --no-cache-dir -r tests/requirements.txt
+          # Set up environment
+          sudo apt-get update
+          sudo apt-get install -y make python3-pip python3-venv
+          sudo curl -L "https://github.com/docker/compose/releases/download/v2.27.1/docker-compose-linux-x86_64" -o /usr/local/bin/docker-compose
+          sudo chmod +x /usr/local/bin/docker-compose
+          sudo ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
+          docker-compose version
+
+          # Set up Python virtual environment
+          python3 -m venv venv
+          ./venv/bin/pip install --upgrade pip
+          ./venv/bin/pip install --no-cache-dir -r tests/requirements.txt
 
           # Run service-specific tests
           source ./venv/bin/activate
