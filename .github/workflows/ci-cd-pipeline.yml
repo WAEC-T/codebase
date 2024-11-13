@@ -189,10 +189,10 @@ jobs:
            if [[ "${{ steps.changed-files.outputs.modified_files }}" == *"${{ matrix.service }}/"* ]] || [[ "${{ steps.changed-files.outputs.added_files }}" == *"${{ matrix.service }}/"* ]]; then
             echo "Changes detected in ${{ matrix.service }}."
             service_changed="true"
-          else
+           else
             echo "No changes detected in ${{ matrix.service }}."
-          fi
-          echo "service_changed=$service_changed" >> $GITHUB_ENV
+           fi
+           echo "service_changed=$service_changed" >> $GITHUB_ENV
 
       - name: Set up Docker Buildx
         if: env.service_changed == 'true'
