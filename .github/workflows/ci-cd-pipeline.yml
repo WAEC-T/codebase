@@ -135,8 +135,8 @@ jobs:
             echo "No changes detected for ${{ matrix.service }}; skipping tests."
           fi
 
-      - name: Set up environment configuration
-        uses: ./.github/workflows/set-configuration.yml
+      # - name: Set up environment configuration
+      - uses: ./.github/workflows/set-configuration.yml
         with:
           venv-requirements: 'tests/requirements.txt'
 
