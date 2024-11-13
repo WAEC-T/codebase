@@ -96,6 +96,8 @@ jobs:
           source ./venv/bin/activate
           make test-all
 
+        continue-on-error: false
+
   run-service-tests:
     name: CI – Service-Specific Tests
     runs-on: ubuntu-latest
@@ -147,6 +149,8 @@ jobs:
           # Run service-specific tests
           source ./venv/bin/activate
           make test-service ${{ matrix.service }}
+
+        continue-on-error: false
 
   cd:
     name: CD –
