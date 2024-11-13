@@ -4,22 +4,21 @@ import httpx
 import psycopg2
 from dotenv import load_dotenv
 import os
+import dump.sql
 
 load_dotenv("../../../.env.prod")
 DATABASE_URL = os.environ.get("DATABASE_URL")
-print("DATABASE_URL: ", DATABASE_URL)
 SSH_USER=os.environ.get("SSH_USER")
 SSH_PASS=os.environ.get("SSH_PASS")
 
 async def get_async(url):
     print(f"Starting scenario on {url}...", flush=True)
-    timeout = httpx.Timeout(100.0, read=None)
+    timeout = httpx.Timeout(10.0, read=None)
     async with httpx.AsyncClient() as client:
         return await client.get(url, timeout=timeout)
 
 async def trigger_clients(clients: list[str]):
     results = await asyncio.gather(*map(get_async, clients))
-    print("All clients triggered...", flush=True)
     return results
 
 def clean_database():

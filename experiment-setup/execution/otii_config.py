@@ -1,31 +1,39 @@
 # equipment_config.py
 
-from otii_tcp_client import otii_client
+from otii_tcp_client import otii_connection, otii as otii_application
+from otii_tcp_client.arc import Channel
 
-def create_otii_app():
+def create_otii_app(host="127.0.0.1", port=1905):
     # Connect to the Otii 3 application
-    client = otii_client.OtiiClient().connect()
-    return client
+    connection = otii_connection.OtiiConnection(host, port)
+    connect_response = connection.connect_to_server(try_for_seconds=10)
+    if connect_response["type"] == "error":
+        raise Exception(
+            f'Exit! Error code: {connect_response["errorcode"]}, '
+            f'Description: {connect_response["payload"]["message"]}'
+        )
+    otii_app = otii_application.Otii(connection)
+
+    return otii_app
 
 # TODO: change this to bootstrap a new project if the project doesn't exist or create direct in the equipment?
 def configure_multimeter(otii_app):
     # Based on the example from
     # https://github.com/qoitech/otii-tcp-client-python/blob/master/examples/basic_measurement.py
     devices = otii_app.get_devices()
-    print(f"Connected devices: {devices}")
     if len(devices) == 0:
         raise Exception("No Arc or Ace connected!")
     device = devices[0]
 
-    device.enable_channel('mp', True)
+    device.enable_channel(Channel.MAIN_CURRENT)
+    device.enable_channel(Channel.MAIN_VOLTAGE)
+    device.enable_channel(Channel.MAIN_POWER)
 
-    # Set device parameters
-    device.set_main_voltage(5.0)  # Set main voltage to 5V
-    device.set_exp_voltage(4.9)   # Set expansion voltage to 4.9V
-    device.set_max_current(2.0)   # Set max current to 2Ax
+    device.set_channel_samplerate(Channel.MAIN_CURRENT, 10000)
+    device.set_channel_samplerate(Channel.MAIN_VOLTAGE, 10000)
+    device.set_channel_samplerate(Channel.MAIN_POWER, 10000)
 
     # Get the active project
     project = otii_app.get_active_project()
-    print("project: ", project)
-    print("device: ", device)
+
     return project, device
