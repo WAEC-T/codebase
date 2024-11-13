@@ -4,6 +4,7 @@ import httpx
 import psycopg2
 from dotenv import load_dotenv
 import os
+import dump.sql
 
 load_dotenv("../../../.env.prod")
 DATABASE_URL = os.environ.get("DATABASE_URL")
@@ -27,6 +28,9 @@ def clean_database():
                 cur.execute("TRUNCATE TABLE users CASCADE;")
                 cur.execute("TRUNCATE TABLE messages CASCADE;")
                 cur.execute("TRUNCATE TABLE followers CASCADE;")
+                with open('dump.sql', 'r') as f:
+                    sql_commands = f.read()
+                    cur.execute(sql_commands)
                 conn.commit()
         return True
     except Exception as e:
