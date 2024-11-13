@@ -168,14 +168,9 @@ jobs:
           - go-gin
           - go-gorilla
     steps:
-      - name: Check job status
-        run: |
-          echo "run-all-tests result: ${{ needs.run-all-tests.result }}"
-          echo "run-service-tests result: ${{ needs.run-service-tests.result }}"
-
       - name: Proceed if Tests Succeeded
         if: ${{ needs.run-all-tests.result == 'success' || needs.run-service-tests.result == 'success' }}
-        run: echo "Deploying services..."
+        run: echo "Deploying services  ${{ matrix.service }}."
 
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -211,13 +206,6 @@ jobs:
         if: env.service_changed == 'true'
         uses: docker/setup-buildx-action@v1
 
-      - name: Log in to Docker Hub
-        if: env.service_changed == 'true'
-        uses: docker/login-action@v2
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
-
       - name: Check if Dockerfile exists
         if: env.service_changed == 'true'
         id: check_file
@@ -228,8 +216,28 @@ jobs:
             echo "found=false" >> $GITHUB_ENV
           fi
 
+      - name: Log in to Docker Hub
+        if: ${{ env.service_changed == 'true' && github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build Docker Image
+        if: ${{ github.event_name == 'pull_request' }}
+        run: |
+          cd ${{ matrix.service }}
+          IMAGE_NAME="simonharwick97822/${{ matrix.service }}"
+          COMMIT_SHA=$(git rev-parse --short HEAD)
+          TIMESTAMP=$(date +%Y%m%d%H%M)
+            
+          # Build the image without pushing in PRs
+          docker buildx build --platform linux/arm64 \
+            -t ${IMAGE_NAME}:latest \
+            -t ${IMAGE_NAME}:commit-sha-${COMMIT_SHA}-${TIMESTAMP} \
+
       - name: Build and Push Docker Image
-        if: env.found == 'true'
+        if: ${{ env.found == 'true' && github.event_name == 'push' && github.ref == 'refs/heads/main' }}
         run: |
           cd ${{ matrix.service }}
           IMAGE_NAME="simonharwick97822/${{ matrix.service }}"
