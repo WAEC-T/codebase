@@ -6,8 +6,7 @@ from dotenv import load_dotenv
 import os
 
 load_dotenv("../../../.env.prod")
-# DATABASE_URL = os.environ.get("DATABASE_URL")
-DATABASE_URL = "postgresql://waect:AKIAYZZGS4DG74ZYUESY@waectdatabase-waectdb03830e3f-zscita2xr59f.c10ia6ywc903.eu-central-1.rds.amazonaws.com:5432/waect"
+DATABASE_URL = os.environ.get("DATABASE_URL")
 print("DATABASE_URL: ", DATABASE_URL)
 SSH_USER=os.environ.get("SSH_USER")
 SSH_PASS=os.environ.get("SSH_PASS")
