@@ -72,8 +72,8 @@ test-all: start-local-db
 
 .PHONY: test-services
 test-service: start-local-db
-	@set -e; \
 	@services=$$(echo "$(MAKECMDGOALS)" | tr ' ' '\n' | grep -v '^test-service$$'); \
+	@set -e; \
 	for service in $$services; do \
 		if echo "$(ALL_SERVICES)" | grep -wq "$$service"; then \
 			$(MAKE) -s test-single-service SERVICE=$$service; \
