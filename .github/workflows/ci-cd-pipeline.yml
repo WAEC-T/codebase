@@ -77,8 +77,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Set up environment configuration
-        uses: ./.github/workflows/set-configuration.yml
+      - uses: ./.github/workflows/set-configuration.yml
         with:
           venv-requirements: 'tests/requirements.txt'
 
