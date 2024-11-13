@@ -79,7 +79,7 @@ jobs:
 
       # - name: Set up environment configuration
       - name: Set up environment configuration
-        uses: ./.github/workflows/set-configuration.yml@fix/cd-build-amd64-armv7
+        uses: self./.github/workflows/set-configuration.yml@fix/cd-build-amd64-armv7
         with:
           venv-requirements: 'tests/requirements.txt'
 
