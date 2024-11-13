@@ -63,6 +63,7 @@ test-single-service:
 
 .PHONY: test-all
 test-all: start-local-db
+    @set -e; \
 	@for service in $(ALL_SERVICES); do \
 		$(MAKE) -s test-single-service SERVICE=$$service; \
 	done
