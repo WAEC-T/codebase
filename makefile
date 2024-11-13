@@ -64,9 +64,8 @@ test-single-service:
 .PHONY: test-all
 test-all: start-local-db
     @set -e; \
-    trap '$(MAKE) -s stop-local-db' EXIT; \
-    for service in $(ALL_SERVICES); do \
-	    $(MAKE) -s test-single-service SERVICE=$$service; \
+	for service in $(ALL_SERVICES); do \
+		$(MAKE) -s test-single-service SERVICE=$$service; \
 	done
 	@$(MAKE) -s stop-local-db
 	@echo "$(GREEN)All services tested!$(RESET)"
