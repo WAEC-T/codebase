@@ -2,7 +2,7 @@ import requests
 import socket
 from flask import Flask
 
-SERVER_URL = "http://10.0.0.4:5000"
+SERVER_URL = "http://localhost:5000"
 
 app = Flask(__name__)
 
@@ -77,7 +77,9 @@ def follow(follows_username, username=None, password=None, session=None):
         r = requests.get(
             SERVER_URL + f"/{follows_username}/follow", allow_redirects=True
         )
-
+    print("text: " + r.text)
+    print("followusername", follows_username)
+    print(SERVER_URL + f"/{follows_username}/follow")
     assert f"You are now following &#34;{follows_username}&#34;" in r.text
     return r
 
