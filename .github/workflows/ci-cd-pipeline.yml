@@ -44,7 +44,7 @@ jobs:
         run: |
           # Initialize flags
           root_changed="false"
-          any_service_changed="true"
+          any_service_changed="false"
 
           # Get the list of changed files by comparing against the base branch
           git fetch origin main
@@ -53,7 +53,7 @@ jobs:
           # Check if any of the changed files are outside the known service directories
           for file in $changed_files; do
             if [[ ! "$file" =~ ^(python-flask/|c-sharp-razor/|rust-actix/|ruby-sinatra/|javascript-express/|go-gin/|go-gorilla/|\.github/) ]]; then
-              root_changed="false"
+              root_changed="true"
               echo "Root-level file changed: $file"
             fi
             if [[ "$file" =~ ^(python-flask/|c-sharp-razor/|rust-actix/|ruby-sinatra/|javascript-express/|go-gin/|go-gorilla/) ]]; then
@@ -75,29 +75,22 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
-          ref: fix/cd-build-amd64-armv7
           fetch-depth: 0
-
-      # - name: Set up environment configuration
-      - name: Set up environment configuration
-        uses: self/./.github/workflows/set-configuration.yml@fix/cd-build-amd64-armv7
-        with:
-          venv-requirements: 'tests/requirements.txt'
 
       - name: Run all tests if root changed
         run: |
-#          echo "ROOT_CHANGED: ${{ needs.check-root-changes.outputs.root_changed }}"
-#          echo "SERVICE_CHANGED: ${{ needs.check-root-changes.outputs.service_changed }}"
-#          # Set up environment
-#          sudo apt-get update
-#          sudo apt-get install -y make python3-pip python3-venv
-#          sudo curl -L "https://github.com/docker/compose/releases/download/v2.27.1/docker-compose-linux-x86_64" -o /usr/local/bin/docker-compose
-#          sudo chmod +x /usr/local/bin/docker-compose
-#
-#          # Set up Python virtual environment
-#          python3 -m venv venv
-#          ./venv/bin/pip install --upgrade pip
-#          ./venv/bin/pip install --no-cache-dir -r tests/requirements.txt
+          echo "ROOT_CHANGED: ${{ needs.check-root-changes.outputs.root_changed }}"
+          echo "SERVICE_CHANGED: ${{ needs.check-root-changes.outputs.service_changed }}"
+          # Set up environment
+          sudo apt-get update
+          sudo apt-get install -y make python3-pip python3-venv
+          sudo curl -L "https://github.com/docker/compose/releases/download/v2.27.1/docker-compose-linux-x86_64" -o /usr/local/bin/docker-compose
+          sudo chmod +x /usr/local/bin/docker-compose
+
+          # Set up Python virtual environment
+          python3 -m venv venv
+          ./venv/bin/pip install --upgrade pip
+          ./venv/bin/pip install --no-cache-dir -r tests/requirements.txt
 
           # Run all tests
           source ./venv/bin/activate
@@ -124,7 +117,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
-          ref: fix/cd-build-amd64-armv7
           fetch-depth: 0
 
       - name: Check if this service requires testing
@@ -137,12 +129,6 @@ jobs:
             echo "::set-output name=service_changed::false"
             echo "No changes detected for ${{ matrix.service }}; skipping tests."
           fi
-
-      # - name: Set up environment configuration
-      - name: Set up environment configuration
-        uses: self/./.github/workflows/set-configuration.yml@fix/cd-build-amd64-armv7
-        with:
-          venv-requirements: 'tests/requirements.txt'
 
       - name: Set up environment and run tests if service changed
         if: ${{ steps.service-check.outputs.service_changed == 'true' }}
