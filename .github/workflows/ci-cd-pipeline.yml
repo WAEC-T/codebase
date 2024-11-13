@@ -213,6 +213,7 @@ jobs:
             echo "found=true" >> $GITHUB_ENV
           else
             echo "found=false" >> $GITHUB_ENV
+          fi
 
       - name: Build and Push Docker Image
         if: env.found == 'true'
