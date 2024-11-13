@@ -206,6 +206,13 @@ jobs:
         if: env.service_changed == 'true'
         uses: docker/setup-buildx-action@v1
 
+      - name: Log in to Docker Hub
+        if: ${{ env.service_changed == 'true' && github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
       - name: Check if Dockerfile exists
         if: env.service_changed == 'true'
         id: check_file
@@ -216,21 +223,14 @@ jobs:
             echo "found=false" >> $GITHUB_ENV
           fi
 
-      - name: Log in to Docker Hub
-        if: ${{ env.service_changed == 'true' && github.event_name == 'push' && github.ref == 'refs/heads/main' }}
-        uses: docker/login-action@v2
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
-
       - name: Build Docker Image
-        if: ${{ github.event_name == 'pull_request' }}
+        if: ${{ env.found == 'true' && github.event_name == 'pull_request' }}
         run: |
           cd ${{ matrix.service }}
           IMAGE_NAME="simonharwick97822/${{ matrix.service }}"
           COMMIT_SHA=$(git rev-parse --short HEAD)
           TIMESTAMP=$(date +%Y%m%d%H%M)
-            
+
           # Build the image without pushing in PRs
           docker buildx build --platform linux/arm64 \
             -t ${IMAGE_NAME}:latest \
