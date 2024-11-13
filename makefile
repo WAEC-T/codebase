@@ -72,6 +72,7 @@ test-all: start-local-db
 
 .PHONY: test-services
 test-service: start-local-db
+	# test this
 	@set -e; \
 	@services=$$(echo "$(MAKECMDGOALS)" | tr ' ' '\n' | grep -v '^test-service$$'); \
 	for service in $$services; do \
