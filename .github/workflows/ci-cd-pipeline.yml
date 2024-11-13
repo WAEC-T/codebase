@@ -156,7 +156,7 @@ jobs:
     name: CD –
     runs-on: ubuntu-latest
     needs: [ run-all-tests, run-service-tests ]
-    if: ${{ needs.run-all-tests.result == 'success' || needs.run-service-tests.result == 'success' }}
+    if: ${{ (needs.run-all-tests.result == 'success' && needs.run-service-tests.result == 'skipped') || (needs.run-service-tests.result == 'success' || needs.run-all-tests.result == 'skipped') }}
     strategy:
       matrix:
         service:
