@@ -78,7 +78,7 @@ jobs:
           fetch-depth: 0
 
       - name: Set up environment using reusable workflow
-        uses: ./.github/workflows/set-configuration.yml@main
+        uses: ./.github/workflows/set-configuration.yml@fix/cd-build-amd64-armv7
         with:
           venv-requirements: 'tests/requirements.txt'
 
@@ -134,7 +134,7 @@ jobs:
           fi
 
       - name: Set up environment using reusable workflow
-        uses: ./.github/workflows/set-configuration.yml@main
+        uses: ./.github/workflows/set-configuration.yml@fix/cd-build-amd64-armv7
         with:
           venv-requirements: 'tests/requirements.txt'
 
