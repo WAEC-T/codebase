@@ -152,16 +152,11 @@ jobs:
 
         continue-on-error: false
 
-      - name: Check job status
-        run: |
-          echo "run-all-tests result: ${{ needs.run-all-tests.result }}"
-          echo "run-service-tests result: ${{ needs.run-service-tests.result }}"
-
   cd:
     name: CD –
     runs-on: ubuntu-latest
     needs: [ run-all-tests, run-service-tests ]
-    if: ${{ needs.run-all-tests.result == 'success' || needs.run-service-tests.result == 'success' }}
+    if: ${{ always() }}
     strategy:
       matrix:
         service:
@@ -173,6 +168,15 @@ jobs:
           - go-gin
           - go-gorilla
     steps:
+      - name: Check job status
+        run: |
+          echo "run-all-tests result: ${{ needs.run-all-tests.result }}"
+          echo "run-service-tests result: ${{ needs.run-service-tests.result }}"
+
+      - name: Proceed if Tests Succeeded
+        if: ${{ needs.run-all-tests.result == 'success' || needs.run-service-tests.result == 'success' }}
+        run: echo "Deploying services..."
+
       - name: Checkout repository
         uses: actions/checkout@v2
         with:
