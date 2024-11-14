@@ -2,7 +2,7 @@ import requests
 import socket
 from flask import Flask
 
-SERVER_URL = "http://localhost:5000"
+SERVER_URL = "http://10.7.7.144:5000"
 
 app = Flask(__name__)
 
