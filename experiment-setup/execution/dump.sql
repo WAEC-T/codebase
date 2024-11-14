@@ -17771,5 +17771,5 @@ INSERT INTO messages VALUES(11303,106,'What should I go armed?', TO_TIMESTAMP(12
 INSERT INTO messages VALUES(11304,186,'Where does that mean?', TO_TIMESTAMP(1233065869));
 INSERT INTO messages VALUES(11305,152,'“There’s another rendering now; but let some light upon a sofa near the bedroom door.', TO_TIMESTAMP(1233065869));
 INSERT INTO messages VALUES(11306,199,'Among many other particulars he narrates, in all probability have been that of deduction.', TO_TIMESTAMP(1233065869));
-SELECT setval('user_user_id_seq', (SELECT MAX(user_id) FROM user) + 1);
-SELECT setval('message_message_id_seq', (SELECT MAX(message_id) FROM message) + 1);
+SELECT setval('users_user_id_seq', (SELECT COALESCE(MAX(user_id)) FROM users) + 1);
+SELECT setval('messages_message_id_seq', (SELECT COALESCE(MAX(message_id)) FROM messages) + 1);
