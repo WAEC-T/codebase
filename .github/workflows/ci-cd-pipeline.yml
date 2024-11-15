@@ -242,14 +242,14 @@ jobs:
             .
 
       - name: Build and Push Docker Image
-        if: ${{ env.found == 'true' && github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+        if: ${{ env.found == 'true' }}  # && github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: |
           cd ${{ matrix.service }}
           IMAGE_NAME="simonharwick97822/${{ matrix.service }}"
           COMMIT_SHA=$(git rev-parse --short HEAD)
           TIMESTAMP=$(date +%Y%m%d%H%M)
-
-          docker buildx build --platform linux/arm64, linux/amd64 \
+          
+          docker buildx build --platform linux/arm64,linux/amd64 \
             -t ${IMAGE_NAME}:latest \
             -t ${IMAGE_NAME}:commit-sha-${COMMIT_SHA}-${TIMESTAMP} \
             --push .
