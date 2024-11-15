@@ -36,6 +36,7 @@ clean-db:
 .PHONY: start-service
 start-service:
 	@echo "$(CYAN)Spinning service and running tests...$(RESET) \n"
+	@echo "./$(SERVICE)/$(COMPOSE_FILE_STANDARD) \n"
 	@docker-compose -f ./$(SERVICE)/$(COMPOSE_FILE_STANDARD) up -d > /dev/null 2>&1
 
 .PHONY: stop-service
