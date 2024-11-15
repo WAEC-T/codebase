@@ -23,7 +23,7 @@ def add_message():
 
         db.session.add(new_message)
         db.session.commit()
-        flash(f'Message was recorded')
+        flash(f'Your message was recorded')
 
     return redirect(url_for('main.timeline'))
 
