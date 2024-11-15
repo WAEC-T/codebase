@@ -33,7 +33,7 @@ def _register_user_via_gui(driver, data):
     register_url = "http://localhost:5000/register"
     driver.get(register_url)
     
-    wait = WebDriverWait(driver, 30)
+    wait = WebDriverWait(driver, 15)
     input_fields = driver.find_elements(By.TAG_NAME, "input")
 
     for idx, str_content in enumerate(data):
@@ -42,7 +42,7 @@ def _register_user_via_gui(driver, data):
 
     get_text_from_first_li(driver)
 
-    wait = WebDriverWait(driver, 30)
+    wait = WebDriverWait(driver, 15)
     li_text = wait.until(get_text_from_first_li)
     return li_text
 
@@ -50,7 +50,7 @@ def _login_user_via_gui(driver, username, password):
     login_url = "http://localhost:5000/login"
     driver.get(login_url)
 
-    wait = WebDriverWait(driver, 30)
+    wait = WebDriverWait(driver, 15)
     input_fields = driver.find_elements(By.TAG_NAME, "input")
     print(input_fields)
 
@@ -61,7 +61,7 @@ def _login_user_via_gui(driver, username, password):
 
     get_text_from_first_li(driver)
 
-    wait = WebDriverWait(driver, 30)
+    wait = WebDriverWait(driver, 15)
     li_text = wait.until(get_text_from_first_li)
     return li_text
 
@@ -71,7 +71,7 @@ def _logout_user_via_gui(driver):
 
     get_text_from_first_li(driver)
 
-    wait = WebDriverWait(driver, 30)
+    wait = WebDriverWait(driver, 15)
     li_text = wait.until(get_text_from_first_li)
     return li_text
 
