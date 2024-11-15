@@ -1,9 +1,7 @@
-import os
 import json
 import base64
 import psycopg2
 import requests
-from contextlib import closing
 
 BASE_URL = "http://localhost:5000/api"
 USERNAME = 'simulator'
