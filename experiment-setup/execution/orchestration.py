@@ -43,15 +43,16 @@ def clean_database():
         print(f"Database cleaning failed: {e}")
         return False 
 
-async def manage_server_docker_service(host, docker_compose_dir):
+async def manage_server_docker_service(host, docker_compose_file):
+    print(host, docker_compose_file, SSH_USER, SSH_PASS)
     try:
-        async with await asyncssh.connect(host, username=SSH_USER, password=SSH_PASS) as conn:
+        async with await asyncssh.connect(host, username=SSH_USER, password=SSH_PASS, known_hosts=None) as conn:
 
-            _ = await conn.run("docker-compose stop", check=True)
+            _ = await conn.run("[[ $(docker ps -a -q) ]] && docker stop $(docker ps -a -q) || echo 'No containers to stop'", check=True)
             print("Container stopped.", flush=True)
 
-            _ = await conn.run(f"cd {docker_compose_dir} && docker-compose up -d", check=True)
-            print(f"Docker service {docker_compose_dir} started successfully...", flush=True)
+            _ = await conn.run(f"docker compose -f {docker_compose_file} up -d", check=True)
+            print(f"Docker service {docker_compose_file} started successfully...", flush=True)
 
             return True 
     except Exception as e:
