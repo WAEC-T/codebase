@@ -168,9 +168,12 @@ jobs:
           - go-gin
           - go-gorilla
     steps:
-      - name: Proceed if Tests Succeeded
-        if: ${{ needs.run-all-tests.result == 'success' || needs.run-service-tests.result == 'success' }}
-        run: echo "Deploying services  ${{ matrix.service }}."
+      - name: Check if Tests Succeeded
+        run: |
+          if [[ "${{ needs.run-all-tests.result }}" != "success" && "${{ needs.run-service-tests.result }}" != "success" ]]; then
+            echo "Tests did not succeed. Exiting the job."
+            exit 1
+          fi
 
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -245,7 +248,7 @@ jobs:
           COMMIT_SHA=$(git rev-parse --short HEAD)
           TIMESTAMP=$(date +%Y%m%d%H%M)
 
-          docker buildx build --platform linux/arm64 linux/amd64 \
+          docker buildx build --platform linux/arm64, linux/amd64 \
             -t ${IMAGE_NAME}:latest \
             -t ${IMAGE_NAME}:commit-sha-${COMMIT_SHA}-${TIMESTAMP} \
             --push .
