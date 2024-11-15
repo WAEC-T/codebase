@@ -130,26 +130,21 @@ jobs:
             echo "No changes detected for ${{ matrix.service }}; skipping tests."
           fi
 
-      - name: Set Up Environment
-        uses: ./.github/workflows/set-configuration.yml@main
-        with:
-          venv-requirements: 'tests/requirements.txt'
-
       - name: Set up environment and run tests if service changed
         if: ${{ steps.service-check.outputs.service_changed == 'true' }}
         run: |
-#          # Set up environment
-#          sudo apt-get update
-#          sudo apt-get install -y make python3-pip python3-venv
-#          sudo curl -L "https://github.com/docker/compose/releases/download/v2.27.1/docker-compose-linux-x86_64" -o /usr/local/bin/docker-compose
-#          sudo chmod +x /usr/local/bin/docker-compose
-#          sudo ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
-#          docker-compose version
-#
-#          # Set up Python virtual environment
-#          python3 -m venv venv
-#          ./venv/bin/pip install --upgrade pip
-#          ./venv/bin/pip install --no-cache-dir -r tests/requirements.txt
+          # Set up environment
+          sudo apt-get update
+          sudo apt-get install -y make python3-pip python3-venv
+          sudo curl -L "https://github.com/docker/compose/releases/download/v2.27.1/docker-compose-linux-x86_64" -o /usr/local/bin/docker-compose
+          sudo chmod +x /usr/local/bin/docker-compose
+          sudo ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
+          docker-compose version
+
+          # Set up Python virtual environment
+          python3 -m venv venv
+          ./venv/bin/pip install --upgrade pip
+          ./venv/bin/pip install --no-cache-dir -r tests/requirements.txt
 
           # Run service-specific tests
           source ./venv/bin/activate
