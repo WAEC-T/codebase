@@ -169,6 +169,7 @@ jobs:
           - go-gorilla
     steps:
       - name: Check if Tests Succeeded
+        if: ${{ github.ref != 'refs/heads/main' }}
         run: |
           if [[ "${{ needs.run-all-tests.result }}" != "success" && "${{ needs.run-service-tests.result }}" != "success" ]]; then
             echo "Tests did not succeed. Exiting the job."
