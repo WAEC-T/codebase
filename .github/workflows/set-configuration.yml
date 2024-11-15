@@ -1,5 +1,6 @@
 name: Set Environment Configuration
-
+# SH: I think we can reuse this when merged in main - we can use this to set up the environment for the tests
+# SH: Didn't work when trying to call it in this branch
 on:
   workflow_call:
     inputs:
