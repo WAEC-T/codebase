@@ -5,7 +5,7 @@ import psycopg2
 from dotenv import load_dotenv
 import os
 
-load_dotenv("../../../.env.prod")
+load_dotenv("../../.env.prod")
 DATABASE_URL = os.environ.get("DATABASE_URL")
 SSH_USER=os.environ.get("SSH_USER")
 SSH_PASS=os.environ.get("SSH_PASS")
@@ -14,10 +14,17 @@ async def get_async(url):
     print(f"Starting scenario on {url}...", flush=True)
     timeout = httpx.Timeout(10.0, read=None)
     async with httpx.AsyncClient() as client:
-        return await client.get(url, timeout=timeout)
+        try:
+            response = await client.get(url, timeout=timeout)
+            return response
+        except Exception as e:
+            print(f"Error with {url}: {e}", flush=True)
+        finally:
+            print(f"Finished scenario on {url}.", flush=True)
 
 async def trigger_clients(clients: list[str]):
     results = await asyncio.gather(*map(get_async, clients))
+    print("All clients finished execution...", flush=True)
     return results
 
 def clean_database():
@@ -27,6 +34,9 @@ def clean_database():
                 cur.execute("TRUNCATE TABLE users CASCADE;")
                 cur.execute("TRUNCATE TABLE messages CASCADE;")
                 cur.execute("TRUNCATE TABLE followers CASCADE;")
+                with open('dump.sql', 'r') as f:
+                    sql_commands = f.read()
+                    cur.execute(sql_commands)
                 conn.commit()
         return True
     except Exception as e:
