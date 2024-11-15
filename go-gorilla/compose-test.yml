@@ -5,7 +5,7 @@ services:
       dockerfile: Dockerfile
     container_name: go-gorilla
     env_file:
-      - ../.env.test
+      - ../.env.local
     ports:
       - "5000:5000"
     networks:
