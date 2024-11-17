@@ -27,17 +27,18 @@ async def trigger_clients(clients: list[str]):
     print("All clients finished execution...", flush=True)
     return results
 
-def clean_database():
+def clean_database(with_dump: bool):
     try:
         with psycopg2.connect(DATABASE_URL) as conn:
             with conn.cursor() as cur:
                 cur.execute("TRUNCATE TABLE users CASCADE;")
                 cur.execute("TRUNCATE TABLE messages CASCADE;")
                 cur.execute("TRUNCATE TABLE followers CASCADE;")
-                with open('dump.sql', 'r') as f:
-                    sql_commands = f.read()
-                    cur.execute(sql_commands)
-                conn.commit()
+                if(with_dump):
+                    with open('dump.sql', 'r') as f:
+                        sql_commands = f.read()
+                        cur.execute(sql_commands)
+                    conn.commit()
         return True
     except Exception as e:
         print(f"Database cleaning failed: {e}")

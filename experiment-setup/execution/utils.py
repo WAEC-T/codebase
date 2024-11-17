@@ -6,3 +6,6 @@ RESET = '\033[0m'
 def print_random_color(string):
     random_color = random.choice(TERMINAL_COLORS)
     print(f"{random_color}{string}{RESET}", flush=True)
+
+def print_info_call(scenario, service, endpoint, iter_num):
+    print(f"Starting {scenario} sequence for service {service} - Call: {endpoint} with {iter_num} requests")

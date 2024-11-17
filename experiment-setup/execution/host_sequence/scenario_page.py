@@ -1,12 +1,10 @@
 import requests
 import time
 import pandas as pd
-from const_data import register_data, login_data, message_data
-from utils import clean_database, print_info_call
+from host_sequence.const_data import register_data_dummie, login_data_dummie, message_data
+from utils import print_info_call
 
-import sys
-
-BASE_URL = "http://localhost:5000"
+BASE_URL = "http://10.7.7.144:5000"
 BASE_DELAY = 1.8
 ITER_NUM = 20  # iteration number for each endpoint call has to be <= 400
 
@@ -22,13 +20,13 @@ def request_endpoint(path, method="get", data=None, user_session=None):
     response = (user_session or session).request(method=method, url=url, data=data)
     end = time.time()
     print(f"Request to {url:<50} | Status: {response.status_code:<3}  | start: {start:<20.6f} | end: {end:<20.6f}")
-    return {"endpoint": path, "response": response.status_code, "text": response.text, "start": start, "end": end,
+    return {"endpoint": path, "response": response.status_code, "start": start, "end": end,
             "delta": end - start}
 
 
 def sequential_interval_scenario(service, start, iter):
     # set main user
-    main_user = register_data[0]["username"]
+    main_user = register_data_dummie(0)["username"]
 
     # 1. Access Public Timeline
     print_info_call("Page", service, "Public Timeline", ITER_NUM)
@@ -38,7 +36,8 @@ def sequential_interval_scenario(service, start, iter):
     # 2. Register all 400 users
     print_info_call("Page", service, "Register", ITER_NUM)
     register_response = []
-    for user in register_data[:ITER_NUM]:
+    for i in range(ITER_NUM):
+        user = register_data_dummie(i)
         response = request_endpoint("/register", method="post", data=user)
         register_response.append(response)
         # Create a session for each user after registration
@@ -48,7 +47,8 @@ def sequential_interval_scenario(service, start, iter):
     # 3. Login with all 400 users
     print_info_call("Page", service, "Login", ITER_NUM)
     login_response = []
-    for user in login_data[:ITER_NUM][::-1]:
+    for i in range(ITER_NUM-1, -1, -1):
+        user = login_data_dummie(i)
         user_session = user_sessions[user["username"]]
         response = request_endpoint("/login", method="post", data=user, user_session=user_session)
         login_response.append(response)
@@ -58,7 +58,8 @@ def sequential_interval_scenario(service, start, iter):
     print_info_call("Page", service, "Follow", ITER_NUM)
     follow_response = []
     main_user_session = user_sessions[main_user]
-    for user in login_data[1:ITER_NUM]:  # Start from the second user to avoid self-following
+    for i in range(1, ITER_NUM):  # Start from the second user to avoid self-following
+        user = login_data_dummie(i)
         whom_username = user["username"]
         response = request_endpoint(f"/{whom_username}/follow", user_session=main_user_session)
         follow_response.append(response)
@@ -84,7 +85,8 @@ def sequential_interval_scenario(service, start, iter):
     # 8. Unfollow all users
     print_info_call("Page", service, "Unfollow", ITER_NUM)
     unfollow_response = []
-    for user in login_data[1:ITER_NUM]:
+    for i in range(ITER_NUM):
+        user = login_data_dummie(i)
         whom_username = user["username"]
         response = request_endpoint(f"/{whom_username}/unfollow", user_session=main_user_session)
         unfollow_response.append(response)
@@ -93,7 +95,8 @@ def sequential_interval_scenario(service, start, iter):
     # 9. Logout all users
     print_info_call("Page", service, "Logout", ITER_NUM)
     logout_response = []
-    for user in login_data[:ITER_NUM]:
+    for i in range(ITER_NUM):
+        user = login_data_dummie(i)
         user_session = user_sessions[user["username"]]
         response = request_endpoint("/logout", user_session=user_session)
         logout_response.append(response)
@@ -114,12 +117,7 @@ def sequential_interval_scenario(service, start, iter):
 
 
 def run_page_seq_scenario(service, start):
-    # Run the scenario only once
     data = [sequential_interval_scenario(service, start, 0)]
-
-    # Clean the database after the run
-    clean_database()
-
     df = pd.DataFrame(data, columns=[
         "ExperimentID",
         "PublicPageResponse",

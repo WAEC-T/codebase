@@ -53,10 +53,10 @@ def generate_output(otii_project, device):
         stats = recording.get_channel_statistics(device.id, channel, info['from'], info['to'])
         print_random_color(f"{variable}: Min={stats['min']}, Max={stats['max']}, Avg={stats['average']}")
 
-def save_sequential_time(dataframe_api, dataframe_page, recording_name, out_path):
+def save_sequential_time(dataframe_api, dataframe_page, recording_name, service_name, out_path):
     """Save sequential time data for API and Page as JSON files."""
-    api_path = Path(out_path, f"sequential_time_api_{recording_name}.json")
-    page_path = Path(out_path, f"sequential_time_page_{recording_name}.json")
+    api_path = Path(out_path, f"{service_name}-sequential-time-api-{recording_name}.json")
+    page_path = Path(out_path, f"sequential-time-page-{recording_name}.json")
 
     dataframe_api.to_json(api_path, orient="records", lines=True)
     dataframe_page.to_json(page_path, orient="records", lines=True)
