@@ -1,5 +1,4 @@
 use askama_actix::Template;
-use chrono::{DateTime, Utc};
 use serde::Deserialize;
 
 #[derive(Clone)]
@@ -13,7 +12,7 @@ pub struct UserTemplate {
 pub struct MessageTemplate {
     pub text: String,
     pub username: String,
-    pub pub_date: DateTime<Utc>,
+    pub pub_date: String,
     pub gravatar_url: String,
 }
 

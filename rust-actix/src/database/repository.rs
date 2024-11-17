@@ -1,4 +1,3 @@
-use std::env;
 use crate::database::models::*;
 use crate::database::schema;
 use chrono::DateTime;
@@ -6,6 +5,7 @@ use chrono::Utc;
 use diesel::pg::PgConnection;
 use diesel::sql_types::Integer;
 use diesel::{prelude::*, sql_query, Connection as Conn};
+use std::env;
 use std::error::Error;
 
 fn load_db_url_from_env() -> Result<String, Box<dyn Error>> {

@@ -1,8 +1,15 @@
-use crate::{api::model::*, database::repository::{create_msg, create_user, establish_connection, follow, get_followers, get_latest, get_public_messages, get_timeline, get_user_by_name, set_latest, unfollow}, utils::datetime::convert_naive_to_utc};
+use crate::{
+    api::model::*,
+    database::repository::{
+        create_msg, create_user, establish_connection, follow, get_followers, get_latest,
+        get_public_messages, get_timeline, get_user_by_name, set_latest, unfollow,
+    },
+    utils::datetime::convert_naive_to_utc,
+};
 use actix_web::{web, HttpResponse};
-use chrono:: Utc;
-use pwhash::bcrypt;
+use chrono::Utc;
 use diesel::PgConnection;
+use pwhash::bcrypt;
 
 fn get_user_id(username: &str) -> Option<i32> {
     let conn = &mut establish_connection();
@@ -50,7 +57,10 @@ pub async fn register_new_user(info: RegisterInfo, query: web::Query<Latest>) ->
     }
 }
 
-pub async fn list_feed_messages(amount: web::Query<MessageAmount>, query: web::Query<Latest>) -> HttpResponse {
+pub async fn list_feed_messages(
+    amount: web::Query<MessageAmount>,
+    query: web::Query<Latest>,
+) -> HttpResponse {
     let conn = &mut establish_connection();
     update_latest(conn, query);
     let messages: Vec<Message> = get_public_messages(conn, amount.no)
@@ -65,7 +75,11 @@ pub async fn list_feed_messages(amount: web::Query<MessageAmount>, query: web::Q
     HttpResponse::Ok().json(messages)
 }
 
-pub async fn list_user_messages(username: String, amount: web::Query<MessageAmount>, query: web::Query<Latest>) -> HttpResponse {
+pub async fn list_user_messages(
+    username: String,
+    amount: web::Query<MessageAmount>,
+    query: web::Query<Latest>,
+) -> HttpResponse {
     let conn = &mut establish_connection();
     update_latest(conn, query);
 
@@ -75,7 +89,7 @@ pub async fn list_user_messages(username: String, amount: web::Query<MessageAmou
             .map(|(msg, user)| Message {
                 content: msg.text,
                 user: user.username,
-                pub_date: convert_naive_to_utc(msg.pub_date)
+                pub_date: convert_naive_to_utc(msg.pub_date),
             })
             .collect();
 
@@ -85,7 +99,11 @@ pub async fn list_user_messages(username: String, amount: web::Query<MessageAmou
     }
 }
 
-pub async fn create_user_message(username: String, msg: MessageContent, query: web::Query<Latest>) -> HttpResponse {
+pub async fn create_user_message(
+    username: String,
+    msg: MessageContent,
+    query: web::Query<Latest>,
+) -> HttpResponse {
     let conn = &mut establish_connection();
     update_latest(conn, query);
 
@@ -97,7 +115,11 @@ pub async fn create_user_message(username: String, msg: MessageContent, query: w
     }
 }
 
-pub async fn list_user_followers(username: String, amount: web::Query<MessageAmount>, query: web::Query<Latest>) -> HttpResponse {
+pub async fn list_user_followers(
+    username: String,
+    amount: web::Query<MessageAmount>,
+    query: web::Query<Latest>,
+) -> HttpResponse {
     let conn = &mut establish_connection();
     update_latest(conn, query);
 
@@ -110,7 +132,11 @@ pub async fn list_user_followers(username: String, amount: web::Query<MessageAmo
     }
 }
 
-pub async fn update_user_followers(username: String, follow_param: FollowParam, query: web::Query<Latest>) -> HttpResponse {
+pub async fn update_user_followers(
+    username: String,
+    follow_param: FollowParam,
+    query: web::Query<Latest>,
+) -> HttpResponse {
     let conn = &mut establish_connection();
     update_latest(conn, query);
 
