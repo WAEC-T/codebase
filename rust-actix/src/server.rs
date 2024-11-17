@@ -13,7 +13,6 @@ use actix_web::cookie::Key;
 pub async fn start() -> std::io::Result<()> {
     HttpServer::new(move || {
         App::new()
-            .wrap(Logger::default())
             .wrap(AuthMiddleware)
             .service(api_services())
             .wrap(
