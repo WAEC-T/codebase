@@ -1,19 +1,15 @@
 services:
-  web:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: go-gorilla
-    env_file:
-      - ../.env.local
+  go-gorilla:
+    image: waect/go-gorilla:latest
+    build: .
     ports:
       - "5000:5000"
+    env_file:
+      - ../.env.local
     networks:
       - waect-network
 
 networks:
   waect-network:
-    name: waect-network
-    driver: bridge
     external: true
   

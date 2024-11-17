@@ -23,6 +23,8 @@ DATABASE_URL = "postgresql://user:pass@localhost:5432/waect"
 def get_text_from_first_li(driver):
     try:
         flashes_ul = driver.find_element(By.CLASS_NAME, "flashes")
+        print("flashes_ul", flashes_ul)
+
         li_elements = flashes_ul.find_elements(By.TAG_NAME, "li")
         if li_elements and li_elements[0].text.strip():
             return li_elements[0].text.strip()
@@ -32,7 +34,7 @@ def get_text_from_first_li(driver):
 def _register_user_via_gui(driver, data):
     register_url = "http://localhost:5000/register"
     driver.get(register_url)
-    
+    print(driver.page_source)
     wait = WebDriverWait(driver, 15)
     input_fields = driver.find_elements(By.TAG_NAME, "input")
 

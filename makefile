@@ -19,7 +19,7 @@ RESET = \033[0m
 .PHONY: start-local-db
 start-local-db:
 	@echo "$(BLUE)Starting the database container...$(RESET)"
-	@docker-compose -f $(LOCAL_DATABASE) up -d > /dev/null 2>&1
+	@docker-compose -f $(LOCAL_DATABASE) up -d
 
 .PHONY: stop-local-db
 stop-local-db:
