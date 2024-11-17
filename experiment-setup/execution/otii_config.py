@@ -16,7 +16,7 @@ def configure_multimeter(otii_app):
 
     device.set_main_voltage(5.0)
     device.set_exp_voltage(4.9)
-    device.set_max_current(2.0)
+    device.set_max_current(2.5)
 
     project = otii_app.get_active_project()
     return project, device

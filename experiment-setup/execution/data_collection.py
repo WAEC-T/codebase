@@ -61,7 +61,7 @@ def save_sequential_time(dataframe_api, dataframe_page, recording_name, out_path
     dataframe_api.to_json(api_path, orient="records", lines=True)
     dataframe_page.to_json(page_path, orient="records", lines=True)
 
-def save_data(dataframe, recording_name, out_path):
+def save_data(dataframe, recording_name, out_path, scenario_name, service_name):
     """Save the collected data as a CSV file."""
-    csv_path = Path(out_path, f"{recording_name}.csv")
+    csv_path = Path(out_path, f"{service_name}-{scenario_name}-{recording_name}.csv")
     dataframe.to_csv(csv_path, index=False)

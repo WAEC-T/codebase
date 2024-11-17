@@ -12,13 +12,15 @@ from orchestration import clean_database, manage_server_docker_service, trigger_
 
 # Check the static addresses when preparing the setup!
 SERVER_URL = "http://10.7.7.144:5000"
-CLIENT_1_URL = "http://10.7.7.198:5001/trigger"
-CLIENT_2_URL = "http://10.7.7.177:5001/trigger"
+CLIENT_1_URL = "http://10.7.7.199:5001/trigger"
+CLIENT_2_URL = "http://10.7.7.178:5001/trigger"
 CLIENT_3_URL = "http://10.7.7.145:5001/trigger"
 
 BASE_COMPOSE_FILES_LOCATION = '/media/mmcblk0p2/setup/compose_files/'
+COOLDOWN = 30
 
-SERVICES = {"python-flask": BASE_COMPOSE_FILES_LOCATION + 'python-flask-compose-prod.yml'}
+SERVICES = {"rust-actix": BASE_COMPOSE_FILES_LOCATION + 'rust-actix-compose-prod.yml'}
+            # "python-flask": BASE_COMPOSE_FILES_LOCATION + 'python-flask-compose-prod.yml'}
 
 async def main(otii_project, device, out_path, service, run_mode="berries"):
     client_urls = [CLIENT_1_URL, CLIENT_2_URL, CLIENT_3_URL]
@@ -40,10 +42,11 @@ async def main(otii_project, device, out_path, service, run_mode="berries"):
         print(f"Scenario took {t_delta}", flush=True)
         print(f"Done with scenario {run_mode} for service {service}...", flush=True)
         df, recording_name = collect_data(otii_project, device)
-        save_data(df, recording_name, out_path)
+        save_data(df, recording_name, out_path, run_mode, service)
         # if time_seq_api_df and time_seq_page_df:
         #     save_sequential_time(time_seq_api_df, time_seq_page_df, recording_name, out_path)
         generate_output(otii_project, device)
+        
 
 async def main_async(out_path):
     otii_project, device = configure_multimeter(create_otii_app())

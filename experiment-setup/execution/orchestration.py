@@ -47,12 +47,18 @@ async def manage_server_docker_service(host, docker_compose_file):
     print(host, docker_compose_file, SSH_USER, SSH_PASS)
     try:
         async with await asyncssh.connect(host, username=SSH_USER, password=SSH_PASS, known_hosts=None) as conn:
-
-            _ = await conn.run("[[ $(docker ps -a -q) ]] && docker stop $(docker ps -a -q) || echo 'No containers to stop'", check=True)
-            print("Container stopped.", flush=True)
-
-            _ = await conn.run(f"docker compose -f {docker_compose_file} up -d", check=True)
-            print(f"Docker service {docker_compose_file} started successfully...", flush=True)
+            stop_cmd = "docker ps -a -q | xargs -r docker stop"
+            up_cmd = f"docker-compose -f {docker_compose_file} up -d"
+            result = await conn.run(stop_cmd, check=False)
+            if result.returncode == 0: 
+                print("Containers stopped successfully.", flush=True)
+            else:
+                print(f"Failed to stop containers. Error: {result.stderr}", flush=True)
+            result = await conn.run(up_cmd, check=False)
+            if result.returncode == 0:
+                print(f"Docker service {docker_compose_file} started successfully...", flush=True)
+            else:
+                print(f"Failed to start Docker Compose. Error: {result.stderr}", flush=True)
 
             return True 
     except Exception as e:
