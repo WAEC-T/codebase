@@ -7,7 +7,6 @@ else
     exit 1
 fi
 
-# Run the Python script
 if [ -f "/media/mmcblk0p2/scenario.py" ]; then
     python "/media/mmcblk0p2/scenario.py" >> /media/mmcblk0p2/scenario.log 2>&1 &
 else
