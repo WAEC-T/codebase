@@ -103,10 +103,11 @@ def unfollow_user(username):
     existing_follower = Follower.query.filter_by(who_id=g.user.user_id,
                                                  whom_id=whom.user_id).first()
     if existing_follower is None:
-        flash(f'You are no longer following "{username}"')
+        flash(f'You are not following "{username}"')
     else:
         db.session.delete(existing_follower)
         db.session.commit()
+        flash(f'You are no longer following "{username}"')
     return redirect(url_for('main.user_timeline', username=username))
 
 
