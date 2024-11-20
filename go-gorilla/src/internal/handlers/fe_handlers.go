@@ -33,27 +33,26 @@ type Data struct {
 }
 
 // GetUser retrieves the user from the session.
-func GetUser(r *http.Request) (any, string, error) {
+func GetUser(r *http.Request) (string, string, error) {
 	session, err := GetSession(r)
 	if err != nil {
-		return nil, "", err
+		return "", "", err
 	}
 
 	userID, ok := session.Values["user_id"]
 	if !ok {
-		return nil, "", fmt.Errorf("no user in the session")
+		return "", "", fmt.Errorf("no user in the session")
 	}
-
 	// Perform type assertion for userID
 	userIDStr := strconv.Itoa(userID.(int))
 	if !ok {
-		return nil, "", fmt.Errorf("user_id is not of type string")
+		return "", "", fmt.Errorf("user_id is not of type string")
 	}
 
 	// Query the user from the database
 	user, err := db.GetUserNameByUserID(userIDStr) // Assuming queryUserByID is defined
 	if err != nil {
-		return nil, "", err
+		return "", "", err
 	}
 
 	return user, userIDStr, nil
@@ -79,7 +78,6 @@ func GetFlash(w http.ResponseWriter, r *http.Request) []any {
 	}
 
 	flashes := session.Flashes()
-	log.Println("Retrieved flash messages:", flashes) // Debug
 	session.Save(r, w)
 	return flashes
 }
@@ -104,8 +102,8 @@ func Reload(w http.ResponseWriter, r *http.Request, message string, template str
 func Public_timeline(w http.ResponseWriter, r *http.Request) {
 	user, userID, err := GetUser(r)
 	if err != nil {
-		// Log the error and handle the user not being logged in
-		fmt.Println("public timeline: error retrieving user:", userID, err)
+		fmt.Println(userID)
+		return
 	}
 
 	// Fetch public messages
@@ -115,6 +113,8 @@ func Public_timeline(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
+
+	//following, err := db.GetFollowing(userID, 30) //TODO: LIMIT OF FOLLOWERS WE QUERY?
 
 	// Prepare data for rendering
 	flash := GetFlash(w, r)
@@ -316,7 +316,6 @@ func Follow_user(w http.ResponseWriter, r *http.Request) {
 	}
 	vars := mux.Vars(r)
 	username := vars["username"]
-	println("Now following " + username)
 
 	profileUser, err := db.GetUserByUsername(username)
 	profileUserID := fmt.Sprintf("%v", profileUser.UserID)
@@ -329,7 +328,7 @@ func Follow_user(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("Error when trying to insert data into the database")
 		return
 	}
-	message := fmt.Sprintf("You are now following &#34;%s&#34;", username)
+	message := fmt.Sprintf("You are now following %s", username)
 	SetFlash(w, r, message)
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
@@ -343,7 +342,6 @@ func Unfollow_user(w http.ResponseWriter, r *http.Request) {
 	}
 	vars := mux.Vars(r)
 	username := vars["username"]
-	println("displaying username for " + username)
 
 	profileUser, err := db.GetUserByUsername(username)
 	profileUserID := fmt.Sprintf("%v", profileUser.UserID)
@@ -356,7 +354,7 @@ func Unfollow_user(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("Error when trying to delete data from database")
 		return
 	}
-	message := fmt.Sprintf("You are no longer following &#34;%s&#34;", username)
+	message := fmt.Sprintf("You are no longer following %s", username)
 	SetFlash(w, r, message)
 	http.Redirect(w, r, "/", http.StatusFound)
 }
@@ -369,11 +367,9 @@ func User_timeline(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
 		return
 	}
-	vars := mux.Vars(r)
-	username := vars["username"]
 
 	following, err := db.GetFollowing(user_id, 30) //TODO: LIMIT OF FOLLOWERS WE QUERY?
-	profile_user, err := db.GetUserByUsername(username)
+	profile_user, err := db.GetUserByUsername(user)
 	if err != nil || helpers.IsNil(profile_user) {
 		SetFlash(w, r, "The user does not exist")
 		http.Redirect(w, r, "/", http.StatusSeeOther)
