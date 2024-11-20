@@ -46,8 +46,7 @@ async def main(otii_project, device, out_path, service, run_mode):
         print(f"Done with scenario {run_mode} for service {service}...", flush=True)
         df, recording_name = collect_data(otii_project, device)
         if time_seq_api_df is not None and time_seq_page_df is not None:
-            save_data(time_seq_api_df, recording_name, out_path, run_mode, service)
-            save_data(time_seq_page_df, recording_name, out_path, run_mode, service)
+            save_sequential_time(time_seq_api_df, time_seq_page_df, recording_name, service, out_path)
         save_data(df, recording_name, out_path, run_mode, service)
         generate_output(otii_project, device)
         

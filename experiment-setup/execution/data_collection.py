@@ -55,11 +55,11 @@ def generate_output(otii_project, device):
 
 def save_sequential_time(dataframe_api, dataframe_page, recording_name, service_name, out_path):
     """Save sequential time data for API and Page as JSON files."""
-    api_path = Path(out_path, f"{service_name}-sequential-time-api-{recording_name}.json")
-    page_path = Path(out_path, f"sequential-time-page-{recording_name}.json")
-
-    dataframe_api.to_json(api_path, orient="records", lines=True)
-    dataframe_page.to_json(page_path, orient="records", lines=True)
+    api_path = Path(out_path, f"{service_name}-sequential-time-api-{recording_name}.csv")
+    page_path = Path(out_path, f"sequential-time-page-{recording_name}.csv")
+    
+    dataframe_api.to_csv(api_path, index=False)
+    dataframe_page.to_csv(page_path, index=False)
 
 def save_data(dataframe, recording_name, out_path, scenario_name, service_name):
     """Save the collected data as a CSV file."""
