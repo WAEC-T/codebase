@@ -38,7 +38,7 @@ async def main(otii_project, device, out_path, service, run_mode):
             print(result_clients_trigger, flush=True)
         elif run_mode == "sequential":
             time_seq_api_df = run_api_seq_scenario(service, start_time)
-            reset = clean_database(False)
+            clean_database(False)
             time_seq_page_df = run_page_seq_scenario(service, start_time)
         otii_project.stop_recording()
         t_delta = datetime.now() - start_time
@@ -46,7 +46,8 @@ async def main(otii_project, device, out_path, service, run_mode):
         print(f"Done with scenario {run_mode} for service {service}...", flush=True)
         df, recording_name = collect_data(otii_project, device)
         if time_seq_api_df is not None and time_seq_page_df is not None:
-            save_sequential_time(time_seq_api_df, time_seq_page_df, recording_name, service, out_path)
+            save_data(time_seq_api_df, recording_name, out_path, run_mode, service)
+            save_data(time_seq_page_df, recording_name, out_path, run_mode, service)
         save_data(df, recording_name, out_path, run_mode, service)
         generate_output(otii_project, device)
         
