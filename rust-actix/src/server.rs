@@ -2,6 +2,7 @@ use actix_identity::config::LogoutBehaviour;
 use actix_identity::IdentityMiddleware;
 use actix_web::middleware::Logger;
 use actix_web::{App, HttpServer};
+use waect_rust::api::middleware::AuthMiddleware;
 use waect_rust::api::services::api_services;
 use waect_rust::frontend::services::page_services;
 use actix_files as fs;
@@ -12,7 +13,7 @@ use actix_web::cookie::Key;
 pub async fn start() -> std::io::Result<()> {
     HttpServer::new(move || {
         App::new()
-            .wrap(Logger::default())
+            .wrap(AuthMiddleware)
             .service(api_services())
             .wrap(
                 IdentityMiddleware::builder()
@@ -26,7 +27,6 @@ pub async fn start() -> std::io::Result<()> {
                     .cookie_http_only(false)
                     .build(),
             )
-            .wrap(Logger::default())
             .service(page_services())
     })
     .bind(("0.0.0.0", 5000))?
