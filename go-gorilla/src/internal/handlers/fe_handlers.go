@@ -331,7 +331,7 @@ func Follow_user(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("Error when trying to insert data into the database")
 		return
 	}
-	message := fmt.Sprintf("You are now following &#34;%s&#34;", username)
+	message := fmt.Sprintf("You are now following %s", username)
 	SetFlash(w, r, message)
 	http.Redirect(w, r, "/public", http.StatusSeeOther)
 }
@@ -358,7 +358,7 @@ func Unfollow_user(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("Error when trying to delete data from database")
 		return
 	}
-	message := fmt.Sprintf("You are no longer following &#34;%s&#34;", username)
+	message := fmt.Sprintf("You are no longer following %s", username)
 	SetFlash(w, r, message)
 	http.Redirect(w, r, "/public", http.StatusFound)
 }
