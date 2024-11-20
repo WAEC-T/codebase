@@ -147,7 +147,7 @@ def test_user1_follow_user2_flash(user1_session):
     """
     user2_session = requests.Session()
     register_user("user2", "user2@waect.com", "waect", user2_session)
-    expected_flash = f'You are now following &#34;user2&#34;'
+    expected_flash = f'You are now following user2'
     response = follow_user("user2", user1_session)
     assert response.status_code == 200, "follow failed"
     assert expected_flash in response.text
@@ -156,7 +156,7 @@ def test_user1_unfollow_user2_flash(user1_session):
     """
     Test flash message for user1 unfollowing user2.
     """
-    expected_flash = 'You are no longer following &#34;user2&#34;'
+    expected_flash = 'You are no longer following user2'
     response = unfollow_user("user2", user1_session)
     assert response.status_code == 200, "unfollow failed"
     assert expected_flash in response.text

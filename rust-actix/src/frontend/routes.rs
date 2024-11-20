@@ -195,7 +195,7 @@ async fn follow_user(
             _target_id,
         );
 
-        let message = format!("You are now following \"{}\"", _target_username);
+        let message = format!("You are now following {}", _target_username);
         add_flash(session, message.as_str());
     } else {
         return HttpResponse::Found()
@@ -223,7 +223,7 @@ async fn unfollow_user(
             _current_user.id().unwrap().parse::<i32>().unwrap(),
             _target_id,
         );
-        let message = format!("You are no longer following \"{}\"", _target_username);
+        let message = format!("You are no longer following {}", _target_username);
         add_flash(session, message.as_str());
     } else {
         return HttpResponse::Found()

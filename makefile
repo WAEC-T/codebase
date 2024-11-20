@@ -70,7 +70,7 @@ test-all: start-local-db
 	@$(MAKE) -s stop-local-db
 	@echo "$(GREEN)All services tested!$(RESET)"
 
-.PHONY: test-services
+.PHONY: test-service
 test-service: start-local-db
 	@set -e; \
 	services=$$(echo "$(MAKECMDGOALS)" | tr ' ' '\n' | grep -v '^test-service$$'); \
