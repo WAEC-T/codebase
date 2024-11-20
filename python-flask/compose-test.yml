@@ -1,6 +1,6 @@
 services:
   python-flask:
-    image: waect/python-flask:latest
+    image: waect/python-flask
     build: .
     ports:
       - "5000:5000"

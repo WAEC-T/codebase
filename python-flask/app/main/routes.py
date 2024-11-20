@@ -84,8 +84,6 @@ def follow_user(username):
         db.session.add(new_follower)
         db.session.commit()
         flash(f'You are now following "{username}"')
-    else:
-        flash(f'You are already following "{username}"')
 
     return redirect(url_for('main.user_timeline', username=username))
 
@@ -103,10 +101,11 @@ def unfollow_user(username):
     existing_follower = Follower.query.filter_by(who_id=g.user.user_id,
                                                  whom_id=whom.user_id).first()
     if existing_follower is None:
-        flash(f'You are no longer following "{username}"')
+        abort(404)
     else:
         db.session.delete(existing_follower)
         db.session.commit()
+        flash(f'You are no longer following "{username}"')
     return redirect(url_for('main.user_timeline', username=username))
 
 
