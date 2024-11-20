@@ -35,9 +35,4 @@ diesel::table! {
 
 diesel::joinable!(messages -> users (author_id));
 
-diesel::allow_tables_to_appear_in_same_query!(
-    followers,
-    latest,
-    messages,
-    users,
-);
+diesel::allow_tables_to_appear_in_same_query!(followers, latest, messages, users,);

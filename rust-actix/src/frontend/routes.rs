@@ -1,17 +1,26 @@
-use actix_identity::Identity;
-use actix_session::Session;
-use crate::database::repository::{create_msg, create_user, establish_connection, follow, get_passwd_hash, get_public_messages, get_timeline, get_user_by_id, get_user_by_name, get_user_timeline, is_following, unfollow};
 use crate::database::models::{Messages, Users};
+use crate::database::repository::{
+    create_msg, create_user, establish_connection, follow, get_passwd_hash, get_public_messages,
+    get_timeline, get_user_by_id, get_user_by_name, get_user_timeline, is_following, unfollow,
+};
 use crate::frontend::flash_messages::*;
 use crate::frontend::template_structs::*;
-use crate::utils::datetime::convert_naive_to_utc;
-use actix_web::{http::{header, StatusCode}, web::{self, Redirect}, get, post, HttpMessage, HttpRequest, HttpResponse, Responder};
+use crate::utils::datetime::format_datetime_to_message_string;
+use actix_identity::Identity;
+use actix_session::Session;
+use actix_web::{
+    get,
+    http::{header, StatusCode},
+    post,
+    web::{self, Redirect},
+    HttpMessage, HttpRequest, HttpResponse, Responder,
+};
 use askama_actix::Template;
 use chrono::Utc;
 use md5::{Digest, Md5};
 use pwhash::bcrypt;
 
-const PAGE_MESSAGES_LIMIT:i32 = 30;
+const PAGE_MESSAGES_LIMIT: i32 = 30;
 
 fn get_user_id(username: &str) -> i32 {
     let diesel_conn = &mut establish_connection();
@@ -78,7 +87,7 @@ fn format_messages(messages: Vec<(Messages, Users)>) -> Vec<MessageTemplate> {
             text: msg.text,
             username: user.username,
             gravatar_url: gravatar_url(&user.email),
-            pub_date: convert_naive_to_utc(msg.pub_date),
+            pub_date: format_datetime_to_message_string(Some(msg.pub_date)),
         };
         messages_for_template.push(message)
     }
@@ -89,7 +98,8 @@ fn format_messages(messages: Vec<(Messages, Users)>) -> Vec<MessageTemplate> {
 async fn timeline(flash: Option<FlashMessages>, user: Option<Identity>) -> impl Responder {
     if let Some(user) = get_user(user) {
         let diesel_conn = &mut establish_connection();
-        let messages = format_messages(get_timeline(diesel_conn, user.user_id, PAGE_MESSAGES_LIMIT));
+        let messages =
+            format_messages(get_timeline(diesel_conn, user.user_id, PAGE_MESSAGES_LIMIT));
 
         let rendered = TimelineTemplate {
             messages,
@@ -146,7 +156,11 @@ async fn user_timeline(
         if let Some(user) = user.clone() {
             followed = is_following(conn, profile_user.user_id, user.user_id)
         }
-        let messages = format_messages(get_user_timeline(conn, profile_user.user_id, PAGE_MESSAGES_LIMIT));
+        let messages = format_messages(get_user_timeline(
+            conn,
+            profile_user.user_id,
+            PAGE_MESSAGES_LIMIT,
+        ));
         let rendered = TimelineTemplate {
             messages,
             request_endpoint: "user_timeline",
@@ -180,8 +194,8 @@ async fn follow_user(
             _current_user.id().unwrap().parse::<i32>().unwrap(),
             _target_id,
         );
-        let mut message = String::from("You are now following ");
-        message.push_str(&_target_username);
+
+        let message = format!("You are now following {}", _target_username);
         add_flash(session, message.as_str());
     } else {
         return HttpResponse::Found()
@@ -209,8 +223,7 @@ async fn unfollow_user(
             _current_user.id().unwrap().parse::<i32>().unwrap(),
             _target_id,
         );
-        let mut message = String::from("You are no longer following ");
-        message.push_str(&_target_username);
+        let message = format!("You are no longer following {}", _target_username);
         add_flash(session, message.as_str());
     } else {
         return HttpResponse::Found()

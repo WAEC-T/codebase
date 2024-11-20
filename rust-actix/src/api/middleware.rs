@@ -2,7 +2,8 @@ use std::future::{ready, Ready};
 
 use actix_web::{
     dev::{forward_ready, Service, ServiceRequest, ServiceResponse, Transform},
-    Error, http::header
+    http::header,
+    Error,
 };
 use futures_util::future::LocalBoxFuture;
 
@@ -41,14 +42,15 @@ where
     forward_ready!(service);
 
     fn call(&self, req: ServiceRequest) -> Self::Future {
-        if req.path().starts_with("/api") {
-            if req
-            .headers()
-            .get(header::AUTHORIZATION)
-            .map_or(true, |auth_header| auth_header != "Basic c2ltdWxhdG9yOnN1cGVyX3NhZmUh")
-            {
-                return Box::pin(async { Err(actix_web::error::ErrorUnauthorized("Not Authorized").into()) });
-            }
+        if req.path().starts_with("/api")
+            && req
+                .headers()
+                .get(header::AUTHORIZATION)
+                .map_or(true, |auth_header| {
+                    auth_header != "Basic c2ltdWxhdG9yOnN1cGVyX3NhZmUh"
+                })
+        {
+            return Box::pin(async { Err(actix_web::error::ErrorUnauthorized("Not Authorized")) });
         }
 
         let fut: <S as Service<ServiceRequest>>::Future = self.service.call(req);
@@ -58,5 +60,4 @@ where
             Ok(res)
         })
     }
-
 }

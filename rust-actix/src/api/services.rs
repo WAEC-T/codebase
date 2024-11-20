@@ -1,5 +1,5 @@
-use actix_web::{Scope, web};
 use crate::api::routes::*;
+use actix_web::{web, Scope};
 
 pub fn api_services() -> Scope {
     web::scope("/api")
@@ -9,5 +9,5 @@ pub fn api_services() -> Scope {
         .service(get_messages_per_user)
         .service(post_messages_per_user)
         .service(get_followers)
-        .service(post_followers)      
+        .service(post_followers)
 }
