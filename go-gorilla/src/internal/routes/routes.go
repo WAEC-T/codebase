@@ -59,7 +59,7 @@ func SetupRouting() template.FuncMap {
 
 func SetRouteHandlers(r *mux.Router) {
 	//UI
-	r.PathPrefix("/static/").Handler(http.StripPrefix("../static/", http.FileServer(http.Dir("static"))))
+	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 	r.HandleFunc("/public", handlers.Public_timeline)
 	r.HandleFunc("/register", handlers.Register)
 	r.HandleFunc("/login", handlers.Login)
