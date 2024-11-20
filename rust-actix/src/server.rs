@@ -1,18 +1,28 @@
+use std::num::NonZeroUsize;
+
+use actix_files as fs;
 use actix_identity::config::LogoutBehaviour;
 use actix_identity::IdentityMiddleware;
+use actix_session::{storage::CookieSessionStore, SessionMiddleware};
+use actix_web::cookie::Key;
 use actix_web::middleware::Logger;
 use actix_web::{App, HttpServer};
+use local_ip_address::local_ip;
 use waect_rust::api::middleware::AuthMiddleware;
 use waect_rust::api::services::api_services;
 use waect_rust::frontend::services::page_services;
-use actix_files as fs;
-use actix_session::{storage::CookieSessionStore, SessionMiddleware};
-use actix_web::cookie::Key;
 
-#[actix_web::main]
-pub async fn start() -> std::io::Result<()> {
+pub async fn start(port: u16) -> std::io::Result<()> {
+    let default_actix_threads = std::thread::available_parallelism().map_or(2, NonZeroUsize::get);
+    println!(
+        "Starting Rust-Actix server on -- {:?}:{} \nProbable amount of threads: {}",
+        local_ip().unwrap(),
+        port,
+        default_actix_threads
+    );
     HttpServer::new(move || {
         App::new()
+            .wrap(Logger::default())
             .wrap(AuthMiddleware)
             .service(api_services())
             .wrap(
@@ -29,7 +39,7 @@ pub async fn start() -> std::io::Result<()> {
             )
             .service(page_services())
     })
-    .bind(("0.0.0.0", 5000))?
+    .bind(("0.0.0.0", port))?
     .run()
     .await
 }
