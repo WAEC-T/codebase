@@ -121,6 +121,8 @@ def cleanup_db_after_tests():
     yield  # Let all tests execute
     clean_database()
 
+### Test Cases ########################################################################################################
+
 def test_register_flash(user1_session):
     """
     Test flash message for user registration.
@@ -146,15 +148,6 @@ def test_user1_follow_user2_flash(user1_session):
     user2_session = requests.Session()
     register_user("user2", "user2@waect.com", "waect", user2_session)
     expected_flash = f'You are now following &#34;user2&#34;'
-    response = follow_user("user2", user1_session)
-    assert response.status_code == 200, "follow failed"
-    assert expected_flash in response.text
-
-def test_user1_follow_user2_already_followed_flash(user1_session):
-    """
-    Test flash message for user1 following user2 when already followed.
-    """
-    expected_flash = 'You are already following &#34;user2&#34;'
     response = follow_user("user2", user1_session)
     assert response.status_code == 200, "follow failed"
     assert expected_flash in response.text

@@ -84,8 +84,6 @@ def follow_user(username):
         db.session.add(new_follower)
         db.session.commit()
         flash(f'You are now following "{username}"')
-    else:
-        flash(f'You are already following "{username}"')
 
     return redirect(url_for('main.user_timeline', username=username))
 
