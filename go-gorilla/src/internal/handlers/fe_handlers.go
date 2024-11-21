@@ -79,14 +79,12 @@ func GetFlash(w http.ResponseWriter, r *http.Request) []any {
 	}
 
 	flashes := session.Flashes()
-	log.Println("Retrieved flash messages:", flashes) // Debug
 	session.Save(r, w)
 	return flashes
 }
 
 func SetFlash(w http.ResponseWriter, r *http.Request, message string) {
 	session, _ := GetSession(r)
-	fmt.Println("Setting flash message:", message)
 	session.AddFlash(message)
 	session.Save(r, w)
 }
@@ -150,8 +148,6 @@ func Register(w http.ResponseWriter, r *http.Request) {
 		email := r.FormValue("email")
 		password := r.FormValue("password")
 		password2 := r.FormValue("password2")
-
-		fmt.Println("Received form values:", username, email, password, password2)
 
 		userID, err := db.GetUserIDByUsername(username)
 		if err != nil {
@@ -318,7 +314,6 @@ func Follow_user(w http.ResponseWriter, r *http.Request) {
 	}
 	vars := mux.Vars(r)
 	username := vars["username"]
-	println("Now following " + username)
 
 	profileUser, err := db.GetUserByUsername(username)
 	profileUserID := fmt.Sprintf("%v", profileUser.UserID)
@@ -345,7 +340,6 @@ func Unfollow_user(w http.ResponseWriter, r *http.Request) {
 	}
 	vars := mux.Vars(r)
 	username := vars["username"]
-	println("displaying username for " + username)
 
 	profileUser, err := db.GetUserByUsername(username)
 	profileUserID := fmt.Sprintf("%v", profileUser.UserID)
