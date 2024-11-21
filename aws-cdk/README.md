@@ -30,7 +30,7 @@ This guide explains how to connect to the PostgreSQL database instance created u
 3. **Connect using psql**:
    Use the following command structure to connect:
 ```
-psql -h waectdatabase-waectresultstoragedbe1ccf3e0-tmed4lgituj0.c10ia6ywc903.eu-central-1.rds.amazonaws.com -p 5432 -U waect -d waectResultStorage
+psql -h {AWS_POSTGRES_HOST}  -p 5432 -U waect -d waect
 ````
 
 4. **Enter Password**:

@@ -60,9 +60,10 @@ export class RDSStack extends cdk.Stack {
       securityGroups: [dbSg],
       databaseName: dbName,
       credentials: credentials,
-      backupRetention: Duration.days(0),
-      deleteAutomatedBackups: true,
+      backupRetention: Duration.days(7),
+      deleteAutomatedBackups: false,
       removalPolicy: RemovalPolicy.DESTROY,
+      allocatedStorage: 20
     });
     // Capture the endpoint
     const hostname: string = dbInstance.instanceEndpoint.hostname;

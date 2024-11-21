@@ -1,75 +1,26 @@
-use std::collections::HashMap;
-
-use actix_files as fs;
-use actix_identity::config::LogoutBehaviour;
-use actix_identity::Identity;
-use actix_identity::IdentityMiddleware;
-use actix_session::Session;
-use actix_session::{storage::CookieSessionStore, SessionMiddleware};
-use actix_web::http::{header, StatusCode};
-use actix_web::web::{self, Redirect};
-
-use crate::create_msg;
-use crate::create_user;
-use crate::establish_connection;
-use crate::follow;
+use crate::database::models::{Messages, Users};
+use crate::database::repository::{
+    create_msg, create_user, establish_connection, follow, get_passwd_hash, get_public_messages,
+    get_timeline, get_user_by_id, get_user_by_name, get_user_timeline, is_following, unfollow,
+};
 use crate::frontend::flash_messages::*;
 use crate::frontend::template_structs::*;
-use crate::get_passwd_hash;
-use crate::get_public_messages;
-use crate::get_timeline;
-use crate::get_user_by_id;
-use crate::get_user_by_name;
-use crate::get_user_timeline;
-use crate::is_following;
-use crate::unfollow;
-use crate::Messages;
-use crate::Users;
-use actix_web::middleware::Logger;
-use actix_web::HttpMessage;
-use actix_web::HttpRequest;
-use actix_web::{cookie::Key, get, post, App, HttpResponse, HttpServer, Responder};
+use crate::utils::datetime::format_datetime_to_message_string;
+use actix_identity::Identity;
+use actix_session::Session;
+use actix_web::{
+    get,
+    http::{header, StatusCode},
+    post,
+    web::{self, Redirect},
+    HttpMessage, HttpRequest, HttpResponse, Responder,
+};
 use askama_actix::Template;
 use chrono::Utc;
 use md5::{Digest, Md5};
 use pwhash::bcrypt;
 
-#[actix_web::main]
-pub async fn start() -> std::io::Result<()> {
-    let mut labels = HashMap::new();
-    labels.insert("label1".to_string(), "value1".to_string());
-
-    HttpServer::new(move || {
-        App::new()
-            .wrap(
-                IdentityMiddleware::builder()
-                    .logout_behaviour(LogoutBehaviour::DeleteIdentityKeys)
-                    .build(),
-            )
-            .service(fs::Files::new("/static", "./src/frontend/static/").index_file("index.html"))
-            .wrap(
-                SessionMiddleware::builder(CookieSessionStore::default(), Key::from(&[0; 64]))
-                    .cookie_secure(false)
-                    .cookie_http_only(false)
-                    .build(),
-            )
-            .wrap(Logger::default())
-            .service(register)
-            .service(post_register)
-            .service(timeline)
-            .service(public_timeline)
-            .service(login)
-            .service(post_login)
-            .service(logout)
-            .service(user_timeline)
-            .service(follow_user)
-            .service(unfollow_user)
-            .service(add_message)
-    })
-    .bind(("0.0.0.0", 5000))?
-    .run()
-    .await
-}
+const PAGE_MESSAGES_LIMIT: i32 = 30;
 
 fn get_user_id(username: &str) -> i32 {
     let diesel_conn = &mut establish_connection();
@@ -136,9 +87,7 @@ fn format_messages(messages: Vec<(Messages, Users)>) -> Vec<MessageTemplate> {
             text: msg.text,
             username: user.username,
             gravatar_url: gravatar_url(&user.email),
-            pub_date: chrono::DateTime::parse_from_rfc3339(&msg.pub_date)
-                .unwrap()
-                .to_utc(),
+            pub_date: format_datetime_to_message_string(Some(msg.pub_date)),
         };
         messages_for_template.push(message)
     }
@@ -149,7 +98,8 @@ fn format_messages(messages: Vec<(Messages, Users)>) -> Vec<MessageTemplate> {
 async fn timeline(flash: Option<FlashMessages>, user: Option<Identity>) -> impl Responder {
     if let Some(user) = get_user(user) {
         let diesel_conn = &mut establish_connection();
-        let messages = format_messages(get_timeline(diesel_conn, user.user_id, 32));
+        let messages =
+            format_messages(get_timeline(diesel_conn, user.user_id, PAGE_MESSAGES_LIMIT));
 
         let rendered = TimelineTemplate {
             messages,
@@ -177,7 +127,7 @@ async fn public_timeline(
 ) -> impl Responder {
     let user = get_user(user);
     let diesel_conn = &mut establish_connection();
-    let messages = get_public_messages(diesel_conn, 32);
+    let messages = get_public_messages(diesel_conn, PAGE_MESSAGES_LIMIT);
     let messages_for_template = format_messages(messages);
 
     TimelineTemplate {
@@ -206,7 +156,11 @@ async fn user_timeline(
         if let Some(user) = user.clone() {
             followed = is_following(conn, profile_user.user_id, user.user_id)
         }
-        let messages = format_messages(get_user_timeline(conn, profile_user.user_id, 30));
+        let messages = format_messages(get_user_timeline(
+            conn,
+            profile_user.user_id,
+            PAGE_MESSAGES_LIMIT,
+        ));
         let rendered = TimelineTemplate {
             messages,
             request_endpoint: "user_timeline",
@@ -240,8 +194,8 @@ async fn follow_user(
             _current_user.id().unwrap().parse::<i32>().unwrap(),
             _target_id,
         );
-        let mut message = String::from("You are now following ");
-        message.push_str(&_target_username);
+
+        let message = format!("You are now following {}", _target_username);
         add_flash(session, message.as_str());
     } else {
         return HttpResponse::Found()
@@ -269,8 +223,7 @@ async fn unfollow_user(
             _current_user.id().unwrap().parse::<i32>().unwrap(),
             _target_id,
         );
-        let mut message = String::from("You are no longer following ");
-        message.push_str(&_target_username);
+        let message = format!("You are no longer following {}", _target_username);
         add_flash(session, message.as_str());
     } else {
         return HttpResponse::Found()
@@ -290,7 +243,7 @@ async fn add_message(
 ) -> impl Responder {
     if let Some(user) = user {
         let conn = &mut establish_connection();
-        let timestamp = Utc::now().to_rfc3339();
+        let timestamp = Utc::now();
         let user_id = user.id().unwrap().parse::<i32>().unwrap();
         let _ = create_msg(conn, &user_id, &msg.text, timestamp, &0);
         add_flash(session, "Your message was recorded");
