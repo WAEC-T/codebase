@@ -7,8 +7,8 @@ import (
 	"go-gorilla/src/internal/config"
 	"go-gorilla/src/internal/db"
 	"go-gorilla/src/internal/helpers"
+	"log"
 
-	"html"
 	"net"
 	"net/http"
 	"strconv"
@@ -74,6 +74,7 @@ func Gravatar_url(email string, size int) string {
 func GetFlash(w http.ResponseWriter, r *http.Request) []any {
 	session, err := GetSession(r)
 	if err != nil {
+		log.Println("Error retrieving session for flash messages:", err)
 		return nil
 	}
 
@@ -84,7 +85,7 @@ func GetFlash(w http.ResponseWriter, r *http.Request) []any {
 
 func SetFlash(w http.ResponseWriter, r *http.Request, message string) {
 	session, _ := GetSession(r)
-	session.AddFlash(html.UnescapeString(message))
+	session.AddFlash(message)
 	session.Save(r, w)
 }
 
@@ -113,6 +114,8 @@ func Public_timeline(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	following, err := db.GetFollowing(userID, 30) //TODO: LIMIT OF FOLLOWERS WE QUERY?
+
 	// Prepare data for rendering
 	flash := GetFlash(w, r)
 	data := Data{
@@ -120,7 +123,7 @@ func Public_timeline(w http.ResponseWriter, r *http.Request) {
 		User:          user,
 		Req:           r.RequestURI,
 		FlashMessages: flash,
-		Followed:      nil,
+		Followed:      following,
 	}
 
 	// Render the template
@@ -311,7 +314,6 @@ func Follow_user(w http.ResponseWriter, r *http.Request) {
 	}
 	vars := mux.Vars(r)
 	username := vars["username"]
-	println("Now following " + username)
 
 	profileUser, err := db.GetUserByUsername(username)
 	profileUserID := fmt.Sprintf("%v", profileUser.UserID)
@@ -324,9 +326,9 @@ func Follow_user(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("Error when trying to insert data into the database")
 		return
 	}
-	message := fmt.Sprintf("You are now following &#34;%s&#34;", username)
+	message := fmt.Sprintf("You are now following %s", username)
 	SetFlash(w, r, message)
-	http.Redirect(w, r, "/", http.StatusSeeOther)
+	http.Redirect(w, r, "/public", http.StatusSeeOther)
 }
 
 // """Removes the current user as follower of the given user."""
@@ -338,7 +340,6 @@ func Unfollow_user(w http.ResponseWriter, r *http.Request) {
 	}
 	vars := mux.Vars(r)
 	username := vars["username"]
-	println("displaying username for " + username)
 
 	profileUser, err := db.GetUserByUsername(username)
 	profileUserID := fmt.Sprintf("%v", profileUser.UserID)
@@ -351,9 +352,9 @@ func Unfollow_user(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("Error when trying to delete data from database")
 		return
 	}
-	message := fmt.Sprintf("You are no longer following &#34;%s&#34;", username)
+	message := fmt.Sprintf("You are no longer following %s", username)
 	SetFlash(w, r, message)
-	http.Redirect(w, r, "/", http.StatusFound)
+	http.Redirect(w, r, "/public", http.StatusFound)
 }
 
 // """Display's a users tweets."""

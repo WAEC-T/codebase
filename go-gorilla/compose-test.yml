@@ -16,4 +16,3 @@ networks:
     name: waect-network
     driver: bridge
     external: true
-  

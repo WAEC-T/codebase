@@ -56,7 +56,7 @@
             <img src="{{getavatar $fields.Email 48}}" alt="{{$fields.Username}}'s avatar">
             <strong><a href="{{url_for "timeline" (formatUsernameUrl $fields.Username)}}">{{$fields.Username}}</a></strong>
             {{$fields.Text}}
-            <small>&mdash; {{gettimestamp $fields.Pub_date}}</small>
+            <small>&mdash; {{gettimestamp $fields.PubDate}}</small>
       
             {{if $user}} <!-- Check if user is logged in -->
               <div class="followstatus">
