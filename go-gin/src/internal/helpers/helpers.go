@@ -15,7 +15,6 @@ import (
 func CheckPasswordHash(userEnteredPwd string, dbpwd string) bool {
 	hash := md5.Sum([]byte(userEnteredPwd))
 	str := hex.EncodeToString(hash[:])
-	fmt.Println("test")
 	return str == dbpwd
 }
 

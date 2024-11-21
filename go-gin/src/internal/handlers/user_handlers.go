@@ -112,7 +112,6 @@ func UserTimelineHandler(c *gin.Context) {
 	}
 
 	messages, err := db.GetUserMessages(pUserId, 30)
-	fmt.Println(messages)
 
 	if err != nil {
 		fmt.Println("Error fetching user messages")
@@ -121,7 +120,6 @@ func UserTimelineHandler(c *gin.Context) {
 	}
 
 	formattedMessages := helpers.FormatMessages(messages)
-	fmt.Println("Rendering users public timeline")
 
 	c.HTML(http.StatusOK, "timeline.html", gin.H{
 		"TimelineBody":    true,
@@ -165,9 +163,6 @@ func MyTimelineHandler(c *gin.Context) {
 	}
 
 	formattedMessages := helpers.FormatMessages(messages)
-	fmt.Println(formattedMessages)
-
-	fmt.Println("Rendering users timeline")
 
 	// For template rendering with Gin
 	c.HTML(http.StatusOK, "timeline.html", gin.H{
@@ -221,8 +216,6 @@ func AddMessageHandler(c *gin.Context) {
 				return
 			}
 
-			fmt.Println("Rendering users timeline")
-
 			c.Redirect(http.StatusSeeOther, "/")
 			session.AddFlash("Your message was recorded")
 			session.Save()
@@ -236,9 +229,8 @@ func RegisterHandler(c *gin.Context) {
 	session := sessions.Default(c)
 
 	userID, exists := c.Get("UserID")
-	if exists {
-		fmt.Println("User exists")
-		fmt.Println("userID:", userID)
+	if !exists {
+		fmt.Println("User does not exists, ID: ", userID)
 		return
 	}
 
@@ -291,12 +283,9 @@ func RegisterHandler(c *gin.Context) {
 				return
 			}
 
-			fmt.Println("User successfully registered")
-
 			// Redirect to login page after successful registration
 			session.AddFlash("You were successfully registered and can login now")
-			// print session info
-			fmt.Println("session info:", session, "Logged in")
+
 			session.Save()
 			c.Redirect(http.StatusSeeOther, "/login")
 			return
@@ -358,7 +347,6 @@ func LoginHandler(c *gin.Context) {
 				return
 			}
 
-			fmt.Println("User successfully logged in")
 			c.SetCookie("UserID", fmt.Sprint(userID), 3600, "/", "", false, true)
 
 			session.AddFlash("You were logged in")
@@ -378,7 +366,6 @@ func LoginHandler(c *gin.Context) {
 
 func LogoutHandler(c *gin.Context) {
 	session := sessions.Default(c)
-	fmt.Println("User successfully logged out")
 
 	session.AddFlash("You were logged out")
 

@@ -13,6 +13,9 @@ import (
 var err error
 
 func main() {
+
+	//Set to ReleaseMode to disable logging
+	gin.SetMode(gin.ReleaseMode)
 	/*---------------------
 	 * Load env vars
 	 *----------------------*/
@@ -29,7 +32,15 @@ func main() {
 	/*---------------------
 	* Setup routing
 	*----------------------*/
-	r := gin.Default()
+	r := gin.New()
 	routes.SetRouteHandlers(r)
+
+	/*---------------------
+	* Start the server
+	*----------------------*/
+	err = r.Run(":5000") // Start the server on port 5000
+	if err != nil {
+		log.Fatalf("Failed to start server: %v", err)
+	}
 
 }

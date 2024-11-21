@@ -11,14 +11,14 @@ import (
 
 func SetRouteHandlers(r *gin.Engine) {
 
-	r.LoadHTMLGlob("../templates/*.html")
+	r.LoadHTMLGlob("templates/*.html")
 
 	// sessions, for cookies
 	store := cookie.NewStore([]byte("devops"))
 	r.Use(sessions.Sessions("session", store))
 
 	// Static (styling)
-	r.Static("/static", "../static")
+	r.Static("static", "static")
 
 	// Define routes -> Here is where the links are being registered! Check the html layout file
 	// user routes
@@ -46,9 +46,6 @@ func SetRouteHandlers(r *gin.Engine) {
 
 	// // some helper method to "cache" what was the latest simulator action
 	// r.GET("/api/latest", getLatestHandler)
-
-	// Start the server
-	r.Run(":5000")
 }
 
 func LoadEnvVars() string {
