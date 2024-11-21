@@ -19,7 +19,7 @@ RESET = \033[0m
 .PHONY: start-local-db
 start-local-db:
 	@echo "$(BLUE)Starting the database container...$(RESET)"
-	@docker-compose -f $(LOCAL_DATABASE) up -d
+	@docker-compose -f $(LOCAL_DATABASE) up -d > /dev/null 2>&1
 
 .PHONY: stop-local-db
 stop-local-db:
@@ -36,7 +36,6 @@ clean-db:
 .PHONY: start-service
 start-service:
 	@echo "$(CYAN)Spinning service and running tests...$(RESET) \n"
-	@echo "./$(SERVICE)/$(COMPOSE_FILE_STANDARD) \n"
 	@docker-compose -f ./$(SERVICE)/$(COMPOSE_FILE_STANDARD) up -d > /dev/null 2>&1
 
 .PHONY: stop-service
