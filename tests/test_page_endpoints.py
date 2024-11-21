@@ -24,27 +24,25 @@ def get_text_from_first_li(driver):
     try:
         flashes_ul = driver.find_element(By.CLASS_NAME, "flashes")
         li_elements = flashes_ul.find_elements(By.TAG_NAME, "li")
-        print("Flash messages found: ", [li.text for li in li_elements])
         if li_elements and li_elements[0].text.strip():
             return li_elements[0].text.strip()
-    except Exception as e:
-        print("Error finding flash messages:", e)
-    return None
+    except:
+        return None
 
 def _register_user_via_gui(driver, data):
     register_url = "http://localhost:5000/register"
     driver.get(register_url)
-
+    
+    wait = WebDriverWait(driver, 15)
     input_fields = driver.find_elements(By.TAG_NAME, "input")
+
     for idx, str_content in enumerate(data):
         input_fields[idx].send_keys(str_content)
-    input_fields[-1].send_keys(Keys.RETURN)
+    input_fields[4].send_keys(Keys.RETURN)
 
-    wait = WebDriverWait(driver, 4)
+    get_text_from_first_li(driver)
 
-    # Capture page source for debugging after form submission
-    print("Post-submit page source:", driver.page_source)
-
+    wait = WebDriverWait(driver, 15)
     li_text = wait.until(get_text_from_first_li)
     return li_text
 
@@ -52,7 +50,7 @@ def _login_user_via_gui(driver, username, password):
     login_url = "http://localhost:5000/login"
     driver.get(login_url)
 
-    wait = WebDriverWait(driver, 4)
+    wait = WebDriverWait(driver, 15)
     input_fields = driver.find_elements(By.TAG_NAME, "input")
     print(input_fields)
 
@@ -63,7 +61,7 @@ def _login_user_via_gui(driver, username, password):
 
     get_text_from_first_li(driver)
 
-    wait = WebDriverWait(driver, 4)
+    wait = WebDriverWait(driver, 15)
     li_text = wait.until(get_text_from_first_li)
     return li_text
 
@@ -73,7 +71,7 @@ def _logout_user_via_gui(driver):
 
     get_text_from_first_li(driver)
 
-    wait = WebDriverWait(driver, 4)
+    wait = WebDriverWait(driver, 15)
     li_text = wait.until(get_text_from_first_li)
     return li_text
 
