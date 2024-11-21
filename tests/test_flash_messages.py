@@ -150,7 +150,6 @@ def test_user1_follow_user2_flash(user1_session):
     expected_flash = f'You are now following user2'
     response = follow_user("user2", user1_session)
     assert response.status_code == 200, "follow failed"
-    print("THIS IS THE following RESPONSE: ", response.text)
     assert expected_flash in response.text
 
 def test_user1_unfollow_user2_flash(user1_session):
@@ -160,7 +159,6 @@ def test_user1_unfollow_user2_flash(user1_session):
     expected_flash = 'You are no longer following user2'
     response = unfollow_user("user2", user1_session)
     assert response.status_code == 200, "unfollow failed"
-    print("THIS IS THE unfollowing RESPONSE: ", response.text)
     assert expected_flash in response.text
 
 def test_user1_post_message_flash(user1_session):
