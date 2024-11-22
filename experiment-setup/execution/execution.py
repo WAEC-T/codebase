@@ -20,7 +20,8 @@ BASE_COMPOSE_FILES_LOCATION = '/media/mmcblk0p2/setup/compose_files/'
 COOLDOWN = 30
 
 SERVICES = {"rust-actix": BASE_COMPOSE_FILES_LOCATION + 'rust-actix-compose-prod.yml',
-            "python-flask": BASE_COMPOSE_FILES_LOCATION + 'python-flask-compose-prod.yml'}
+            "python-flask": BASE_COMPOSE_FILES_LOCATION + 'python-flask-compose-prod.yml',
+            "go-gorilla": BASE_COMPOSE_FILES_LOCATION + 'go-gorilla-compose-prod.yml'}
 
 async def main(otii_project, device, out_path, service, run_mode):
     client_urls = [CLIENT_1_URL, CLIENT_2_URL, CLIENT_3_URL]
