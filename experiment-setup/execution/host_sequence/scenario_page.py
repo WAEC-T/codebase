@@ -89,7 +89,7 @@ def sequential_interval_scenario(service, start, iter):
 
     # 8. Unfollow all users
     print_info_call("Page", service, "Unfollow", ITER_NUM)
-    for i in range(ITER_NUM):
+    for i in range(ITER_NUM, 1):
         user = login_data_dummie(i)
         whom_username = user["username"]
         response = request_endpoint(f"/{whom_username}/unfollow", user_session=main_user_session)
