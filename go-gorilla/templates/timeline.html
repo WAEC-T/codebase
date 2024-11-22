@@ -34,10 +34,9 @@
       </div>
     {{end}}
 
-    <div>
       {{if ne .Req (print "/public")}}
-        </div>
         {{if eq .User .ProfileUser}}
+        <div class="followstatus">This is you!</div>
           <div class="twitbox">
             <h3>What's on your mind, {{.User}}?</h3>
             <form action="{{url_for "add_message" ""}}" method="POST">
@@ -47,8 +46,9 @@
               </p>
             </form>
           </div>
-        {{end}}
-        
+          {{else if IsFollowing $following .User}}
+              You are currently following this user
+          {{end}}
       {{end}}
       <ul class="messages">
         {{range $fields := .Messages}}
@@ -57,28 +57,11 @@
             <strong><a href="{{url_for "timeline" (formatUsernameUrl $fields.Username)}}">{{$fields.Username}}</a></strong>
             {{$fields.Text}}
             <small>&mdash; {{gettimestamp $fields.PubDate}}</small>
-      
-            {{if $user}} <!-- Check if user is logged in -->
-              <div class="followstatus">
-                {{if eq $user $fields.Username}}
-                  This is you!
-                {{else if IsFollowing $following $fields.AuthorID}}
-                  You are currently following this user
-                  <a class="unfollow" href="{{url_for "unfollow" (formatUsernameUrl $fields.Username)}}">Unfollow user</a>
-                {{else}}
-                  You are not yet following this user
-                  <a class="follow" href="{{url_for "follow" (formatUsernameUrl $fields.Username)}}">Follow user</a>
-                {{end}}
-              </div>
-            {{end}}
           </li>
         {{end}}
       </ul>
     </div>
     </div>
-    
-
-
   <div class="footer">
     Minitwit - Go application
   </div>
