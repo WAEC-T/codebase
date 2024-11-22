@@ -5,11 +5,14 @@ import (
 	"fmt"
 	"go-gorilla/src/internal/config"
 	"go-gorilla/src/internal/models"
+	"log"
+	"os"
 	"strconv"
 	"time"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 	"gorm.io/gorm/schema"
 )
 
@@ -25,7 +28,18 @@ func CheckValueInMap(maps []map[interface{}]interface{}, value interface{}) bool
 }
 
 func ConnectDB(uri string) (*gorm.DB, error) {
-	db, err := gorm.Open(postgres.Open(uri), &gorm.Config{NamingStrategy: schema.NamingStrategy{SingularTable: true}})
+	// Create a new GORM database connection with silent logging
+	db, err := gorm.Open(postgres.Open(uri), &gorm.Config{
+		NamingStrategy: schema.NamingStrategy{
+			SingularTable: true, // Use singular table names
+		},
+		Logger: logger.New(
+			log.New(os.Stdout, "\r\n", log.LstdFlags), // Create a logger but silence it
+			logger.Config{
+				LogLevel: logger.Silent, // Set log level to Silent
+			},
+		),
+	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to database: %w", err)
 	}
