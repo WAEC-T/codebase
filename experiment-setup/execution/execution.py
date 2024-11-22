@@ -14,12 +14,12 @@ from host_sequence.scenario_page import run_page_seq_scenario
 SERVER_URL = "http://10.7.7.144:5000"
 CLIENT_1_URL = "http://10.7.7.199:5001/trigger"
 CLIENT_2_URL = "http://10.7.7.178:5001/trigger"
-CLIENT_3_URL = "http://10.7.7.145:5001/trigger"
+CLIENT_3_URL = "http://10.7.7.147:5001/trigger"
 
 BASE_COMPOSE_FILES_LOCATION = '/media/mmcblk0p2/setup/compose_files/'
 COOLDOWN = 30
 
-SERVICES = {#"rust-actix": BASE_COMPOSE_FILES_LOCATION + 'rust-actix-compose-prod.yml'}
+SERVICES = {"rust-actix": BASE_COMPOSE_FILES_LOCATION + 'rust-actix-compose-prod.yml',
             "python-flask": BASE_COMPOSE_FILES_LOCATION + 'python-flask-compose-prod.yml'}
 
 async def main(otii_project, device, out_path, service, run_mode):
@@ -46,12 +46,12 @@ async def main(otii_project, device, out_path, service, run_mode):
         print(f"Done with scenario {run_mode} for service {service}...", flush=True)
         df, recording_name = collect_data(otii_project, device)
         if time_seq_api_df is not None and time_seq_page_df is not None:
-            save_sequential_time(time_seq_api_df, time_seq_page_df, recording_name, service, out_path)
-        save_data(df, recording_name, out_path, run_mode, service)
+            save_sequential_time(time_seq_api_df, time_seq_page_df, out_path, service, run_mode, recording_name)
+        save_data(df, out_path, service, run_mode, recording_name)
         generate_output(otii_project, device)
         
 
-async def main_async(out_path, run_mode="berries"):
+async def main_async(run_mode="berries", out_path=Path("data/out")):
     otii_project, device = configure_multimeter(create_otii_app())
     for service, filepath in SERVICES.items():
         service_started = await manage_server_docker_service(
@@ -62,6 +62,6 @@ async def main_async(out_path, run_mode="berries"):
             await main(otii_project, device, out_path, service, run_mode)
 
 if __name__ == "__main__":
-    out_path = Path(sys.argv[1])
-    run_mode = str(Path(sys.argv[2]))
-    asyncio.run(main_async(out_path, run_mode))
+    run_mode = str(Path(sys.argv[1]))
+    out_path = Path(sys.argv[2])
+    asyncio.run(main_async(run_mode, out_path))

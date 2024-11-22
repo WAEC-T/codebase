@@ -21,7 +21,7 @@ def request_endpoint(path, method="get", data=None, params=None, user_session=No
     response = (user_session or session).request(method=method, url=url, json=data, params=params, headers=AUTH_HEADER)
     end = time.time()
     print(f"Request to {url:<40} | Status: {response.status_code:<3} | start: {start:<20.6f} | end: {end:<20.6f}")
-    return {"endpoint": f"/api{path}", "response": response.status_code, "text": response.text, "start": start, "end": end,
+    return {"endpoint": f"/api{path}", "response": response.status_code, "start": start, "end": end,
             "delta": end - start}
 
 
