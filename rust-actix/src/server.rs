@@ -22,6 +22,7 @@ pub async fn start(port: u16) -> std::io::Result<()> {
     );
     HttpServer::new(move || {
         App::new()
+            .wrap(Logger::default())
             .wrap(AuthMiddleware)
             .service(api_services())
             .wrap(
