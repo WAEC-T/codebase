@@ -53,15 +53,22 @@ def generate_output(otii_project, device):
         stats = recording.get_channel_statistics(device.id, channel, info['from'], info['to'])
         print_random_color(f"{variable}: Min={stats['min']}, Max={stats['max']}, Avg={stats['average']}")
 
-def save_sequential_time(dataframe_api, dataframe_page, recording_name, service_name, out_path):
+def save_sequential_time(dataframe_api, dataframe_page, out_path, service_name, run_mode, recording_name):
     """Save sequential time data for API and Page as JSON files."""
-    api_path = Path(out_path, f"{service_name}-sequential-time-api-{recording_name}.csv")
-    page_path = Path(out_path, f"sequential-time-page-{recording_name}.csv")
+    service_path = Path(out_path, service_name)
+    target_folder = service_path / run_mode
+    target_folder.mkdir(parents=True, exist_ok=True)
+
+    api_path = target_folder / f"{service_name}-sequential-api-{recording_name}.csv"
+    page_path = target_folder / f"{service_name}-sequential-page-{recording_name}.csv"
     
     dataframe_api.to_csv(api_path, index=False)
     dataframe_page.to_csv(page_path, index=False)
 
-def save_data(dataframe, recording_name, out_path, scenario_name, service_name):
+def save_data(dataframe, out_path, service_name, run_mode, recording_name):
     """Save the collected data as a CSV file."""
-    csv_path = Path(out_path, f"{service_name}-{scenario_name}-{recording_name}.csv")
+    service_path = Path(out_path, service_name)
+    target_folder = service_path / run_mode
+    target_folder.mkdir(parents=True, exist_ok=True)
+    csv_path = target_folder / f"{service_name}-power-{recording_name}.csv"
     dataframe.to_csv(csv_path, index=False)
