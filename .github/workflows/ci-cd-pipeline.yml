@@ -198,7 +198,9 @@ jobs:
         id: check_changes
         run: |
            service_changed="false"
-           if [[ "${{ steps.changed-files.outputs.modified_files }}" == *"${{ matrix.service }}/"* ]] || [[ "${{ steps.changed-files.outputs.added_files }}" == *"${{ matrix.service }}/"* ]]; then
+           if [[ "${{ matrix.service }}" == "rust-actix" ]]; then
+            echo "Skipping rust-actix service."
+           elif [[ "${{ steps.changed-files.outputs.modified_files }}" == *"${{ matrix.service }}/"* ]] || [[ "${{ steps.changed-files.outputs.added_files }}" == *"${{ matrix.service }}/"* ]]; then
             echo "Changes detected in ${{ matrix.service }}."
             service_changed="true"
            else
