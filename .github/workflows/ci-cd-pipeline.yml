@@ -198,9 +198,7 @@ jobs:
         id: check_changes
         run: |
            service_changed="false"
-           if [[ "${{ matrix.service }}" == "rust-actix" ]]; then
-            echo "Skipping rust-actix service."
-           elif [[ "${{ steps.changed-files.outputs.modified_files }}" == *"${{ matrix.service }}/"* ]] || [[ "${{ steps.changed-files.outputs.added_files }}" == *"${{ matrix.service }}/"* ]]; then
+           if [[ "${{ steps.changed-files.outputs.modified_files }}" == *"${{ matrix.service }}/"* ]] || [[ "${{ steps.changed-files.outputs.added_files }}" == *"${{ matrix.service }}/"* ]]; then
             echo "Changes detected in ${{ matrix.service }}."
             service_changed="true"
            else
@@ -232,16 +230,20 @@ jobs:
       - name: Build Docker Image
         if: ${{ env.found == 'true' && github.event_name == 'pull_request' }}
         run: |
-          cd ${{ matrix.service }}
-          IMAGE_NAME="simonharwick97822/${{ matrix.service }}"
-          COMMIT_SHA=$(git rev-parse --short HEAD)
-          TIMESTAMP=$(date +%Y%m%d%H%M)
+          if [[ "${{ matrix.service }}" == "rust-actix" ]]; then
+            echo "Skipping rust-actix service."
+          else
+            cd ${{ matrix.service }}
+            IMAGE_NAME="simonharwick97822/${{ matrix.service }}"
+            COMMIT_SHA=$(git rev-parse --short HEAD)
+            TIMESTAMP=$(date +%Y%m%d%H%M)
 
-          # Build the image without pushing in PRs
-          docker buildx build --platform linux/arm64 \
-            -t ${IMAGE_NAME}:latest \
-            -t ${IMAGE_NAME}:commit-sha-${COMMIT_SHA}-${TIMESTAMP} \
-            .
+            # Build the image without pushing in PRs
+            docker buildx build --platform linux/arm64 \
+              -t ${IMAGE_NAME}:latest \
+              -t ${IMAGE_NAME}:commit-sha-${COMMIT_SHA}-${TIMESTAMP} \
+              .
+          fi
 
       - name: Build and Push Docker Image
         if: ${{ env.found == 'true' && github.event_name == 'push' && github.ref == 'refs/heads/main' }}
