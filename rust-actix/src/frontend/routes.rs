@@ -228,7 +228,7 @@ async fn unfollow_user(
             &mut conn,
             _current_user.id().unwrap().parse::<i32>().unwrap(),
             _target_id,
-        );
+        ).await;
         let message = format!("You are no longer following {}", _target_username);
         add_flash(session, message.as_str());
     } else {
