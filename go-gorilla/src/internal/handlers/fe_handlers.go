@@ -41,7 +41,7 @@ func GetUser(r *http.Request) (any, string, error) {
 
 	userID, ok := session.Values["user_id"]
 	if !ok {
-		return nil, "", fmt.Errorf("no user in the session")
+		return nil, "", nil
 	}
 
 	// Perform type assertion for userID
