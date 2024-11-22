@@ -63,6 +63,6 @@ async def main_async(run_mode="berries", out_path=Path("data/out")):
             await main(otii_project, device, out_path, service, run_mode)
 
 if __name__ == "__main__":
-    run_mode = str(Path(sys.argv[1]))
-    out_path = Path(sys.argv[2])
+    run_mode = str(Path(sys.argv[1])) if len(sys.argv) > 1 else None
+    out_path = Path(sys.argv[2]) if len(sys.argv) > 2 else None
     asyncio.run(main_async(run_mode, out_path))
