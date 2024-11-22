@@ -6,7 +6,7 @@
 </head>
 <body>
   <div class="page">
-    <h1>MiniTwitGo</h1>
+    <h1>MiniTwit</h1>
     <div class="navigation">
       {{if .User}}
         <a href="{{url_for "timeline" ""}}">my timeline</a>
@@ -18,50 +18,54 @@
         <a href="{{url_for "login" ""}}">sign in</a>
       {{end}}
     </div>
-{{$user := .User}}
-{{$following := .Followed}}
+    {{$user := .User}}
+    {{$following := .Followed}}
     {{if eq .Req (print "/public")}}
-      <h2>Public timeline</h2>
+    <h2>Public timeline</h2>
     {{else}}
-      <h2>{{.ProfileUser}}'s timeline</h2>
+    <h2>{{.ProfileUser}}'s timeline</h2>    
     {{end}}
 
     {{if .FlashMessages}}
-      <div class="flashes">
-        {{range .FlashMessages}}
-          <div>{{.}}</div>
-        {{end}}
-      </div>
+    <div class="flashes">
+      {{range .FlashMessages}}
+      <div>{{.}}</div>
+      {{end}}
+    </div>
     {{end}}
 
-      {{if ne .Req (print "/public")}}
-        {{if eq .User .ProfileUser}}
-        <div class="followstatus">This is you!</div>
-          <div class="twitbox">
-            <h3>What's on your mind, {{.User}}?</h3>
+    {{if ne .Req (print "/public")}}
+    {{if eq .User .ProfileUser}}
+    <div class="followstatus">This is you!</div>
+    <div class="twitbox">
+      <h3>What's on your mind, {{.User}}?</h3>
             <form action="{{url_for "add_message" ""}}" method="POST">
-              <p>
-                <input type="text" name="text" size="60">
-                <input type="submit" value="Share">
-              </p>
-            </form>
-          </div>
-          {{else if IsFollowing $following .User}}
-              You are currently following this user
-          {{end}}
-      {{end}}
-      <ul class="messages">
-        {{range $fields := .Messages}}
-          <li>
-            <img src="{{getavatar $fields.Email 48}}" alt="{{$fields.Username}}'s avatar">
+        <p>
+          <input type="text" name="text" size="60">
+          <input type="submit" value="Share">
+        </p>
+      </form>
+    </div>
+    {{else if IsFollowing $following .UserID}}
+      You are currently following this user
+      <a class="unfollow" href="{{url_for "unfollow" (formatUsernameUrl .ProfileUser)}}">Unfollow user</a>
+    {{else}}
+      You are not yet following this user
+      <a class="follow" href="{{url_for "follow" (formatUsernameUrl .ProfileUser)}}">Follow user</a>
+    {{end}}
+    {{end}}
+    <ul class="messages">
+      {{range $fields := .Messages}}
+      <li>
+        <img src="{{getavatar $fields.Email 48}}" alt="{{$fields.Username}}'s avatar">
             <strong><a href="{{url_for "timeline" (formatUsernameUrl $fields.Username)}}">{{$fields.Username}}</a></strong>
-            {{$fields.Text}}
-            <small>&mdash; {{gettimestamp $fields.PubDate}}</small>
-          </li>
-        {{end}}
-      </ul>
-    </div>
-    </div>
+        {{$fields.Text}}
+        <small>&mdash; {{gettimestamp $fields.PubDate}}</small>
+      </li>
+      {{end}}
+    </ul>
+  </div>
+  </div>
   <div class="footer">
     Minitwit - Go application
   </div>

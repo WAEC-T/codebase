@@ -25,6 +25,7 @@ const PER_PAGE = 30
 // Data represents the data parsed to the templates.
 type Data struct {
 	Messages      any
+	UserID        int
 	User          any
 	ProfileUser   any
 	Req           string
@@ -138,9 +139,11 @@ func Public_timeline(w http.ResponseWriter, r *http.Request) {
 func Register(w http.ResponseWriter, r *http.Request) {
 	user, _, err := GetUser(r)
 	if err == nil && !(helpers.IsNil(user)) {
+		fmt.Println("first")
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 
 	} else if r.Method == "GET" {
+		fmt.Println("here")
 		config.Tpl.ExecuteTemplate(w, "register.html", nil)
 
 	} else if r.Method == "POST" {
@@ -266,8 +269,11 @@ func Timeline(w http.ResponseWriter, r *http.Request) {
 
 		following, err := db.GetFollowing(user_id, 30) //TODO: LIMIT OF FOLLOWERS WE QUERY?
 
+		userIDInt, _ := strconv.Atoi(user_id)
+
 		d := Data{
 			User:          user,
+			UserID:        userIDInt,
 			ProfileUser:   profile_user,
 			Messages:      messages,
 			FlashMessages: flash,
@@ -328,7 +334,7 @@ func Follow_user(w http.ResponseWriter, r *http.Request) {
 	}
 	message := fmt.Sprintf("You are now following %s", username)
 	SetFlash(w, r, message)
-	http.Redirect(w, r, "/public", http.StatusSeeOther)
+	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
 // """Removes the current user as follower of the given user."""
@@ -354,7 +360,7 @@ func Unfollow_user(w http.ResponseWriter, r *http.Request) {
 	}
 	message := fmt.Sprintf("You are no longer following %s", username)
 	SetFlash(w, r, message)
-	http.Redirect(w, r, "/public", http.StatusFound)
+	http.Redirect(w, r, "/", http.StatusFound)
 }
 
 // """Display's a users tweets."""
