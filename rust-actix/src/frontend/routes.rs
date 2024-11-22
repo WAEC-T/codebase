@@ -1,8 +1,8 @@
 use crate::database::models::{Messages, Users};
 use crate::database::pool::DatabasePool;
 use crate::database::repository::{
-    create_msg, create_user, follow, get_passwd_hash, get_public_messages,
-    get_timeline, get_user_by_id, get_user_by_name, get_user_timeline, is_following, unfollow,
+    create_msg, create_user, follow, get_passwd_hash, get_public_messages, get_timeline,
+    get_user_by_id, get_user_by_name, get_user_timeline, is_following, unfollow,
 };
 use crate::frontend::flash_messages::*;
 use crate::frontend::template_structs::*;
@@ -33,7 +33,10 @@ async fn get_user_id(pool: web::Data<DatabasePool>, username: &str) -> i32 {
     }
 }
 
-async fn get_user_template_by_name(pool: web::Data<DatabasePool>, username: &str) -> Option<UserTemplate> {
+async fn get_user_template_by_name(
+    pool: web::Data<DatabasePool>,
+    username: &str,
+) -> Option<UserTemplate> {
     let mut conn = pool.get().await.unwrap();
     let user = get_user_by_name(&mut conn, username).await;
     if let Some(user) = user {
@@ -61,7 +64,10 @@ async fn get_user_template(pool: web::Data<DatabasePool>, user_id: i32) -> Optio
     }
 }
 
-async fn get_user(pool: web::Data<DatabasePool>, user_option: Option<Identity>) -> Option<UserTemplate> {
+async fn get_user(
+    pool: web::Data<DatabasePool>,
+    user_option: Option<Identity>,
+) -> Option<UserTemplate> {
     if let Some(user) = user_option {
         let user_id = user.id().unwrap().parse::<i32>().unwrap();
         get_user_template(pool, user_id).await
@@ -96,7 +102,11 @@ fn format_messages(messages: Vec<(Messages, Users)>) -> Vec<MessageTemplate> {
 }
 
 #[get("/")]
-async fn timeline(pool: web::Data<DatabasePool>, flash: Option<FlashMessages>, user: Option<Identity>) -> impl Responder {
+async fn timeline(
+    pool: web::Data<DatabasePool>,
+    flash: Option<FlashMessages>,
+    user: Option<Identity>,
+) -> impl Responder {
     let mut conn = pool.get().await.unwrap();
     if let Some(user) = get_user(pool.clone(), user).await {
         let messages =
@@ -157,14 +167,11 @@ async fn user_timeline(
         let user = get_user(pool.clone(), user).await;
         let mut conn = pool.get().await.unwrap();
         if let Some(user) = user.clone() {
-            
             followed = is_following(&mut conn, profile_user.user_id, user.user_id).await
         }
-        let messages = format_messages(get_user_timeline(
-            &mut conn,
-            profile_user.user_id,
-            PAGE_MESSAGES_LIMIT,
-        ).await);
+        let messages = format_messages(
+            get_user_timeline(&mut conn, profile_user.user_id, PAGE_MESSAGES_LIMIT).await,
+        );
         let rendered = TimelineTemplate {
             messages,
             request_endpoint: "user_timeline",
@@ -197,8 +204,9 @@ async fn follow_user(
         follow(
             &mut conn,
             _current_user.id().unwrap().parse::<i32>().unwrap(),
-            _target_id
-        ).await;
+            _target_id,
+        )
+        .await;
 
         let message = format!("You are now following {}", _target_username);
         add_flash(session, message.as_str());
@@ -228,7 +236,8 @@ async fn unfollow_user(
             &mut conn,
             _current_user.id().unwrap().parse::<i32>().unwrap(),
             _target_id,
-        ).await;
+        )
+        .await;
         let message = format!("You are no longer following {}", _target_username);
         add_flash(session, message.as_str());
     } else {
@@ -252,7 +261,7 @@ async fn add_message(
         let mut conn = pool.get().await.unwrap();
         let timestamp = Utc::now();
         let user_id = user.id().unwrap().parse::<i32>().unwrap();
-        let _ = create_msg(&mut conn, &user_id, &msg.text, timestamp, &0);
+        let _ = create_msg(&mut conn, &user_id, &msg.text, timestamp, &0).await;
         add_flash(session, "Your message was recorded");
         return HttpResponse::Found()
             .append_header((header::LOCATION, "/"))
@@ -336,7 +345,11 @@ async fn register(flash_messages: Option<FlashMessages>) -> impl Responder {
 }
 
 #[post("/register")]
-async fn post_register(pool: web::Data<DatabasePool>, info: web::Form<RegisterInfo>, session: Session) -> impl Responder {
+async fn post_register(
+    pool: web::Data<DatabasePool>,
+    info: web::Form<RegisterInfo>,
+    session: Session,
+) -> impl Responder {
     if info.username.is_empty() {
         add_flash(session, "You have to enter a username");
         return Redirect::to("/register").see_other();
@@ -357,7 +370,7 @@ async fn post_register(pool: web::Data<DatabasePool>, info: web::Form<RegisterIn
     let hash = bcrypt::hash(info.password.clone()).unwrap();
 
     let mut conn = pool.get().await.unwrap();
-    let _ = create_user(&mut conn, &info.username, &info.email, &hash);
+    let _ = create_user(&mut conn, &info.username, &info.email, &hash).await;
 
     add_flash(
         session,

@@ -1,7 +1,10 @@
 use std::env;
 use std::error::Error;
 
-use diesel_async::{AsyncPgConnection, pooled_connection::{AsyncDieselConnectionManager,bb8}};
+use diesel_async::{
+    pooled_connection::{bb8, AsyncDieselConnectionManager},
+    AsyncPgConnection,
+};
 
 pub type PostgresConnection = AsyncPgConnection;
 pub type PostgresPooledConnection<'a> = bb8::PooledConnection<'a, PostgresConnection>;

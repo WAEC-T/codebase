@@ -1,19 +1,24 @@
+use crate::database::pool::DatabasePool;
 use crate::{
     api::model::*,
-    database::{repository::{
-        create_msg, create_user, follow, get_followers, get_latest,
-        get_public_messages, get_timeline, get_user_by_name, set_latest, unfollow,
-    }, PostgresConnection},
+    database::{
+        repository::{
+            create_msg, create_user, follow, get_followers, get_latest, get_public_messages,
+            get_timeline, get_user_by_name, set_latest, unfollow,
+        },
+        PostgresConnection,
+    },
     utils::datetime::convert_naive_to_utc,
 };
 use actix_web::{web, HttpResponse};
 use chrono::Utc;
 use pwhash::bcrypt;
-use crate::database::pool::DatabasePool;
 
 async fn get_user_id(pool: web::Data<DatabasePool>, username: &str) -> Option<i32> {
     let mut conn = pool.get().await.unwrap();
-    get_user_by_name(&mut conn, username).await.map(|user| user.user_id)
+    get_user_by_name(&mut conn, username)
+        .await
+        .map(|user| user.user_id)
 }
 
 async fn update_latest(conn: &mut PostgresConnection, query: web::Query<Latest>) {
@@ -26,7 +31,11 @@ pub async fn retrieve_latest(pool: web::Data<DatabasePool>) -> HttpResponse {
     HttpResponse::Ok().json(Latest { latest })
 }
 
-pub async fn register_new_user(pool: web::Data<DatabasePool>, info: RegisterInfo, query: web::Query<Latest>) -> HttpResponse {
+pub async fn register_new_user(
+    pool: web::Data<DatabasePool>,
+    info: RegisterInfo,
+    query: web::Query<Latest>,
+) -> HttpResponse {
     let mut conn = pool.get().await.unwrap();
     update_latest(&mut conn, query).await;
 
@@ -52,7 +61,7 @@ pub async fn register_new_user(pool: web::Data<DatabasePool>, info: RegisterInfo
         HttpResponse::BadRequest().json(reg_err)
     } else {
         let hash = bcrypt::hash(info.pwd.clone()).unwrap();
-        let _ = create_user(&mut conn, &info.username, &info.email, &hash);
+        let _ = create_user(&mut conn, &info.username, &info.email, &hash).await;
         HttpResponse::NoContent().json(String::from(""))
     }
 }
@@ -64,7 +73,8 @@ pub async fn list_feed_messages(
 ) -> HttpResponse {
     let mut conn = pool.get().await.unwrap();
     update_latest(&mut conn, query).await;
-    let messages: Vec<Message> = get_public_messages(&mut conn, amount.no).await
+    let messages: Vec<Message> = get_public_messages(&mut conn, amount.no)
+        .await
         .into_iter()
         .map(|(msg, user)| Message {
             content: msg.text,
@@ -86,7 +96,8 @@ pub async fn list_user_messages(
     update_latest(&mut conn, query).await;
 
     if let Some(user_id) = get_user_id(pool.clone(), &username).await {
-        let messages: Vec<Message> = get_timeline(&mut conn, user_id, amount.no).await
+        let messages: Vec<Message> = get_timeline(&mut conn, user_id, amount.no)
+            .await
             .into_iter()
             .map(|(msg, user)| Message {
                 content: msg.text,
@@ -111,7 +122,7 @@ pub async fn create_user_message(
     update_latest(&mut conn, query).await;
 
     if let Some(user_id) = get_user_id(pool.clone(), &username).await {
-        let _ = create_msg(&mut conn, &user_id, &msg.content, Utc::now(), &0);
+        let _ = create_msg(&mut conn, &user_id, &msg.content, Utc::now(), &0).await;
         HttpResponse::NoContent().json("")
     } else {
         HttpResponse::NotFound().json("")
