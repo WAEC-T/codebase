@@ -14,7 +14,7 @@ from host_sequence.scenario_page import run_page_seq_scenario
 SERVER_URL = "http://10.7.7.144:5000"
 CLIENT_1_URL = "http://10.7.7.199:5001/trigger"
 CLIENT_2_URL = "http://10.7.7.178:5001/trigger"
-CLIENT_3_URL = "http://10.7.7.147:5001/trigger"
+CLIENT_3_URL = "http://10.7.7.145:5001/trigger"
 
 BASE_COMPOSE_FILES_LOCATION = '/media/mmcblk0p2/setup/compose_files/'
 COOLDOWN = 30
