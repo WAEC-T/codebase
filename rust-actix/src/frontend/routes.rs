@@ -1,6 +1,7 @@
 use crate::database::models::{Messages, Users};
+use crate::database::pool::{self, DatabasePool};
 use crate::database::repository::{
-    create_msg, create_user, establish_connection, follow, get_passwd_hash, get_public_messages,
+    create_msg, create_user, follow, get_passwd_hash, get_public_messages,
     get_timeline, get_user_by_id, get_user_by_name, get_user_timeline, is_following, unfollow,
 };
 use crate::frontend::flash_messages::*;
@@ -9,6 +10,7 @@ use crate::utils::datetime::format_datetime_to_message_string;
 use actix_identity::Identity;
 use actix_session::Session;
 use actix_web::{
+    error,
     get,
     http::{header, StatusCode},
     post,
@@ -22,9 +24,9 @@ use pwhash::bcrypt;
 
 const PAGE_MESSAGES_LIMIT: i32 = 30;
 
-fn get_user_id(username: &str) -> i32 {
-    let diesel_conn = &mut establish_connection();
-    let user = get_user_by_name(diesel_conn, username);
+async fn get_user_id(pool: web::Data<DatabasePool>, username: &str) -> i32 {
+    let mut conn = pool.get().await.map_err(error::ErrorInternalServerError)?;
+    let user = get_user_by_name(conn, username).await;
     if let Some(user) = user {
         user.user_id
     } else {
