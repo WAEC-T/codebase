@@ -83,18 +83,18 @@ def follow(follows_username, username=None, password=None, session=None):
     return r
 
 
-def unfollow(follows_username, username=None, password=None, session=None):
+def unfollow(unfollows_username, username=None, password=None, session=None):
     if session:
         r = session.get(
-            SERVER_URL + f"/{follows_username}/unfollow", allow_redirects=True
+            SERVER_URL + f"/{unfollows_username}/unfollow", allow_redirects=True
         )
     else:
         login(username, password)
         r = requests.get(
-            SERVER_URL + f"/{follows_username}/follow", allow_redirects=True
+            SERVER_URL + f"/{unfollows_username}/unfollow", allow_redirects=True
         )
 
-    assert f"You are no longer following {follows_username}" in r.text
+    assert f"You are no longer following {unfollows_username}" in r.text
     return r
 
 
@@ -115,22 +115,20 @@ def scenario_per_user(username, email, password):
         print("    Following 10 users...", flush=True)
         for idx in range(10):
             follow(USERS[offset + idx], session=session)
-            get_private_timeline(session)
+            get_private_timeline(username, session)
         print("Requesting 10 times the private timeline...", flush=True)
         for idx in range(10):
-            get_private_timeline(session)
+            get_private_timeline(username, session)
         print("Sending 10 tweets...", flush=True)
         for idx in range(10):
             add_message(session, TWEETS[idx])
         for idx in range(10):
             unfollow(USERS[offset + idx], session=session)
-            get_private_timeline(session)
+            get_private_timeline(username, session)
 
     logout(session)
     
             
-
-
 def scenario():
     hostname = socket.gethostname()
     scenario_per_user(f"{hostname}", f"{hostname}@itu.dk", "1234567")
