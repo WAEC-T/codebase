@@ -119,7 +119,7 @@ async fn timeline(
             user: Some(user),
             followed: Some(false),
             flashes: flash.unwrap_or_default().messages,
-            title: String::from("Timeline"),
+            title: String::from("My Timeline"),
         }
         .render()
         .unwrap();
@@ -144,12 +144,12 @@ async fn public_timeline(
 
     TimelineTemplate {
         messages: messages_for_template,
-        request_endpoint: "/",
+        request_endpoint: "public_timeline",
         profile_user: None,
         user,
         followed: Some(false),
         flashes: flash_messages.unwrap_or_default().messages,
-        title: String::from(""),
+        title: String::from("Public Timeline"),
     }
 }
 
@@ -167,19 +167,20 @@ async fn user_timeline(
         let user = get_user(pool.clone(), user).await;
         let mut conn = pool.get().await.unwrap();
         if let Some(user) = user.clone() {
-            followed = is_following(&mut conn, profile_user.user_id, user.user_id).await
+            followed = is_following(&mut conn, profile_user.clone().user_id, user.user_id).await
         }
         let messages = format_messages(
             get_user_timeline(&mut conn, profile_user.user_id, PAGE_MESSAGES_LIMIT).await,
         );
+        let profile_user_name = profile_user.clone().username;
         let rendered = TimelineTemplate {
             messages,
             request_endpoint: "user_timeline",
-            profile_user: Some(profile_user),
+            profile_user: Some(profile_user.clone()),
             user,
             followed: Some(followed),
             flashes: flash_messages.unwrap_or_default().messages,
-            title: String::from("Timeline"),
+            title: format!("{}'s Timeline", profile_user_name),
         }
         .render()
         .unwrap();
