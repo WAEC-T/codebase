@@ -11,7 +11,7 @@ COPY Gemfile ./
 
 RUN bundle install
 
-COPY . ./
+COPY ./src .
 
 EXPOSE 5000
 

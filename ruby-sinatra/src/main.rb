@@ -8,8 +8,6 @@ require "json"
 require "newrelic_rpm"
 require 'dotenv'
 
-Dotenv.load(File.expand_path("../.env.local", __dir__))
-
 Dir["./models/*.rb"].each { |file| require file }
 
 USER_NOT_FOUND = "User not found"
@@ -72,22 +70,19 @@ helpers do
   def request_is_not_from_simulator
     request.env["HTTP_AUTHORIZATION"] != "Basic c2ltdWxhdG9yOnN1cGVyX3NhZmUh"
   end
-
-  def update_latest(request)
-    parsed_command_id = request.params["latest"]
-    Latest.set(parsed_command_id.to_i) if parsed_command_id.present?
-  end
   
 end
 
+def update_latest(request)
+  parsed_command_id = request.params["latest"]
+  Latest.set(parsed_command_id.to_i) if parsed_command_id.present?
+end
+
 before "/api/*" do
-  if request.path_info == "/latest"
-    pass
-  elsif request_is_not_from_simulator
+  update_latest(request)
+  if request_is_not_from_simulator
     halt [403, { status: 403, error_msg: "You are not authorized to use this resource!" }.to_json]
   end
-
-  update_latest(request)
 end
 
 get "/" do
@@ -253,7 +248,7 @@ namespace "/api" do
 
   get "/msgs/:username" do |username|
     user = User.find_by_username(username)
-    return [400, USER_NOT_FOUND] if user.nil?
+    return [404, USER_NOT_FOUND] if user.nil?
     return [400, NO_IS_REQUIRED] if params[:no].nil?
 
     count = params[:no].to_i
@@ -268,7 +263,7 @@ namespace "/api" do
 
   post "/msgs/:username" do |username|
     user = User.find_by_username(username)
-    return [400, USER_NOT_FOUND] if user.nil?
+    return [404, USER_NOT_FOUND] if user.nil?
 
     request_data = JSON.parse(request.body.read, symbolize_names: true)
     message = user.messages.create(
