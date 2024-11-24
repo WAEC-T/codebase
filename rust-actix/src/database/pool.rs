@@ -41,8 +41,6 @@ pub async fn establish_pool() -> Result<DatabasePool, bb8::RunError> {
     Ok(DatabasePool(pool))
 }
 
-// TODO: add the right certificate and remove danger_accept_invalid_certs(true)
-
 async fn establish_connection(database_url: &str) -> ConnectionResult<AsyncPgConnection> {
         if database_url.contains("localhost") || database_url.contains("database") || database_url.contains("host.docker.internal") {
             let (client, connection) =
