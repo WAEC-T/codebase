@@ -20,8 +20,9 @@ BASE_COMPOSE_FILES_LOCATION = '/media/mmcblk0p2/setup/compose_files/'
 COOLDOWN = 30
 
 SERVICES = {"rust-actix": BASE_COMPOSE_FILES_LOCATION + 'rust-actix-compose-prod.yml',
-            "python-flask": BASE_COMPOSE_FILES_LOCATION + 'python-flask-compose-prod.yml',
-            "go-gorilla": BASE_COMPOSE_FILES_LOCATION + 'go-gorilla-compose-prod.yml'}
+            #"python-flask": BASE_COMPOSE_FILES_LOCATION + 'python-flask-compose-prod.yml',
+            #"go-gorilla": BASE_COMPOSE_FILES_LOCATION + 'go-gorilla-compose-prod.yml'
+            }
 
 async def main(otii_project, device, out_path, service, run_mode):
     client_urls = [CLIENT_1_URL, CLIENT_2_URL, CLIENT_3_URL]
@@ -52,17 +53,20 @@ async def main(otii_project, device, out_path, service, run_mode):
         generate_output(otii_project, device)
         
 
-async def main_async(run_mode="berries", out_path=Path("data/out")):
+async def main_async(run_mode, out_path):
+    ssh_target = SERVER_URL.removeprefix("http://").removesuffix(':5000')
     otii_project, device = configure_multimeter(create_otii_app())
     for service, filepath in SERVICES.items():
         service_started = await manage_server_docker_service(
-            SERVER_URL.removeprefix("http://").removesuffix(':5000'), 
+            ssh_target, 
             filepath
         )
         if service_started:
             await main(otii_project, device, out_path, service, run_mode)
+    await manage_server_docker_service(ssh_target, "", True)
+    
 
 if __name__ == "__main__":
-    run_mode = str(Path(sys.argv[1])) if len(sys.argv) > 1 else None
-    out_path = Path(sys.argv[2]) if len(sys.argv) > 2 else None
+    run_mode = str(Path(sys.argv[1])) if len(sys.argv) > 1 else "berries"
+    out_path = Path(sys.argv[2]) if len(sys.argv) > 2 else Path("data/out")
     asyncio.run(main_async(run_mode, out_path))

@@ -1,36 +1,45 @@
+use crate::database::pool::DatabasePool;
 use crate::{
     api::model::*,
-    database::repository::{
-        create_msg, create_user, establish_connection, follow, get_followers, get_latest,
-        get_public_messages, get_timeline, get_user_by_name, set_latest, unfollow,
+    database::{
+        repository::{
+            create_msg, create_user, follow, get_followers, get_latest, get_public_messages,
+            get_timeline, get_user_by_name, set_latest, unfollow,
+        },
+        PostgresConnection,
     },
     utils::datetime::convert_naive_to_utc,
 };
 use actix_web::{web, HttpResponse};
 use chrono::Utc;
-use diesel::PgConnection;
 use pwhash::bcrypt;
 
-fn get_user_id(username: &str) -> Option<i32> {
-    let conn = &mut establish_connection();
-    get_user_by_name(conn, username).map(|user| user.user_id)
+async fn get_user_id(pool: web::Data<DatabasePool>, username: &str) -> Option<i32> {
+    let mut conn = pool.get().await.unwrap();
+    get_user_by_name(&mut conn, username)
+        .await
+        .map(|user| user.user_id)
 }
 
-fn update_latest(conn: &mut PgConnection, query: web::Query<Latest>) {
-    set_latest(conn, query.latest);
+async fn update_latest(conn: &mut PostgresConnection, query: web::Query<Latest>) {
+    set_latest(conn, query.latest).await;
 }
 
-pub async fn retrieve_latest() -> HttpResponse {
-    let conn: &mut PgConnection = &mut establish_connection();
-    let latest = get_latest(conn);
+pub async fn retrieve_latest(pool: web::Data<DatabasePool>) -> HttpResponse {
+    let mut conn = pool.get().await.unwrap();
+    let latest = get_latest(&mut conn).await;
     HttpResponse::Ok().json(Latest { latest })
 }
 
-pub async fn register_new_user(info: RegisterInfo, query: web::Query<Latest>) -> HttpResponse {
-    let conn = &mut establish_connection();
-    update_latest(conn, query);
+pub async fn register_new_user(
+    pool: web::Data<DatabasePool>,
+    info: RegisterInfo,
+    query: web::Query<Latest>,
+) -> HttpResponse {
+    let mut conn = pool.get().await.unwrap();
+    update_latest(&mut conn, query).await;
 
-    let user_exists = get_user_id(&info.username);
+    let user_exists = get_user_id(pool.clone(), &info.username).await;
 
     let error = if info.username.is_empty() {
         Some(String::from("You have to enter a username"))
@@ -52,18 +61,20 @@ pub async fn register_new_user(info: RegisterInfo, query: web::Query<Latest>) ->
         HttpResponse::BadRequest().json(reg_err)
     } else {
         let hash = bcrypt::hash(info.pwd.clone()).unwrap();
-        let _ = create_user(conn, &info.username, &info.email, &hash);
+        let _ = create_user(&mut conn, &info.username, &info.email, &hash).await;
         HttpResponse::NoContent().json(String::from(""))
     }
 }
 
 pub async fn list_feed_messages(
+    pool: web::Data<DatabasePool>,
     amount: web::Query<MessageAmount>,
     query: web::Query<Latest>,
 ) -> HttpResponse {
-    let conn = &mut establish_connection();
-    update_latest(conn, query);
-    let messages: Vec<Message> = get_public_messages(conn, amount.no)
+    let mut conn = pool.get().await.unwrap();
+    update_latest(&mut conn, query).await;
+    let messages: Vec<Message> = get_public_messages(&mut conn, amount.no)
+        .await
         .into_iter()
         .map(|(msg, user)| Message {
             content: msg.text,
@@ -76,15 +87,17 @@ pub async fn list_feed_messages(
 }
 
 pub async fn list_user_messages(
+    pool: web::Data<DatabasePool>,
     username: String,
     amount: web::Query<MessageAmount>,
     query: web::Query<Latest>,
 ) -> HttpResponse {
-    let conn = &mut establish_connection();
-    update_latest(conn, query);
+    let mut conn = pool.get().await.unwrap();
+    update_latest(&mut conn, query).await;
 
-    if let Some(user_id) = get_user_id(&username) {
-        let messages: Vec<Message> = get_timeline(conn, user_id, amount.no)
+    if let Some(user_id) = get_user_id(pool.clone(), &username).await {
+        let messages: Vec<Message> = get_timeline(&mut conn, user_id, amount.no)
+            .await
             .into_iter()
             .map(|(msg, user)| Message {
                 content: msg.text,
@@ -100,15 +113,16 @@ pub async fn list_user_messages(
 }
 
 pub async fn create_user_message(
+    pool: web::Data<DatabasePool>,
     username: String,
     msg: MessageContent,
     query: web::Query<Latest>,
 ) -> HttpResponse {
-    let conn = &mut establish_connection();
-    update_latest(conn, query);
+    let mut conn = pool.get().await.unwrap();
+    update_latest(&mut conn, query).await;
 
-    if let Some(user_id) = get_user_id(&username) {
-        let _ = create_msg(conn, &user_id, &msg.content, Utc::now(), &0);
+    if let Some(user_id) = get_user_id(pool.clone(), &username).await {
+        let _ = create_msg(&mut conn, &user_id, &msg.content, Utc::now(), &0).await;
         HttpResponse::NoContent().json("")
     } else {
         HttpResponse::NotFound().json("")
@@ -116,15 +130,16 @@ pub async fn create_user_message(
 }
 
 pub async fn list_user_followers(
+    pool: web::Data<DatabasePool>,
     username: String,
     amount: web::Query<MessageAmount>,
     query: web::Query<Latest>,
 ) -> HttpResponse {
-    let conn = &mut establish_connection();
-    update_latest(conn, query);
+    let mut conn = pool.get().await.unwrap();
+    update_latest(&mut conn, query).await;
 
-    if let Some(user_id) = get_user_id(&username) {
-        let followers = get_followers(conn, user_id, amount.no);
+    if let Some(user_id) = get_user_id(pool.clone(), &username).await {
+        let followers = get_followers(&mut conn, user_id, amount.no).await;
         let followers = followers.into_iter().map(|user| user.username).collect();
         HttpResponse::Ok().json(Follows { follows: followers })
     } else {
@@ -133,22 +148,23 @@ pub async fn list_user_followers(
 }
 
 pub async fn update_user_followers(
+    pool: web::Data<DatabasePool>,
     username: String,
     follow_param: FollowParam,
     query: web::Query<Latest>,
 ) -> HttpResponse {
-    let conn = &mut establish_connection();
-    update_latest(conn, query);
+    let mut conn = pool.get().await.unwrap();
+    update_latest(&mut conn, query).await;
 
-    if let Some(user_id) = get_user_id(&username) {
+    if let Some(user_id) = get_user_id(pool.clone(), &username).await {
         if let Some(follow_username) = follow_param.follow {
-            if let Some(follow_user_id) = get_user_id(&follow_username) {
-                follow(conn, user_id, follow_user_id);
+            if let Some(follow_user_id) = get_user_id(pool.clone(), &follow_username).await {
+                follow(&mut conn, user_id, follow_user_id).await;
                 return HttpResponse::NoContent().json("");
             }
         } else if let Some(unfollow_username) = follow_param.unfollow {
-            if let Some(unfollow_user_id) = get_user_id(&unfollow_username) {
-                unfollow(conn, user_id, unfollow_user_id);
+            if let Some(unfollow_user_id) = get_user_id(pool.clone(), &unfollow_username).await {
+                unfollow(&mut conn, user_id, unfollow_user_id).await;
                 return HttpResponse::NoContent().json("");
             }
         }

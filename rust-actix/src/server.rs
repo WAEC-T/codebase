@@ -4,16 +4,19 @@ use actix_identity::IdentityMiddleware;
 use actix_session::{storage::CookieSessionStore, SessionMiddleware};
 use actix_web::cookie::Key;
 // use actix_web::middleware::Logger;
-use actix_web::{App, HttpServer};
+use actix_web::{web, App, HttpServer};
 use waect_rust::api::middleware::AuthMiddleware;
 use waect_rust::api::services::api_services;
+use waect_rust::database;
 use waect_rust::frontend::services::page_services;
 
 #[actix_web::main]
 pub async fn start() -> std::io::Result<()> {
+    let pool = database::establish_pool().await.unwrap();
     HttpServer::new(move || {
         App::new()
             // .wrap(Logger::default())
+            .app_data(web::Data::new(pool.clone()))
             .wrap(AuthMiddleware)
             .service(api_services())
             .wrap(
