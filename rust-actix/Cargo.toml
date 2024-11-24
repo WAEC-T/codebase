@@ -28,8 +28,5 @@ actix-service = "2.0.2"
 futures-util = "0.3.31"
 diesel-async = { version = "0.5.1", features = ["bb8", "postgres"] }
 tokio-postgres = "0.7.12"
-rustls = "0.23.18"
-tokio-postgres-rustls = "0.13.0"
-rustls-native-certs = "0.8.1"
 native-tls = "0.2.12"
 postgres-native-tls = "0.5.0"
