@@ -8,6 +8,7 @@ class Message < ActiveRecord::Base
   scope :authored_by, ->(users) { where(author: users) }
 
   validates_presence_of :text
+  validates_presence_of :pub_date
 
   def sim_format
     {

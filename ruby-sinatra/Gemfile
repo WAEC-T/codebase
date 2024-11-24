@@ -33,3 +33,5 @@ group :development do
   gem "bundler-audit"
   gem "lefthook"
 end
+
+gem "sinatra-namespace", "~> 1.0"

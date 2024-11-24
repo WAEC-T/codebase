@@ -1,0 +1,15 @@
+services:
+  ruby-sinatra:
+    image: waect/ruby-sinatra
+    build: .
+    container_name: ruby-sinatra
+    ports:
+      - "5000:5000"
+    env_file:
+      - ../.env.local
+    networks:
+      - waect-network
+
+networks:
+  waect-network:
+    external: true
