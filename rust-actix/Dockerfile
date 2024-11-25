@@ -1,6 +1,7 @@
 FROM alpine:edge AS builder
 WORKDIR /usr/src/waect-rust
 RUN apk update && apk add --no-cache rust cargo libpq-dev
+
 COPY . .
 RUN cargo build --release 
 
