@@ -90,6 +90,7 @@ def sequential_interval_scenario(service, start, iter):
         user_session = user_sessions[unfollow["unfollow"]]
         response = request_endpoint(f"/fllws/{unfollow['unfollow']}", method="post", data={"unfollow": "user0"},
                                     params=api_latest_query, user_session=user_session)
+        response['endpoint'] = response['endpoint'].replace('fllws', 'unfllw')
         results.append(response)
     time.sleep(BASE_DELAY)
 
