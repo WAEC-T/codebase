@@ -12,8 +12,8 @@ from host_sequence.scenario_page import run_page_seq_scenario
 
 # Check the static addresses when preparing the setup!
 SERVER_URL = "http://10.7.7.144:5000"
-CLIENT_1_URL = "http://10.7.7.199:5001/trigger"
-CLIENT_2_URL = "http://10.7.7.178:5001/trigger"
+CLIENT_1_URL = "http://10.7.7.198:5001/trigger"
+CLIENT_2_URL = "http://10.7.7.177:5001/trigger"
 CLIENT_3_URL = "http://10.7.7.145:5001/trigger"
 
 BASE_COMPOSE_FILES_LOCATION = '/media/mmcblk0p2/setup/compose_files/'
@@ -24,7 +24,7 @@ SERVICES = {"rust-actix": BASE_COMPOSE_FILES_LOCATION + 'rust-actix-compose-prod
             #"go-gorilla": BASE_COMPOSE_FILES_LOCATION + 'go-gorilla-compose-prod.yml'
             }
 
-async def main(otii_project, device, out_path, service, run_mode):
+async def execute_experiment(otii_project, device, out_path, service, run_mode, iterations):
     client_urls = [CLIENT_1_URL, CLIENT_2_URL, CLIENT_3_URL]
     time_seq_api_df = None
     time_seq_page_df = None
@@ -53,7 +53,7 @@ async def main(otii_project, device, out_path, service, run_mode):
         generate_output(otii_project, device)
         
 
-async def main_async(run_mode, out_path):
+async def main(run_mode, out_path, iterations):
     ssh_target = SERVER_URL.removeprefix("http://").removesuffix(':5000')
     otii_project, device = configure_multimeter(create_otii_app())
     for service, filepath in SERVICES.items():
@@ -62,11 +62,11 @@ async def main_async(run_mode, out_path):
             filepath
         )
         if service_started:
-            await main(otii_project, device, out_path, service, run_mode)
+            await execute_experiment(otii_project, device, out_path, service, run_mode, iterations)
     await manage_server_docker_service(ssh_target, "", True)
     
 
 if __name__ == "__main__":
     run_mode = str(Path(sys.argv[1])) if len(sys.argv) > 1 else "berries"
     out_path = Path(sys.argv[2]) if len(sys.argv) > 2 else Path("data/out")
-    asyncio.run(main_async(run_mode, out_path))
+    asyncio.run(main(run_mode, out_path, 10))

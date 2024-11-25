@@ -36,7 +36,7 @@ pub async fn establish_pool() -> Result<DatabasePool, bb8::RunError> {
     config.custom_setup = Box::new(|url| establish_connection(url).boxed());
     let manager = AsyncDieselConnectionManager::<AsyncPgConnection>::new_with_config(database_url, config);
     let pool = bb8::Pool::builder().connection_timeout(Duration::from_secs(15)).max_lifetime(Some(Duration::from_secs(60 * 60 * 24)))
-    .idle_timeout(Some(Duration::from_secs(60 * 2))).min_idle(Some(3)).build(manager).await?;
+    .idle_timeout(Some(Duration::from_secs(60 * 2))).min_idle(Some(10)).build(manager).await?;
     println!("Pool status: {:?}", pool.state());
     Ok(DatabasePool(pool))
 }
