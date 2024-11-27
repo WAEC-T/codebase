@@ -35,7 +35,7 @@ func main() {
 	*----------------------*/
 	funcMap := routes.SetupRouting()
 
-	config.Tpl, err = template.New("timeline.html").Funcs(funcMap).ParseGlob("../templates/*.html")
+	config.Tpl, err = template.New("timeline.html").Funcs(funcMap).ParseGlob("templates/*.html")
 	if err != nil {
 		log.Fatalf("Error parsing template: %v", err)
 	}
@@ -43,10 +43,10 @@ func main() {
 	/*---------------------
 	* Setup route-handlers
 	*----------------------*/
-	fmt.Println("Server started on port 5001")
+	fmt.Println("Server started on port 5000")
 	r := mux.NewRouter()
 	routes.SetRouteHandlers(r)
-	err = http.ListenAndServe(":5001", r)
+	err = http.ListenAndServe(":5000", r)
 	if err != nil {
 		log.Fatalf("Failed to start server: %v", err)
 	}
