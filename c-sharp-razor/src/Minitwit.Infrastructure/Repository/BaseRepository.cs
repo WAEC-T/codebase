@@ -8,6 +8,6 @@ public abstract class BaseRepository
     public BaseRepository(MinitwitDbContext minitwitDbContext)
     {
         db = minitwitDbContext;
-        PageSize = 32;
+        PageSize = 30;
     }
 }

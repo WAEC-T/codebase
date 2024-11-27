@@ -44,33 +44,47 @@ public class ProgramOptions
     }
     
     public static void AddDatabase(WebApplicationBuilder builder)
-    {   
-        string dbUser = Environment.GetEnvironmentVariable("POSTGRES_USER") ?? "user";
-        string dbPassword = Environment.GetEnvironmentVariable("POSTGRES_PASSWORD") ?? "pass";
-        string dbHost = Environment.GetEnvironmentVariable("POSTGRES_HOST") ?? "database";
-        string dbPort = Environment.GetEnvironmentVariable("POSTGRES_PORT") ?? "5432";
-        string dbName = Environment.GetEnvironmentVariable("POSTGRES_DB") ?? "waect";
-        
-        var connectionString = $"Host={dbHost};Port={dbPort};Database={dbName};Username={dbUser};Password={dbPassword}";
-        Console.WriteLine($"Testing connection with: {connectionString}");
+    {
+        string? databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
+        Console.WriteLine($"Testing connection with: {databaseUrl}");
 
+        if (string.IsNullOrEmpty(databaseUrl))
+        {
+            throw new InvalidOperationException("DATABASE_URL environment variable is not set.");
+        }
+        
         try
         {
+            // Parse DATABASE_URL into Npgsql-compatible format
+            var connectionString = ConvertDatabaseUrlToConnectionString(databaseUrl);
+        
             using var conn = new NpgsqlConnection(connectionString);
             conn.Open();
             Console.WriteLine("Connection successful!");
+
+            builder.Services.AddDbContext<MinitwitDbContext>(options =>
+            {
+                options.UseNpgsql(connectionString);
+            });
         }
         catch (Exception ex)
         {
             Console.WriteLine($"Connection failed: {ex.Message}");
         }
+    }
 
-        builder.Services.AddDbContext<MinitwitDbContext>(options =>
-        {
-            options.UseNpgsql(connectionString);
-        });
-
-        Console.WriteLine(
-            $"Connection string: Host={dbHost}; Port={dbPort}; Database={dbName}; Username={dbUser}; Password={dbPassword}");
+    private static string ConvertDatabaseUrlToConnectionString(string databaseUrl)
+    {
+        var uri = new Uri(databaseUrl);
+        
+        // Extract from URI
+        var host = uri.Host;
+        var port = uri.Port;
+        var username = uri.UserInfo.Split(':')[0];
+        var password = uri.UserInfo.Split(':')[1];
+        var database = uri.AbsolutePath.Trim('/');
+            
+        // Build connection string
+        return $"Host={host};Port={port};Username={username};Password={password};Database={database}";
     }
 }
