@@ -1,0 +1,23 @@
+version: "3.8"
+
+services:
+  minitwit:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: c_sharp_razor 
+    env_file:
+      - ../.env.local         
+    ports:
+      - "5000:5000"    
+    networks:
+      - waect-network
+    command: ["dotnet", "Minitwit.Web.dll"]
+
+networks:
+  waect-network:
+    name: waect-network
+    driver: bridge
+    external: true
+        
+
