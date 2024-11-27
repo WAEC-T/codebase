@@ -106,6 +106,7 @@ func Public_timeline(w http.ResponseWriter, r *http.Request) {
 		// Log the error and handle the user not being logged in
 		fmt.Println("public timeline: error retrieving user:", userID, err)
 	}
+	//TODO: Fix logs above when no user in session
 
 	// Fetch public messages
 	messages, err := db.GetPublicMessages(PER_PAGE)
@@ -143,7 +144,6 @@ func Register(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 
 	} else if r.Method == "GET" {
-		fmt.Println("here")
 		config.Tpl.ExecuteTemplate(w, "register.html", nil)
 
 	} else if r.Method == "POST" {
