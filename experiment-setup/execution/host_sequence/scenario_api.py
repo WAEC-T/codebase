@@ -67,10 +67,10 @@ def sequential_interval_scenario(service, start, iter):
 
     # 5. All users follow user1
     print_info_call("API", service, "Follow users", ITER_NUM)
-    for i in range(ITER_NUM):
+    for i in range(1, ITER_NUM):
         follow = api_follow_data_dummie(i)
         user_session = user_sessions[follow["follow"]]
-        response = request_endpoint(f"/fllws/{follow['follow']}", method="post", data={"follow": "user1"},
+        response = request_endpoint(f"/fllws/{follow['follow']}", method="post", data={"follow": "user0"},
                                     params=api_latest_query, user_session=user_session)
         results.append(response)
     time.sleep(BASE_DELAY)
@@ -78,18 +78,19 @@ def sequential_interval_scenario(service, start, iter):
     # 6. Get followers for user one
     print_info_call("API", service, "Get followers", ITER_NUM)
     for _ in range(ITER_NUM):
-        response = request_endpoint("/fllws/user1", method="get", params={**api_message_amount, **api_latest_query},
+        response = request_endpoint(f"/fllws/{main_user}", method="get", params={**api_message_amount, **api_latest_query},
                                     user_session=main_user_session)
         results.append(response)
     time.sleep(BASE_DELAY)
 
     # 7. All users unfollow user1
     print_info_call("API", service, "Unfollow users", ITER_NUM)
-    for i in range(ITER_NUM):
+    for i in range(1, ITER_NUM):
         unfollow = api_unfollow_data_dummie(i)
         user_session = user_sessions[unfollow["unfollow"]]
-        response = request_endpoint(f"/fllws/{unfollow['unfollow']}", method="post", data={"unfollow": "user1"},
+        response = request_endpoint(f"/fllws/{unfollow['unfollow']}", method="post", data={"unfollow": "user0"},
                                     params=api_latest_query, user_session=user_session)
+        response['endpoint'] = response['endpoint'].replace('fllws', 'unfllw')
         results.append(response)
     time.sleep(BASE_DELAY)
 
