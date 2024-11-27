@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Minitwit.Core.Entities;
 
 /// <summary>
-/// This class represents Messages, created by the users of the _Chirp!_ application.
+/// This class represents Messages, created by the users of the MiniTwit application.
 /// Messages are small messages,5 to 160 characters in length.
 /// It's the only way for users to communicate with each other.
 /// Messages hold the reactions given to them.
