@@ -1,6 +1,4 @@
 use actix_files as fs;
-use actix_identity::config::LogoutBehaviour;
-use actix_identity::IdentityMiddleware;
 use actix_session::{storage::CookieSessionStore, SessionMiddleware};
 use actix_web::cookie::Key;
 //use actix_web::middleware::Logger;
@@ -25,17 +23,12 @@ pub async fn start(port: u16)  -> std::io::Result<()> {
             .wrap(AuthMiddleware)
             .service(api_services())
             .wrap(
-                IdentityMiddleware::builder()
-                    .logout_behaviour(LogoutBehaviour::DeleteIdentityKeys)
-                    .build(),
-            )
-            .service(fs::Files::new("/static", "./src/frontend/static/").index_file("index.html"))
-            .wrap(
                 SessionMiddleware::builder(CookieSessionStore::default(), Key::from(&[0; 64]))
                     .cookie_secure(false)
                     .cookie_http_only(false)
                     .build(),
             )
+            .service(fs::Files::new("/static", "./src/frontend/static/").index_file("index.html"))
             .service(page_services())
     })
     .bind(("0.0.0.0", port))?

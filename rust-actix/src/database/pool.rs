@@ -7,8 +7,6 @@ use diesel_async::{
     AsyncPgConnection,
 };
 
-use native_tls::Certificate;
-
 use futures_util::FutureExt;
 use tokio_postgres::NoTls;
 
@@ -36,7 +34,7 @@ pub async fn establish_pool() -> Result<DatabasePool, bb8::RunError> {
     config.custom_setup = Box::new(|url| establish_connection(url).boxed());
     let manager = AsyncDieselConnectionManager::<AsyncPgConnection>::new_with_config(database_url, config);
     let pool = bb8::Pool::builder().connection_timeout(Duration::from_secs(15)).max_lifetime(Some(Duration::from_secs(60 * 60 * 24)))
-    .idle_timeout(Some(Duration::from_secs(60 * 2))).min_idle(Some(10)).build(manager).await?;
+    .idle_timeout(Some(Duration::from_secs(60 * 2))).max_size(40).min_idle(Some(20)).build(manager).await?;
     println!("Pool status: {:?}", pool.state());
     Ok(DatabasePool(pool))
 }
@@ -54,12 +52,7 @@ async fn establish_connection(database_url: &str) -> ConnectionResult<AsyncPgCon
                     })?;
             AsyncPgConnection::try_from_client_and_connection(client, connection).await
         } else {
-            let pg_cert = include_bytes!("certificate/pg_aws_rsa2048_g1.pem");
-            let certificate = Certificate::from_pem(pg_cert).map_err(|e| {
-                ConnectionError::BadConnection(format!("Error reading certificate: {}", e))
-            })?;
             let tls_connector = native_tls::TlsConnector::builder()
-                .add_root_certificate(certificate)
                 .danger_accept_invalid_certs(true)
                 .build()
                 .map_err(|e| {
