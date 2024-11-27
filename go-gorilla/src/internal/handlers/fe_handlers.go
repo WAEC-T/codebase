@@ -11,7 +11,6 @@ import (
 
 	"net"
 	"net/http"
-	"strconv"
 	"strings"
 
 	"github.com/gorilla/mux"
@@ -31,33 +30,28 @@ type Data struct {
 	Req           string
 	Followed      any
 	FlashMessages []any // Changed to a slice to match the getFlash return type
+	Endpoint      string
 }
 
 // GetUser retrieves the user from the session.
-func GetUser(r *http.Request) (any, string, error) {
+func GetUser(r *http.Request) (any, int, error) {
 	session, err := GetSession(r)
 	if err != nil {
-		return nil, "", err
+		return nil, 0, err
 	}
 
 	userID, ok := session.Values["user_id"]
 	if !ok {
-		return nil, "", nil
-	}
-
-	// Perform type assertion for userID
-	userIDStr := strconv.Itoa(userID.(int))
-	if !ok {
-		return nil, "", fmt.Errorf("user_id is not of type string")
+		return nil, 0, nil
 	}
 
 	// Query the user from the database
-	user, err := db.GetUserNameByUserID(userIDStr) // Assuming queryUserByID is defined
+	user, err := db.GetUserNameByUserID(userID.(int)) // Assuming queryUserByID is defined
 	if err != nil {
-		return nil, "", err
+		return nil, 0, err
 	}
 
-	return user, userIDStr, nil
+	return user, userID.(int), nil
 }
 
 // getSession retrieves the session for the user.
@@ -122,10 +116,12 @@ func Public_timeline(w http.ResponseWriter, r *http.Request) {
 	flash := GetFlash(w, r)
 	data := Data{
 		Messages:      messages,
+		UserID:        userID,
 		User:          user,
 		Req:           r.RequestURI,
 		FlashMessages: flash,
 		Followed:      following,
+		Endpoint:      "public_timeline",
 	}
 
 	// Render the template
@@ -140,7 +136,7 @@ func Public_timeline(w http.ResponseWriter, r *http.Request) {
 func Register(w http.ResponseWriter, r *http.Request) {
 	user, _, err := GetUser(r)
 	if err == nil && !(helpers.IsNil(user)) {
-		fmt.Println("first")
+		fmt.Println("Redirecting to -> /")
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 
 	} else if r.Method == "GET" {
@@ -231,7 +227,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		session.Values["user_id"] = user_id
 		session.Save(r, w)
 		SetFlash(w, r, "You were logged in")
-		http.Redirect(w, r, "/public", http.StatusSeeOther)
+		http.Redirect(w, r, "/", http.StatusSeeOther)
 		return
 	}
 }
@@ -252,7 +248,7 @@ func Logout(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func Timeline(w http.ResponseWriter, r *http.Request) {
+func MyTimeline(w http.ResponseWriter, r *http.Request) {
 	net.SplitHostPort(r.RemoteAddr)
 	user, user_id, err := GetUser(r)
 	if err != nil || helpers.IsNil(user) {
@@ -269,15 +265,14 @@ func Timeline(w http.ResponseWriter, r *http.Request) {
 
 		following, err := db.GetFollowing(user_id, 30) //TODO: LIMIT OF FOLLOWERS WE QUERY?
 
-		userIDInt, _ := strconv.Atoi(user_id)
-
 		d := Data{
 			User:          user,
-			UserID:        userIDInt,
+			UserID:        user_id,
 			ProfileUser:   profile_user,
 			Messages:      messages,
 			FlashMessages: flash,
 			Followed:      following,
+			Endpoint:      "my_timeline",
 		}
 
 		err = config.Tpl.ExecuteTemplate(w, "timeline.html", d)
@@ -291,15 +286,14 @@ func Timeline(w http.ResponseWriter, r *http.Request) {
 // """Registers a new message for the user."""
 func Add_message(w http.ResponseWriter, r *http.Request) {
 	user, user_id, err := GetUser(r)
-	userIDString, errStr := strconv.Atoi(user_id)
-	if err != nil || errStr != nil || helpers.IsNil(user) {
+	if err != nil || helpers.IsNil(user) {
 		http.Error(w, "You need to login before you can post a message", http.StatusUnauthorized)
 		return
 	}
 	text := r.FormValue("text")
 	if text != "" {
 		// Correct SQL query with pub_date and flagged as integer (0 for unflagged)
-		err := db.AddMessage(text, userIDString)
+		err := db.AddMessage(text, user_id)
 
 		if err != nil {
 			http.Error(w, "Unable to add message", http.StatusInternalServerError)
@@ -321,8 +315,7 @@ func Follow_user(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	username := vars["username"]
 
-	profileUser, err := db.GetUserByUsername(username)
-	profileUserID := fmt.Sprintf("%v", profileUser.UserID)
+	profileUserID, err := db.GetUserIDByUsername(username)
 	if err != nil {
 		http.Error(w, "Followuser: Error when trying to find the user in the database in follow", http.StatusNotFound)
 		return
@@ -334,7 +327,7 @@ func Follow_user(w http.ResponseWriter, r *http.Request) {
 	}
 	message := fmt.Sprintf("You are now following %s", username)
 	SetFlash(w, r, message)
-	http.Redirect(w, r, "/", http.StatusSeeOther)
+	http.Redirect(w, r, "/"+username, http.StatusSeeOther)
 }
 
 // """Removes the current user as follower of the given user."""
@@ -347,8 +340,7 @@ func Unfollow_user(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	username := vars["username"]
 
-	profileUser, err := db.GetUserByUsername(username)
-	profileUserID := fmt.Sprintf("%v", profileUser.UserID)
+	profileUserID, err := db.GetUserIDByUsername(username)
 	if err != nil {
 		http.Error(w, "Error when trying to find the user in the database in unfollow", http.StatusNotFound)
 		return
@@ -360,7 +352,7 @@ func Unfollow_user(w http.ResponseWriter, r *http.Request) {
 	}
 	message := fmt.Sprintf("You are no longer following %s", username)
 	SetFlash(w, r, message)
-	http.Redirect(w, r, "/", http.StatusFound)
+	http.Redirect(w, r, "/"+username, http.StatusFound)
 }
 
 // """Display's a users tweets."""
@@ -393,9 +385,11 @@ func User_timeline(w http.ResponseWriter, r *http.Request) {
 	d := Data{
 		Messages:      messages,
 		User:          user,
-		ProfileUser:   profile_user.Username,
+		UserID:        user_id,
+		ProfileUser:   profile_user,
 		FlashMessages: flash,
 		Followed:      following,
+		Endpoint:      "user_timeline",
 	}
 	err = config.Tpl.ExecuteTemplate(w, "timeline.html", d)
 	if err != nil {

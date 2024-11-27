@@ -10,7 +10,7 @@
   <div class="page">
     <h1>MiniTwit</h1>
     <div class="navigation">
-      {{if .User}}
+      {{if .UserID}}
       <a href="{{url_for "timeline" "" }}">my timeline</a> |
       <a href="{{url_for "public_timeline" "" }}">public timeline</a> |
       <a href="{{url_for "logout" "" }}">sign out [{{.User}}]</a> 
@@ -20,25 +20,27 @@
       <a href="{{url_for "login" "" }}">sign in</a> 
       {{end}}
     </div>
+
     {{$user := .User}}
     {{$following := .Followed}}
-    {{if eq .Req (print "/public")}}
-    <h2>Public timeline</h2>
-    {{else}}
-    <h2>{{.ProfileUser}}'s timeline</h2>
-    {{end}}
 
-    {{if .FlashMessages}}
-    <div class="flashes">
-      {{range .FlashMessages}}
-      <div>{{.}}</div>
-      {{end}}
-    </div>
-    {{end}}
-
-    {{if ne .Req (print "/public")}}
-    {{if eq .User .ProfileUser}}
-    <div class="followstatus">This is you!</div>
+    {{if eq .Endpoint "user_timeline"}}
+      <h2>{{.ProfileUser.Username}}'s Timeline</h2>
+      <div class="followstatus">
+          {{if eq .UserID .ProfileUser.UserID}} 
+              This is you! 
+          {{else if .Followed}} 
+              You are currently following this user.
+              <a class="unfollow" href="/{{.ProfileUser.Username}}/unfollow">Unfollow user</a>.
+          {{else}}
+              You are not yet following this user.
+              <a class="follow" href="/{{.ProfileUser.Username}}/follow">Follow user</a>. 
+          {{end}}
+      </div>
+    {{else if eq .Endpoint "public_timeline"}}
+      <h2>Public Timeline</h2>
+    {{else if eq .Endpoint "my_timeline"}}
+    <h2>My Timeline</h2>
     <div class="twitbox">
       <h3>What's on your mind, {{.User}}?</h3>
       <form action="{{url_for "add_message" "" }}" method="POST">
@@ -48,17 +50,14 @@
         </p>
       </form>
     </div>
-    {{else if IsFollowing $following .UserID}}
-    <div class=followstatus>
-    You are currently following this user
-    <a class="unfollow" href="{{url_for "unfollow" (formatUsernameUrl .ProfileUser)}}">Unfollow user</a>
-    </div>
-    {{else}}
-    <div class=followstatus>
-    You are not yet following this user
-    <a class="follow" href="{{url_for "follow" (formatUsernameUrl .ProfileUser)}}">Follow user</a>
-    </div>
     {{end}}
+
+    {{if .FlashMessages}}
+    <div class="flashes">
+      {{range .FlashMessages}}
+      <div>{{.}}</div>
+      {{end}}
+    </div>
     {{end}}
     <ul class="messages">
       {{if .Messages}}
@@ -74,10 +73,10 @@
       <li><em>There's no message so far.</em></li>
       {{end}}
     </ul>
-  </div>
-  </div>
   <div class="footer">
-    Minitwit - Go application
+   Minitwit Go-gorilla 1.23.1
+  </div>
+  </div>
   </div>
 </body>
 
