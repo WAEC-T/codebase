@@ -1,8 +1,7 @@
 use crate::database::models::{Messages, Users};
 use crate::database::pool::DatabasePool;
 use crate::database::repository::{
-    create_msg, create_user, follow, get_passwd_hash, get_public_messages, get_timeline,
-    get_user_by_id, get_user_by_name, get_user_timeline, is_following, unfollow,
+    create_msg, create_user, follow, get_passwd_hash, get_public_messages, get_timeline, get_user_by_id, get_user_by_name, get_user_id, get_user_timeline, is_following, unfollow
 };
 use crate::frontend::flash_messages::*;
 use crate::frontend::template_structs::*;
@@ -21,16 +20,6 @@ use md5::{Digest, Md5};
 use pwhash::bcrypt;
 
 const PAGE_MESSAGES_LIMIT: i32 = 30;
-
-async fn get_user_id(pool: web::Data<DatabasePool>, username: &str) -> i32 {
-    let mut conn = pool.get().await.unwrap();
-    let user = get_user_by_name(&mut conn, username).await;
-    if let Some(user) = user {
-        user.user_id
-    } else {
-        -1
-    }
-}
 
 async fn get_user_template_by_name(
     pool: web::Data<DatabasePool>,
@@ -204,8 +193,8 @@ async fn follow_user(
 ) -> impl Responder {
     if let Ok(Some(current_user)) = session.get::<i32>("user_id") {
         let _target_username = path.clone();
-        let _target_id = get_user_id(pool.clone(), &_target_username).await;
         let mut conn = pool.get().await.unwrap();
+        let _target_id = get_user_id(&mut conn, &_target_username).await;
         follow(&mut conn, current_user, _target_id).await;
         let message = format!("You are now following {}", _target_username);
         add_flash(session, message.as_str());
@@ -227,9 +216,9 @@ async fn unfollow_user(
     session: Session,
 ) -> impl Responder {
     if let Ok(Some(current_user)) = session.get::<i32>("user_id") {
-        let _target_username = path.clone();
-        let _target_id = get_user_id(pool.clone(), &_target_username).await;
         let mut conn = pool.get().await.unwrap();
+        let _target_username = path.clone();
+        let _target_id = get_user_id(&mut conn, &_target_username).await;
         unfollow(&mut conn, current_user, _target_id).await;
 
         let message = format!("You are no longer following {}", _target_username);
@@ -323,7 +312,7 @@ async fn post_login(
     if let Some(stored_hash) = result {
         if bcrypt::verify(info.password.clone(), &stored_hash) {
             // Successful login
-            let user_id = get_user_id(pool.clone(), &info.username).await;
+            let user_id = get_user_id(&mut conn, &info.username).await;
             session.insert("user_id", user_id).unwrap_or_else(|err| {
                 eprintln!("Failed to insert user_id into session: {:?}", err);
             });
@@ -360,6 +349,7 @@ async fn post_register(
     info: web::Form<RegisterInfo>,
     session: Session,
 ) -> impl Responder {
+    let mut conn = pool.get().await.unwrap();
     if info.username.is_empty() {
         add_flash(session, "You have to enter a username");
         return Redirect::to("/register").see_other();
@@ -372,14 +362,13 @@ async fn post_register(
     } else if info.password != info.password2 {
         add_flash(session, "The two passwords do not match");
         return Redirect::to("/register").see_other();
-    } else if get_user_id(pool.clone(), &info.username).await != -1 {
+    } else if get_user_id(&mut conn, &info.username).await != -1 {
         add_flash(session, "The username is already taken");
         return Redirect::to("/register").see_other();
     }
 
     let hash = bcrypt::hash(info.password.clone()).unwrap();
 
-    let mut conn = pool.get().await.unwrap();
     let _ = create_user(&mut conn, &info.username, &info.email, &hash).await;
 
     add_flash(
