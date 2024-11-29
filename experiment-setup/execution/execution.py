@@ -14,16 +14,16 @@ from host_sequence.scenario_page import run_page_seq_scenario
 
 # Check the static addresses when preparing the setup!
 SERVER_URL = "http://10.7.7.144:5000"
-CLIENT_1_URL = "http://10.7.7.198:5001/trigger"
-CLIENT_2_URL = "http://10.7.7.177:5001/trigger"
+CLIENT_1_URL = "http://10.7.7.199:5001/trigger"
+CLIENT_2_URL = "http://10.7.7.178:5001/trigger"
 CLIENT_3_URL = "http://10.7.7.145:5001/trigger"
 
 BASE_COMPOSE_FILES_LOCATION = '/media/mmcblk0p2/setup/compose_files/'
 COOLDOWN = 30
 
 SERVICES = {"rust-actix": BASE_COMPOSE_FILES_LOCATION + 'rust-actix-compose-prod.yml',
-            #"python-flask": BASE_COMPOSE_FILES_LOCATION + 'python-flask-compose-prod.yml',
-            #"go-gorilla": BASE_COMPOSE_FILES_LOCATION + 'go-gorilla-compose-prod.yml'
+            "python-flask": BASE_COMPOSE_FILES_LOCATION + 'python-flask-compose-prod.yml',
+            "go-gorilla": BASE_COMPOSE_FILES_LOCATION + 'go-gorilla-compose-prod.yml'
             }
 
 
@@ -35,10 +35,10 @@ async def execute_experiment(otii_project, device, out_path, service, run_mode, 
 
     recording_name = f"batch_{iterations}_start_{datetime.now().timestamp()}"
 
-    if(run_mode == "berries" and iteration > 0):
+    if(run_mode == "berries" and iterations > 0):
         for iteration in range(iterations):
-            experiment_data_iteration = await execute_berries(client_urls, otii_project, device, service)
-            pandas.concat(experiment_power_data, experiment_data_iteration, ignore_index=True)
+            experiment_data_iteration = await execute_berries(client_urls, otii_project, device, service, iteration)
+            experiment_power_data = pandas.concat([experiment_power_data, experiment_data_iteration], ignore_index=True)
 
     elif(run_mode == "sequential"):
         experiment_power_data, name = execute_sequential(otii_project, device, service)
@@ -79,7 +79,7 @@ async def execute_berries(client_urls, otii_project, device, service, iteration)
         otii_project.stop_recording()
         t_delta = datetime.now() - start_time
         print(f"Berries scenario for service {service} iteration {iteration} took ~ {t_delta} seconds ~", flush=True)
-        dataframe = collect_data(otii_project, device, iteration)
+        dataframe, _ = collect_data(otii_project, device, iteration)
         return dataframe
 
 
