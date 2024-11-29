@@ -38,9 +38,6 @@ func API_Follow(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//Convert user id to string
-	userIDStr := strconv.Itoa(user_id)
-
 	//Set follow-request type
 	var rv models.FollowData
 
@@ -69,9 +66,7 @@ func API_Follow(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
-			// Convert follow_user_id to string and follow the user
-			follower_userIDStr := strconv.Itoa(follow_user_id)
-			db.FollowUser(userIDStr, follower_userIDStr)
+			db.FollowUser(user_id, follow_user_id)
 			w.WriteHeader(http.StatusNoContent)
 			return
 		}
@@ -87,14 +82,13 @@ func API_Follow(w http.ResponseWriter, r *http.Request) {
 			}
 
 			// Convert unfollow_user_id to string and unfollow the user
-			unfollower_userIDStr := strconv.Itoa(unfollow_user_id)
-			db.UnfollowUser(userIDStr, unfollower_userIDStr)
+			db.UnfollowUser(user_id, unfollow_user_id)
 			w.WriteHeader(http.StatusNoContent)
 			return
 		}
 
 	} else if r.Method == "GET" {
-		followers, errx := db.GetFollowing(userIDStr, 100)
+		followers, errx := db.GetFollowing(user_id, 100)
 		if errx != nil {
 			fmt.Println("Error getting followers for", username)
 			w.WriteHeader(http.StatusNotFound)
