@@ -1,4 +1,4 @@
-# Using upload_csv_to_s3 Function
+# Using upload_to_s3 Function
 
 ## Prerequisites
 - AWS credentials configured (either through AWS CLI or environment variables)
@@ -14,7 +14,7 @@ aws configure
 Ask Gustav for values ;)
 
 ```python
-from upload_to_s3 import upload_csv_to_s3 [[2]](https://stackoverflow.com/questions/61247820)
+from upload_to_s3 import upload_to_s3 [[2]](https://stackoverflow.com/questions/61247820)
 
 def main():
     # Define your parameters
@@ -27,10 +27,10 @@ def main():
     
     try:
         # Upload without custom object name
-        success = upload_csv_to_s3(file_path, bucket_name)
+        success = upload_to_s3(file_path, bucket_name)
         
         # Or upload with custom object name
-        success = upload_csv_to_s3(file_path, bucket_name, object_name)
+        success = upload_to_s3(file_path, bucket_name, object_name)
         
         if success:
             print("File uploaded successfully")
