@@ -64,7 +64,7 @@ func SetRouteHandlers(r *mux.Router) {
 	r.HandleFunc("/register", handlers.Register)
 	r.HandleFunc("/login", handlers.Login)
 	r.HandleFunc("/logout", handlers.Logout)
-	r.HandleFunc("/", handlers.Timeline)
+	r.HandleFunc("/", handlers.MyTimeline)
 	r.HandleFunc("/add_message", handlers.Add_message).Methods("POST")
 	r.HandleFunc("/{username}/follow", handlers.Follow_user)
 	r.HandleFunc("/{username}", handlers.User_timeline)
