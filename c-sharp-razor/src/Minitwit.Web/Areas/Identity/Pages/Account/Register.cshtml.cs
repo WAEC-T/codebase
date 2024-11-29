@@ -33,18 +33,12 @@ namespace Minitwit.Web.Areas.Identity.Pages.Account
 
         public RegisterModel(
             UserManager<Author> userManager,
-            IUserStore<Author> userStore,
             SignInManager<Author> signInManager,
-            ILogger<RegisterModel> logger,
-            IEmailSender emailSender
-        )
+            ILogger<RegisterModel> logger)
         {
             _userManager = userManager;
-            _userStore = userStore;
-            _emailStore = GetEmailStore();
             _signInManager = signInManager;
             _logger = logger;
-            _emailSender = emailSender;
         }
 
         /// <summary>
@@ -66,54 +60,33 @@ namespace Minitwit.Web.Areas.Identity.Pages.Account
         /// </summary>
         public IList<AuthenticationScheme> ExternalLogins { get; set; }
 
+        public object ErrorMessage { get; set; }
+
         /// <summary>
         ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
         ///     directly from your code. This API may change or be removed in future releases.
         /// </summary>
         public class InputModel
         {
-            /// <summary>
-            ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-            ///     directly from your code. This API may change or be removed in future releases.
-            /// </summary>
-            [Required]
+            [Required(ErrorMessage = "You have to enter a username")]
             [DataType(DataType.Text)]
             [Display(Name = "Username")]
             public string Username { get; set; }
 
-            /// <summary>
-            ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-            ///     directly from your code. This API may change or be removed in future releases.
-            /// </summary>
-            [Required]
+            [Required(ErrorMessage = "You have to enter a valid email address")]
             [EmailAddress]
             [Display(Name = "Email")]
             public string Email { get; set; }
 
-            /// <summary>
-            ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-            ///     directly from your code. This API may change or be removed in future releases.
-            /// </summary>
-            [Required]
-            [StringLength(
-                100,
-                ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.",
-                MinimumLength = 1
-            )]
+            [Required(ErrorMessage = "You have to enter a password")]
             [DataType(DataType.Password)]
             [Display(Name = "Password")]
             public string Password { get; set; }
 
-            /// <summary>
-            ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-            ///     directly from your code. This API may change or be removed in future releases.
-            /// </summary>
+            [Required(ErrorMessage = "The two passwords do not match")]
             [DataType(DataType.Password)]
-            [Display(Name = "Confirm password")]
-            [Compare(
-                "Password",
-                ErrorMessage = "The password and confirmation password do not match."
-            )]
+            [Display(Name = "Confirm Password")]
+            [Compare("Password", ErrorMessage = "The two passwords do not match")]
             public string ConfirmPassword { get; set; }
         }
 
@@ -125,86 +98,54 @@ namespace Minitwit.Web.Areas.Identity.Pages.Account
             ).ToList();
         }
 
-        public async Task<IActionResult> OnPostAsync(string returnUrl = null)
+        public async Task<IActionResult> OnPostAsync()
         {
-            returnUrl ??= Url.Content("~/");
-            ExternalLogins = (
-                await _signInManager.GetExternalAuthenticationSchemesAsync()
-            ).ToList();
-            if (ModelState.IsValid)
+            if (User.Identity.IsAuthenticated)
             {
-                // Check if a user with the same username already exists
-                var existingUserByUsername = await _userManager.FindByNameAsync(Input.Username);
-                if (existingUserByUsername != null)
-                {
-                    ModelState.AddModelError("Input.Username", "Username is already taken.");
-                    return Page();
-                }
-
-                // Check if a user with the same email already exists
-                var existingUserByEmail = await _userManager.FindByEmailAsync(Input.Email);
-                if (existingUserByEmail != null)
-                {
-                    ModelState.AddModelError("Input.Email", "Email is already registered.");
-                    return Page();
-                }
-
-                // If no user with the same username or email exists, proceed with creating the user
-                var user = CreateUser();
-
-                await _userStore.SetUserNameAsync(user, Input.Username, CancellationToken.None);
-                await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
-                var result = await _userManager.CreateAsync(user, Input.Password);
-
-                if (result.Succeeded)
-                {
-                    _logger.LogInformation("User created a new account with password.");
-
-                    var userId = await _userManager.GetUserIdAsync(user);
-                    var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-                    code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
-                    var callbackUrl = Url.Page(
-                        "/Account/ConfirmEmail",
-                        pageHandler: null,
-                        values: new
-                        {
-                            area = "Identity",
-                            userId = userId,
-                            code = code,
-                            returnUrl = returnUrl
-                        },
-                        protocol: Request.Scheme
-                    );
-
-                    await _emailSender.SendEmailAsync(
-                        Input.Email,
-                        "Confirm your email",
-                        $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>."
-                    );
-
-                    if (_userManager.Options.SignIn.RequireConfirmedAccount)
-                    {
-                        return RedirectToPage(
-                            "RegisterConfirmation",
-                            new { email = Input.Email, returnUrl = returnUrl }
-                        );
-                    }
-                    else
-                    {
-                        await _signInManager.SignInAsync(user, isPersistent: false);
-                        return LocalRedirect(returnUrl);
-                    }
-                }
-                foreach (var error in result.Errors)
-                {
-                    ModelState.AddModelError(string.Empty, error.Description);
-                }
+                return RedirectToPage("/Timeline");
             }
 
-            // If we got this far, something failed, redisplay form
+            if (!ModelState.IsValid)
+            {
+                return Page();
+            }
+
+            // Check for existing username or email
+            if (await _userManager.FindByNameAsync(Input.Username) != null)
+            {
+                ModelState.AddModelError("Input.Username", "The username is already taken");
+                return Page();
+            }
+
+            if (await _userManager.FindByEmailAsync(Input.Email) != null)
+            {
+                ModelState.AddModelError("Input.Email", "The email is already registered");
+                return Page();
+            }
+
+            // Create new user
+            var newUser = new Author
+            {
+                UserName = Input.Username,
+                Email = Input.Email
+            };
+            var result = await _userManager.CreateAsync(newUser, Input.Password);
+            
+            if (result.Succeeded)
+            {
+                _logger.LogInformation("User registered successfully");
+                TempData["SuccessMessage"] = "You were successfully registered and can login now";
+                return RedirectToPage("/Login");
+            }
+            
+            foreach (var error in result.Errors)
+            {
+                ModelState.AddModelError(string.Empty, error.Description);
+            }
+
             return Page();
         }
-
+        
         private Author CreateUser()
         {
             try

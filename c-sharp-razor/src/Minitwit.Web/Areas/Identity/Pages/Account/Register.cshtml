@@ -2,78 +2,51 @@
 @model RegisterModel
 
 @{
-    ViewData["Title"] = "Register";
+    ViewData["Title"] = "Sign Up";
 }
 
-<div class="row">
-    <div class="col-md-4">
-        <form id="registerForm" asp-route-returnUrl="@Model.ReturnUrl" method="post">
-            <h2>Sign Up</h2>
-            <hr />
-            <!-- Username Field -->
-            <div class="mb-3">
-                <label asp-for="Input.Username" class="form-label">Username</label>
-                <input asp-for="Input.Username" class="form-control" autocomplete="username" aria-required="true" />
-                <span asp-validation-for="Input.Username" class="text-danger"></span>
-            </div>
+<h2>Sign Up</h2>
 
-            <!-- Email Field -->
-            <div class="mb-3">
-                <label asp-for="Input.Email" class="form-label">E-Mail</label>
-                <input asp-for="Input.Email" class="form-control" autocomplete="email" aria-required="true" />
-                <span asp-validation-for="Input.Email" class="text-danger"></span>
-            </div>
-
-            <!-- Password Field -->
-            <div class="mb-3">
-                <label asp-for="Input.Password" class="form-label">Password</label>
-                <input asp-for="Input.Password" type="password" class="form-control" autocomplete="new-password" aria-required="true" />
-                <span asp-validation-for="Input.Password" class="text-danger"></span>
-            </div>
-
-            <!-- Confirm Password Field -->
-            <div class="mb-3">
-                <label asp-for="Input.ConfirmPassword" class="form-label">Password <small>(repeat)</small></label>
-                <input asp-for="Input.ConfirmPassword" type="password" class="form-control" autocomplete="new-password" aria-required="true" />
-                <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
-            </div>
-
-            <!-- Submit Button -->
-            <button id="registerSubmit" type="submit" class="btn btn-primary w-100">Sign Up</button>
-        </form>
-    </div>
-    @* <div class="col-md-6 col-md-offset-2"> *@
-    @*     <section> *@
-    @*         <h3>Use another service to register.</h3> *@
-    @*         <hr /> *@
-    @*         @{ *@
-    @*             if ((Model.ExternalLogins?.Count ?? 0) == 0) *@
-    @*             { *@
-    @*                 <div> *@
-    @*                     <p> *@
-    @*                         There are no external authentication services configured. See this <a href="https://go.microsoft.com/fwlink/?LinkID=532715">article *@
-    @*                         about setting up this ASP.NET application to support logging in via external services</a>. *@
-    @*                     </p> *@
-    @*                 </div> *@
-    @*             } *@
-    @*             else *@
-    @*             { *@
-    @*                 <form id="external-account" asp-page="./ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl" method="post" class="form-horizontal"> *@
-    @*                     <div> *@
-    @*                         <p> *@
-    @*                             @foreach (var provider in Model.ExternalLogins!) *@
-    @*                             { *@
-    @*                                 <button type="submit" class="btn btn-primary" name="provider" value="@provider.Name" title="Log in using your @provider.DisplayName account">@provider.DisplayName</button> *@
-    @*                             } *@
-    @*                         </p> *@
-    @*                     </div> *@
-    @*                 </form> *@
-    @*             } *@
-    @*         } *@
-    @*     </section> *@
-    @* </div> *@
+@if (Model.ErrorMessage != null)
+{
+<div class="error">
+    <strong>Error:</strong> @Model.ErrorMessage
 </div>
+}
+
+<form id="registerForm" asp-route-returnUrl="@Model.ReturnUrl" method="post">
+    <dl>
+        <dt>Username:</dt>
+        <dd>
+            <input asp-for="Input.Username" class="form-control" autocomplete="username" />
+            <span asp-validation-for="Input.Username" class="text-danger"></span>
+        </dd>
+
+        <dt>E-Mail:</dt>
+        <dd>
+            <input asp-for="Input.Email" class="form-control" autocomplete="email" />
+            <span asp-validation-for="Input.Email" class="text-danger"></span>
+        </dd>
+
+        <dt>Password:</dt>
+        <dd>
+            <input asp-for="Input.Password" type="password" class="form-control" autocomplete="new-password" />
+            <span asp-validation-for="Input.Password" class="text-danger"></span>
+        </dd>
+
+        <dt>Password <small>(repeat)</small>:</dt>
+        <dd>
+            <input asp-for="Input.ConfirmPassword" type="password" class="form-control" autocomplete="new-password" />
+            <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
+        </dd>
+    </dl>
+
+    <div class="actions">
+        <input type="submit" class="btn btn-primary" value="Sign Up" />
+    </div>
+</form>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
 }
+

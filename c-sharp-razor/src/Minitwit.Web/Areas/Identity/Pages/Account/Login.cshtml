@@ -2,31 +2,33 @@
 @model LoginModel
 
 @{
-    ViewData["Title"] = "Log in";
+ViewData["Title"] = "Sign In";
 }
 
+<h2>Sign In</h2>
 
-<div class="row">
-    <div class="col-md-4">
-        <section>
-            <form id="account" method="post">
-                <h2>Sign In</h2>
-                <hr />
-                <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
-                <div class="form-floating mb-3">
-                    <input asp-for="Input.Username" class="form-control" autocomplete="email" aria-required="true" />
-                    <label asp-for="Input.Username" class="form-label">Username:</label>
-                    <span asp-validation-for="Input.Username" class="text-danger"></span>
-                </div>
-                <div class="form-floating mb-3">
-                    <input asp-for="Input.Password" class="form-control" autocomplete="current-password" aria-required="true" />
-                    <label asp-for="Input.Password" class="form-label">Password:</label>
-                    <span asp-validation-for="Input.Password" class="text-danger"></span>
-                </div>
-                <div>
-                    <button id="login-submit" type="submit" class="w-100 btn btn-lg btn-primary">Log in</button>
-                </div>
-            </form>
-        </section>
-    </div>
+@if (!string.IsNullOrEmpty(Model.ErrorMessage))
+{
+<div class="error">
+    <strong>Error:</strong> @Model.ErrorMessage
 </div>
+}
+
+<form method="post">
+    <dl>
+        <dt>Username:</dt>
+        <dd>
+            <input asp-for="Input.Username" type="text" class="form-control" size="30" />
+            <span asp-validation-for="Input.Username" class="text-danger"></span>
+        </dd>
+
+        <dt>Password:</dt>
+        <dd>
+            <input asp-for="Input.Password" type="password" class="form-control" size="30" />
+            <span asp-validation-for="Input.Password" class="text-danger"></span>
+        </dd>
+    </dl>
+    <div class="actions">
+        <input type="submit" class="btn btn-primary" value="Sign In" />
+    </div>
+</form>

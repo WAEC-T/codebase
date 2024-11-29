@@ -13,8 +13,13 @@ public class Program
         var builder = WebApplication.CreateBuilder(args);
 
         // Add services to the container.
-        builder.Services.AddRazorPages();
-
+        builder.Services.AddRazorPages(options =>
+        {
+            options.Conventions.AddAreaPageRoute("Identity", "/Account/Register", "/register");
+            options.Conventions.AddAreaPageRoute("Identity", "/Account/Login", "/login");
+            options.Conventions.AddAreaPageRoute("Identity", "/Account/Logout", "/logout");
+        });
+        
         ProgramOptions.AddProgramOptions(builder);
         ProgramOptions.AddIdendity(builder);
         ProgramOptions.AddDatabase(builder);

@@ -34,7 +34,7 @@ public class ProgramOptions
             options.User.AllowedUserNameCharacters =
                 "zxcvbnmasdfghjklqwertyuiopZXCVBNMASDFGHJKLQWERTYUIOP1234567890 @";
         });
-
+        
         builder
             .Services.AddDefaultIdentity<Author>()
             .AddRoles<IdentityRole<int>>()
@@ -45,9 +45,10 @@ public class ProgramOptions
     
     public static void AddDatabase(WebApplicationBuilder builder)
     {
-        string? databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
+        // string? databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
+        string databaseUrl = "postgresql://waect:DALEGREMIO@waectdatabase-waectdb03830e3f-xumxd6xbz9jb.c10ia6ywc903.eu-central-1.rds.amazonaws.com:5432/waect";
         Console.WriteLine($"Testing connection with: {databaseUrl}");
-
+        
         if (string.IsNullOrEmpty(databaseUrl))
         {
             throw new InvalidOperationException("DATABASE_URL environment variable is not set.");
