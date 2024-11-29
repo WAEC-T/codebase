@@ -43,13 +43,13 @@ The script accepts the following arguments:
 Upload a folder /my/local/folder to the S3 bucket my-bucket:
 
 ```bash
-python upload_folder_to_s3.py my-bucket /my/local/folder
+python3 upload_folder_to_s3.py my-bucket /my/local/folder
 ````
 
 Upload the same folder to the data/ prefix in the bucket:
 
 ```bash
-python upload_folder_to_s3.py my-bucket /my/local/folder --prefix data
+python3 upload_folder_to_s3.py my-bucket /my/local/folder --prefix data
 ```
 This will upload files to S3 in the following structure:
 
