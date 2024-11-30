@@ -18,14 +18,8 @@ import (
 func UserFollowActionHandler(c *gin.Context) {
 	session := sessions.Default(c)
 
-	userID, errID := c.Cookie("UserID")
-	if errID != nil {
-		session.AddFlash("You need to login before continuing to follow or unfollow.")
-		session.Save()
-		c.Redirect(http.StatusFound, "/login")
-		return
+	userID := session.Get("user_id")
 
-	}
 	profileUserName := c.Param("username")
 	profileUser, err := db.GetUserByUsername(profileUserName)
 	if err != nil {
@@ -33,16 +27,16 @@ func UserFollowActionHandler(c *gin.Context) {
 		c.Redirect(http.StatusFound, "/public")
 		return
 	}
-	profileUserID := fmt.Sprintf("%v", profileUser.UserID)
+	profileUserID := profileUser.UserID
 
 	action := c.Param("action")
 
 	if action == "/follow" {
-		db.FollowUser(userID, profileUserID)
+		db.FollowUser(userID.(int), profileUserID)
 		session.AddFlash("You are now following " + profileUserName)
 	}
 	if action == "/unfollow" {
-		db.UnfollowUser(userID, profileUserID)
+		db.UnfollowUser(userID.(int), profileUserID)
 		session.AddFlash("You are no longer following " + profileUserName)
 	}
 	session.Save()
@@ -63,11 +57,10 @@ func PublicTimelineHandler(c *gin.Context) {
 		"Messages":     formattedMessages,
 	}
 
-	userID, errID := c.Cookie("UserID")
-	if errID == nil {
-		context["UserID"] = userID
-		userName, errName := db.GetUserNameByUserID(userID)
-
+	session := sessions.Default(c)
+	userID := session.Get("user_id")
+	if userID != nil {
+		userName, errName := db.GetUserNameByUserID(userID.(int))
 		if errName == nil {
 			context["UserName"] = userName
 		}
@@ -79,6 +72,7 @@ func PublicTimelineHandler(c *gin.Context) {
 
 func UserTimelineHandler(c *gin.Context) {
 	session := sessions.Default(c)
+	userID := session.Get("user_id")
 	flashMessages := session.Flashes()
 	session.Save()
 	profileUserName := c.Param("username")
@@ -99,17 +93,7 @@ func UserTimelineHandler(c *gin.Context) {
 	followed := false
 	pUserId := profileUser.UserID
 	profileName := profileUser.Username
-	userID, errID := c.Cookie("UserID")
-	userIDInt, _ := strconv.Atoi(userID)
-	userName, _ := db.GetUserNameByUserID(userID)
-
-	if errID == nil {
-		followed, err = db.CheckFollowStatus(userIDInt, pUserId)
-		if err != nil {
-			fmt.Println("Error checking follow status")
-			return
-		}
-	}
+	userName, _ := db.GetUserNameByUserID(userID.(int))
 
 	messages, err := db.GetUserMessages(pUserId, 30)
 
@@ -124,7 +108,7 @@ func UserTimelineHandler(c *gin.Context) {
 	c.HTML(http.StatusOK, "timeline.html", gin.H{
 		"TimelineBody":    true,
 		"Endpoint":        "user_timeline",
-		"UserID":          userIDInt,
+		"UserID":          userID.(int),
 		"UserName":        userName,
 		"Messages":        formattedMessages,
 		"Followed":        followed,
@@ -135,27 +119,26 @@ func UserTimelineHandler(c *gin.Context) {
 }
 
 func MyTimelineHandler(c *gin.Context) {
-	userID, err := c.Cookie("UserID")
-	errMsg := c.Query("error")
+	session := sessions.Default(c)
 
-	if err != nil {
-		fmt.Println("Error getting user information")
-		c.Redirect(http.StatusFound, "/public")
+	userID := session.Get("userID")
+	if userID == nil {
+		fmt.Println("User not logged in or session expired")
+		c.Redirect(http.StatusFound, "/login") // Redirect to login page if session is invalid
 		return
 	}
 
-	userName, err := db.GetUserNameByUserID(userID)
+	userName, err := db.GetUserNameByUserID(userID.(int))
 	if err != nil {
 		fmt.Println("Error getting username by id")
 		c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
 
-	session := sessions.Default(c)
 	flashMessages := session.Flashes()
 	session.Save() // Clear flashes after retrieving
 
-	messages, err := db.GetMyMessages(userID)
+	messages, err := db.GetMyMessages(userID.(int))
 	if err != nil {
 		fmt.Println("Error getting users messages")
 		c.AbortWithError(http.StatusInternalServerError, err)
@@ -174,7 +157,6 @@ func MyTimelineHandler(c *gin.Context) {
 		"Followed":     false,
 		"ProfileUser":  userID,
 		"Flashes":      flashMessages,
-		"Error":        errMsg,
 	})
 }
 
@@ -227,12 +209,6 @@ func AddMessageHandler(c *gin.Context) {
 
 func RegisterHandler(c *gin.Context) {
 	session := sessions.Default(c)
-
-	userID, exists := c.Get("UserID")
-	if !exists {
-		fmt.Println("User does not exists, ID: ", userID)
-		return
-	}
 
 	var errorData string
 	if c.Request.Method == http.MethodPost {
@@ -302,8 +278,9 @@ func LoginHandler(c *gin.Context) {
 	flashMessages := session.Flashes()
 	session.Save()
 
-	userID, _ := c.Cookie("UserID")
-	if userID != "" {
+	userID := session.Get("user_id")
+	fmt.Println("userID: ", userID)
+	if userID != nil {
 		fmt.Println("User already logged in, redirecting")
 		session.AddFlash("You were logged in")
 		session.Save()
@@ -347,10 +324,11 @@ func LoginHandler(c *gin.Context) {
 				return
 			}
 
-			c.SetCookie("UserID", fmt.Sprint(userID), 3600, "/", "", false, true)
-
+			// Save userID in the session
+			session.Set("userID", userID)
 			session.AddFlash("You were logged in")
 			session.Save()
+
 			c.Redirect(http.StatusFound, "/")
 			return
 		}
