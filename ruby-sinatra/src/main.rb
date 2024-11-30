@@ -269,6 +269,7 @@ namespace "/api" do
     message = user.messages.create(
       text: request_data[:content],
       flagged: false,
+      pub_date: Time.now
     )
 
     if message
