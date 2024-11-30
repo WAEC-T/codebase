@@ -7,7 +7,6 @@ import (
 	"go-gorilla/src/internal/models"
 	"log"
 	"os"
-	"strconv"
 	"time"
 
 	"gorm.io/driver/postgres"
@@ -48,7 +47,7 @@ func ConnectDB(uri string) (*gorm.DB, error) {
 }
 
 // Fetches a username by their ID
-func GetUserNameByUserID(userID string) (string, error) {
+func GetUserNameByUserID(userID int) (string, error) {
 	var user models.Users
 	result := config.DB.First(&user, userID) // Use the passed db instance
 
@@ -126,7 +125,7 @@ func RegisterUser(userName string, email string, password [16]byte) error {
 }
 
 // fetches all messages for the current logged in user for 'My Timeline'
-func GetMyMessages(userID string) ([]models.MessageUser, error) {
+func GetMyMessages(userID int) ([]models.MessageUser, error) {
 
 	var messages []models.MessageUser
 
@@ -158,7 +157,7 @@ func GetMyMessages(userID string) ([]models.MessageUser, error) {
 }
 
 // getFollowing fetches up to `limit` users that the user identified by userID is following
-func GetFollowing(userID string, limit int) ([]models.Users, error) {
+func GetFollowing(userID int, limit int) ([]models.Users, error) {
 	var users []models.Users
 	config.DB.
 		Select("users.*").
@@ -200,29 +199,18 @@ func AddMessage(text string, author_id int) error {
 }
 
 // followUser adds a new follower to the database
-func FollowUser(userID string, profileUserID string) error {
-
-	userIDInt, errz := strconv.Atoi(userID)
-	profileUserIDInt, errx := strconv.Atoi(profileUserID)
-
-	if errz != nil {
-		fmt.Println(errz.Error())
-		return errz
-	} else if errx != nil {
-		fmt.Println(errx.Error())
-		return errx
-	}
+func FollowUser(userID int, profileUserID int) error {
 
 	// following relationship already exists
 	var count int64
-	config.DB.Model(&models.Followers{}).Where("who_id = ? AND whom_id = ?", userIDInt, profileUserIDInt).Count(&count)
+	config.DB.Model(&models.Followers{}).Where("who_id = ? AND whom_id = ?", userID, profileUserID).Count(&count)
 	if count > 0 {
 		return nil
 	}
 
 	newFollower := models.Followers{
-		WhoID:  userIDInt,
-		WhomID: profileUserIDInt,
+		WhoID:  userID,
+		WhomID: profileUserID,
 	}
 
 	config.DB.Create(&newFollower)
@@ -236,19 +224,8 @@ func FollowUser(userID string, profileUserID string) error {
 }
 
 // unfollowUser removes a follower from the database
-func UnfollowUser(userID string, profileUserID string) error {
-	userIDInt, errz := strconv.Atoi(userID)
-	profileUserIDInt, errx := strconv.Atoi(profileUserID)
-
-	if errz != nil {
-		fmt.Println(errz.Error())
-		return errz
-	} else if errx != nil {
-		fmt.Println(errx.Error())
-		return errx
-	}
-
-	config.DB.Where("who_id = ? AND whom_id = ?", userIDInt, profileUserIDInt).Delete(&models.Followers{})
+func UnfollowUser(userID int, profileUserID int) error {
+	config.DB.Where("who_id = ? AND whom_id = ?", userID, profileUserID).Delete(&models.Followers{})
 
 	if config.DB.Error != nil {
 		fmt.Println(config.DB.Error.Error())
