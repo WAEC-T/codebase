@@ -88,6 +88,8 @@ end
 get "/" do
   redirect("/public") unless logged_in?
 
+  @title = "My Timeline"
+
   @messages = Message
     .unflagged
     .authored_by(current_user.following + [current_user])
@@ -99,6 +101,7 @@ get "/" do
 end
 
 get "/public" do
+  @title = "Public Timeline"
   @messages = Message
     .unflagged
     .includes(:author)
@@ -157,7 +160,9 @@ end
 post "/add_message" do
   if !session[:user_id]
     return status 401
-  elsif params[:text]
+  elsif params[:text].nil? || params[:text].strip.empty?
+    flash[:error] = "Message cannot be empty!"
+  else
     if Message.create(
       author_id: session[:user_id],
       text: params[:text],
@@ -165,9 +170,9 @@ post "/add_message" do
       pub_date: Time.now,
     )
       flash[:success] = "Your message was recorded"
+    else
+      flash[:error] = "Something went wrong :("
     end
-  else
-    flash[:error] = "Something went wrong :("
   end
 
   redirect("/")
@@ -175,6 +180,7 @@ end
 
 get "/:username" do
   @profile_user = User.find_by_username(params[:username])
+  @title = "#{@profile_user.username}'s Timeline"
   @messages = Message
     .unflagged
     .authored_by(@profile_user)
