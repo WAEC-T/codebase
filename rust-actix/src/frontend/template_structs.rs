@@ -26,6 +26,7 @@ pub struct TimelineTemplate<'a> {
     pub followed: Option<bool>,
     pub flashes: Vec<String>,
     pub title: String,
+    pub error: String,
 }
 
 #[derive(Template)]

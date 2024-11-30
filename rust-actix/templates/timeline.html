@@ -10,6 +10,7 @@
 {% endblock %}
 {% block body %}
   <h2>{{ title }}</h2>
+  {% if !error.is_empty() %}<div class=error><strong>Error:</strong> {{ error }}</div>{% endif %}
   {% if user.is_some()%}
     {% if request_endpoint == "user_timeline" %}
       <div class=followstatus>

@@ -114,6 +114,7 @@ async fn timeline(
             followed: Some(false),
             flashes: flash.unwrap_or_default().messages,
             title: String::from("My Timeline"),
+            error: String::from(""),
         }
         .render()
         .unwrap();
@@ -144,6 +145,7 @@ async fn public_timeline(
         followed: Some(false),
         flashes: flash_messages.unwrap_or_default().messages,
         title: String::from("Public Timeline"),
+        error: String::from(""),
     }
 }
 
@@ -175,6 +177,7 @@ async fn user_timeline(
             followed: Some(followed),
             flashes: flash_messages.unwrap_or_default().messages,
             title: format!("{}'s Timeline", profile_user_name),
+            error: String::from(""),
         }
         .render()
         .unwrap();
@@ -243,6 +246,31 @@ async fn add_message(
         Ok(Some(user_id)) => {
             let mut conn = pool.get().await.unwrap();
             let timestamp = Utc::now();
+            if &msg.text == ""{
+                if let Some(user) = get_user(pool.clone(), session).await {
+                    let messages =
+                        format_messages(get_timeline(&mut conn, user.user_id, PAGE_MESSAGES_LIMIT).await);
+            
+                    let context = TimelineTemplate {
+                        messages,
+                        request_endpoint: "timeline",
+                        profile_user: None,
+                        user: Some(user),
+                        followed: Some(false),
+                        flashes: Vec::new(),
+                        title: String::from("My Timeline"),
+                        error: String::from("Message cannot be empty!")
+                    }
+                    .render()
+                    .unwrap();
+                    return HttpResponse::Ok().body(context)
+                } else {
+                    return HttpResponse::TemporaryRedirect()
+                        .append_header((header::LOCATION, "/public"))
+                        .finish()
+                }
+    
+            } 
             let _ = create_msg(&mut conn, &user_id, &msg.text, timestamp, &0).await;
             add_flash(session, "Your message was recorded");
             HttpResponse::Found()
@@ -301,17 +329,16 @@ async fn post_login(
     session: Session,
 ) -> impl Responder {
     let mut conn = pool.get().await.unwrap();
-    let result = get_passwd_hash(&mut conn, &info.username).await;
-    if result.is_none() {
-        add_flash(session, "Invalid username");
-        return HttpResponse::Found()
-            .append_header((header::LOCATION, "/login"))
-            .finish();
-    }
+    let mut error_message = String::new();
 
-    if let Some(stored_hash) = result {
-        if bcrypt::verify(info.password.clone(), &stored_hash) {
-            // Successful login
+    let result = get_passwd_hash(&mut conn, &info.username).await;
+
+    if result.is_none() {
+        error_message = "Invalid username".to_string();
+    } else if let Some(stored_hash) = result {
+        if !bcrypt::verify(info.password.clone(), &stored_hash) {
+            error_message = "Invalid password".to_string();
+        } else {
             let user_id = get_user_id(&mut conn, &info.username).await;
             session.insert("user_id", user_id).unwrap_or_else(|err| {
                 eprintln!("Failed to insert user_id into session: {:?}", err);
@@ -324,11 +351,17 @@ async fn post_login(
         }
     }
 
-    // Password incorrect
-    add_flash(session, "Invalid password");
-    return HttpResponse::Found()
-        .append_header((header::LOCATION, "/login"))
-        .finish();
+    let context = LoginTemplate {
+            user: None,
+            error: error_message,
+            username: info.username.clone(),
+            flashes: Vec::new(),  
+        }
+        .render()
+        .unwrap();
+
+    return HttpResponse::Ok().body(context);
+
 }
 
 #[get("/register")]
@@ -350,33 +383,47 @@ async fn post_register(
     session: Session,
 ) -> impl Responder {
     let mut conn = pool.get().await.unwrap();
+    let mut error_message = String::new();
+
     if info.username.is_empty() {
-        add_flash(session, "You have to enter a username");
-        return Redirect::to("/register").see_other();
+        error_message = "You have to enter a username".to_string();
     } else if info.email.is_empty() || !info.email.contains('@') {
-        add_flash(session, "You have to enter a valid email address");
-        return Redirect::to("/register").see_other();
+        error_message = "You have to enter a valid email address".to_string();
     } else if info.password.is_empty() {
-        add_flash(session, "You have to enter a password");
-        return Redirect::to("/register").see_other();
+        error_message = "You have to enter a password".to_string();
     } else if info.password != info.password2 {
-        add_flash(session, "The two passwords do not match");
-        return Redirect::to("/register").see_other();
+        error_message = "The two passwords do not match".to_string();
     } else if get_user_id(&mut conn, &info.username).await != -1 {
-        add_flash(session, "The username is already taken");
-        return Redirect::to("/register").see_other();
+        error_message = "The username is already taken".to_string();
     }
 
-    let hash = bcrypt::hash(info.password.clone()).unwrap();
+    if !error_message.is_empty() {
+        let context = RegisterTemplate {
+            user: None,
+            email: info.email.clone(),
+            username: info.username.clone(),
+            password: info.password.clone(),
+            flashes: Vec::new(),
+            error: error_message,
+        }
+        .render()
+        .unwrap();
 
+        return HttpResponse::Ok().body(context);
+    }
+    else{
+
+    let hash = bcrypt::hash(info.password.clone()).unwrap();
     let _ = create_user(&mut conn, &info.username, &info.email, &hash).await;
 
-    add_flash(
-        session,
-        "You were successfully registered and can login now",
-    );
-    Redirect::to("/login").see_other()
+    add_flash(session, "You were successfully registered and can login now");
+
+    return HttpResponse::SeeOther()
+            .append_header(("Location", "/login"))
+            .finish();
+    }
 }
+
 
 #[get("/logout")]
 async fn logout(session: Session) -> impl Responder {
