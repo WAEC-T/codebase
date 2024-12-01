@@ -34,18 +34,17 @@ func SetRouteHandlers(r *gin.Engine) {
 	r.POST("/login", handlers.LoginHandler)
 	r.POST("/add_message", handlers.AddMessageHandler)
 
-	// // API routes
-	// // is it easier to separate the next two routes into two handlers?
-	// r.GET("/api/msgs", apiMsgsHandler)
-	// r.GET("/api/msgs/:username", apiMsgsPerUserHandler)
-	// r.GET("/api/fllws/:username", apiFllwsHandler)
+	// API routes
+	r.GET("/api/msgs", handlers.ApiMsgsHandler)
+	r.GET("/api/msgs/:username", handlers.ApiMsgsPerUserHandler)
+	r.GET("/api/fllws/:username", handlers.ApiFllwsHandler)
 
-	// r.POST("/api/register", apiRegisterHandler)
-	// r.POST("/api/msgs/:username", apiMsgsPerUserHandler)
-	// r.POST("/api/fllws/:username", apiFllwsHandler)
+	r.POST("/api/register", handlers.ApiRegisterHandler)
+	r.POST("/api/msgs/:username", handlers.ApiMsgsPerUserHandler)
+	r.POST("/api/fllws/:username", handlers.ApiFllwsHandler)
 
-	// // some helper method to "cache" what was the latest simulator action
-	// r.GET("/api/latest", getLatestHandler)
+	// some helper method to "cache" what was the latest simulator action
+	r.GET("/api/latest", handlers.GetLatestHandler)
 }
 
 func LoadEnvVars() string {
