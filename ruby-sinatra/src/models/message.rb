@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# Represents a message model in minitwit.
 class Message < ActiveRecord::Base
   belongs_to :author, class_name: 'User'
 

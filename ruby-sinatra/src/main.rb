@@ -8,19 +8,17 @@ require 'json'
 require 'newrelic_rpm'
 require 'dotenv'
 
-Dir['./models/*.rb'].each { |file| require file }
-
-USER_NOT_FOUND = 'User not found'
+Dir['./models/*.rb'].sort.each { |file| require file }
 
 PR_PAGE = 30
 
 DATABASE_URL = ENV.fetch('DATABASE_URL', nil)
-
 puts "Loaded DATABASE_URL: #{DATABASE_URL}"
 
+USER_NOT_FOUND = 'User not found'
 NO_IS_REQUIRED = 'no is required'
 
-configure :production, :staging do
+configure :production, :staging, :development, :test do
   db = URI.parse(DATABASE_URL)
   set :database, {
     adapter: db.scheme,
@@ -31,24 +29,10 @@ configure :production, :staging do
     password: db.password,
     encoding: 'utf8'
   }
-  set :public_folder, "#{__dir__}/static"
-  enable :sessions
-end
-
-configure :development, :test do
-  if DATABASE_URL
-    set :database, DATABASE_URL
-  else
-    # Fall back to specific configurations for development and test environments
-    case settings.environment
-    when :development
-      set :database, { adapter: 'postgresql', database: 'waect' }
-      ActiveRecord.verbose_query_logs = true
-    when :test
-      set :database, { adapter: 'postgresql', database: 'minitwit_test' }
-      enable :logging
-      ActiveRecord::Base.logger = Logger.new($stdout)
-    end
+  if settings.environment == :development || settings.environment == :test
+    enable :logging
+    ActiveRecord.verbose_query_logs = true
+    ActiveRecord::Base.logger = Logger.new($stdout)
   end
   set :public_folder, "#{__dir__}/static"
   enable :sessions

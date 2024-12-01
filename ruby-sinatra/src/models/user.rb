@@ -3,6 +3,7 @@
 require 'digest'
 require 'bcrypt'
 
+# Represents a user model in minitwit.
 class User < ActiveRecord::Base
   has_and_belongs_to_many :followers,
                           class_name: 'User',

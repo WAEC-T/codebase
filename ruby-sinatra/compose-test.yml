@@ -1,7 +1,7 @@
 services:
   ruby-sinatra:
+    image: waect/ruby-sinatra
     build: .
-    container_name: ruby-sinatra
     ports:
       - "5000:5000"
     env_file:
