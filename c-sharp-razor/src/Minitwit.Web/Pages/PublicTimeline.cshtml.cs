@@ -63,6 +63,7 @@ public class PublicTimelineModel : PageModel
         }
         var Message = new CreateMessage(author.Id, NewMessage!.Text!);
         await CreateMessage(Message);
+        TempData["FlashMessage"] = "Your message was recorded";
         string userTimelineUrl = $"/{User.Identity.Name}";
         return Redirect(userTimelineUrl);
     }
@@ -70,58 +71,6 @@ public class PublicTimelineModel : PageModel
     public async Task CreateMessage(CreateMessage newMessage)
     {
         await _MessageRepository.AddCreateMessageAsync(newMessage);
-    }
-
-    public async Task<IActionResult> OnPostReaction(
-        int MessageId,
-        int currentPage
-    )
-    {
-        Author? author = await _userManager.GetUserAsync(User);
-        await InitializeVariables(currentPage);
-        return Page();
-    }
-
-    public async Task<IActionResult> OnPostRemoveReaction(
-        int MessageId,
-        int currentPage
-    )
-    {
-        Author? author = await _userManager.GetUserAsync(User);
-        await InitializeVariables(currentPage);
-        return Page();
-    }
-
-    public async Task<IActionResult> OnPostFollow(int currentPage, int Author2Follow)
-    {
-        Author? author = await _authorRepository.GetAuthorByIdAsync(
-            _userManager.GetUserAsync(User).Result!.Id
-        );
-        Author? authorToFollow = await _authorRepository.GetAuthorByIdAsync(Author2Follow);
-        await InitializeVariables(currentPage);
-
-        if (author == null)
-            return Page();
-
-        if (authorToFollow != null)
-            await _authorRepository.AddFollowAsync(author.Id, authorToFollow.Id);
-        return Page();
-    }
-
-    public async Task<IActionResult> OnPostUnfollow(int currentPage, int Author2Unfollow)
-    {
-        Author? author = await _authorRepository.GetAuthorByIdAsync(
-            _userManager.GetUserAsync(User).Result!.Id
-        );
-        Author? authorToUnfollow = await _authorRepository.GetAuthorByIdAsync(Author2Unfollow);
-
-        await InitializeVariables(currentPage);
-
-        if (authorToUnfollow == null || author == null)
-            return Page();
-
-        await _authorRepository.RemoveFollowAsync(author.Id, authorToUnfollow.Id);
-        return Page();
     }
 
     public async Task InitializeVariables()

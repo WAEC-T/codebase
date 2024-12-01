@@ -108,30 +108,27 @@ public class UserTimelineModel : PageModel
     
     public async Task<IActionResult> OnGetFollow(string author)
     {   
-        Console.WriteLine("Following user" + author);
         Author? currentUser = await _userManager.GetUserAsync(User);
         Author? authorToFollow = await _authorRepository.GetAuthorByNameAsync(author);
-
-        if (currentUser == null || authorToFollow == null)
+        
+        if (currentUser == null)
             return NotFound();
         
         await _authorRepository.AddFollowAsync(currentUser.Id, authorToFollow.Id);
-        Console.WriteLine("Sucess in Following");
-        // Redirect back to the user's timeline page after following
+        TempData["FlashMessage"] = "You are now following " + authorToFollow.UserName;
         return RedirectToPage("/UserTimeline", new { author = authorToFollow.UserName });
     }
 
     public async Task<IActionResult> OnGetUnfollow(string author)
-    {
+    {   
         Author? currentUser = await _userManager.GetUserAsync(User);
         Author? authorToUnfollow = await _authorRepository.GetAuthorByNameAsync(author);
 
-        if (currentUser == null || authorToUnfollow == null)
+        if (currentUser == null)
             return NotFound();
-
+        
         await _authorRepository.RemoveFollowAsync(currentUser.Id, authorToUnfollow.Id);
-
-        // Redirect back to the user's timeline page after unfollowing
+        TempData["FlashMessage"] = "You are no longer following " + authorToUnfollow.UserName;
         return RedirectToPage("/UserTimeline", new { author = authorToUnfollow.UserName });
     }
 }
