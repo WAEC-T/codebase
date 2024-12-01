@@ -246,7 +246,7 @@ async fn add_message(
         Ok(Some(user_id)) => {
             let mut conn = pool.get().await.unwrap();
             let timestamp = Utc::now();
-            if &msg.text == ""{
+            if msg.text.is_empty() {
                 if let Some(user) = get_user(pool.clone(), session).await {
                     let messages =
                         format_messages(get_timeline(&mut conn, user.user_id, PAGE_MESSAGES_LIMIT).await);
@@ -360,7 +360,7 @@ async fn post_login(
         .render()
         .unwrap();
 
-    return HttpResponse::Ok().body(context);
+    HttpResponse::Ok().body(context)
 
 }
 
@@ -409,7 +409,7 @@ async fn post_register(
         .render()
         .unwrap();
 
-        return HttpResponse::Ok().body(context);
+        HttpResponse::Ok().body(context)
     }
     else{
 
