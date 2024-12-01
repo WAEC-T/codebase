@@ -84,8 +84,6 @@ returns: ("", 204) or ({"status": 400, "error_msg": error}, 400)
 */
 func ApiRegisterHandler(c *gin.Context) {
 	UpdateLatestHandler(c)
-	latest := GetLatestHelper()
-	fmt.Println(fmt.Sprint(latest) + " apiRegisterHandler: registering user.")
 
 	errorData := ErrorData{
 		status:    0,
@@ -180,7 +178,6 @@ func ApiRegisterHandler(c *gin.Context) {
 			c.AbortWithStatusJSON(400, errorData.error_msg)
 			return
 		} else {
-			fmt.Println("User successfully registered")
 			c.JSON(204, "")
 		}
 	}
@@ -192,8 +189,6 @@ func ApiRegisterHandler(c *gin.Context) {
 */
 func ApiMsgsHandler(c *gin.Context) {
 	UpdateLatestHandler(c)
-	latest := GetLatestHelper()
-	fmt.Println(fmt.Sprint(latest) + " apiMsgsHandler: getting all messages.")
 
 	errorData := ErrorData{
 		status:    0,
@@ -238,8 +233,6 @@ func ApiMsgsHandler(c *gin.Context) {
 */
 func ApiMsgsPerUserHandler(c *gin.Context) {
 	UpdateLatestHandler(c)
-	latest := GetLatestHelper()
-	fmt.Println(fmt.Sprint(latest) + " apiMsgsPerUserHandler: getting all messages by user " + c.Param("username") + ".")
 
 	errorData := ErrorData{
 		status:    0,
@@ -284,7 +277,6 @@ func ApiMsgsPerUserHandler(c *gin.Context) {
 		}
 
 		// Log successful retrieval of messages
-		fmt.Println("Successfully retrieved messages")
 		filteredMessages := helpers.FilterMessages(messages)
 		jsonFilteredMessages, _ := json.Marshal(filteredMessages)
 		c.Header("Content-Type", "application/json")
@@ -302,15 +294,12 @@ func ApiMsgsPerUserHandler(c *gin.Context) {
 		}
 
 		if err := json.Unmarshal(body, &messageReq); err != nil {
-
 			fmt.Println("Failed to parse JSON body")
-
 			errorData.status = 400
 			errorData.error_msg = "Failed to parse JSON"
 		}
 
 		text := messageReq.Content
-		fmt.Println(text)
 		authorId, err := db.GetUserIDByUsername(profileUserName)
 		if err != nil {
 			errorData.status = http.StatusBadRequest
@@ -325,7 +314,6 @@ func ApiMsgsPerUserHandler(c *gin.Context) {
 			c.AbortWithStatusJSON(http.StatusInternalServerError, errorData)
 		}
 
-		fmt.Println("Successfully uploaded message")
 		c.String(http.StatusNoContent, "")
 	}
 }
@@ -349,8 +337,6 @@ else if POST:
 */
 func ApiFllwsHandler(c *gin.Context) {
 	UpdateLatestHandler(c)
-	latest := GetLatestHelper()
-	fmt.Println(fmt.Sprint(latest) + " apiFllwsHandler: checking follow")
 
 	errorData := ErrorData{
 		status:    0,
@@ -391,9 +377,6 @@ func ApiFllwsHandler(c *gin.Context) {
 			errorData.error_msg = "Failed to fetch followers from DB"
 			c.AbortWithStatusJSON(http.StatusInternalServerError, errorData)
 		}
-
-		// Successfully retrieved followers, log this event
-		fmt.Println("Successfully retrieved followers")
 
 		// empty slice for follower usernames
 		followerNames := []string{}
@@ -455,8 +438,6 @@ func ApiFllwsHandler(c *gin.Context) {
 				return
 			}
 
-			fmt.Println("Follow request processed")
-
 			c.JSON(http.StatusNoContent, "")
 			return
 		} else if requestBody.Unfollow != "" {
@@ -477,7 +458,6 @@ func ApiFllwsHandler(c *gin.Context) {
 				return
 			}
 
-			fmt.Println("Unfollow request processed")
 			c.JSON(http.StatusNoContent, "")
 		} else {
 			errorData.status = http.StatusNotFound

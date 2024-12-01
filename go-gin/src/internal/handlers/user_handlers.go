@@ -222,6 +222,7 @@ func RegisterHandler(c *gin.Context) {
 		passwordConfirm := c.Request.FormValue("passwordConfirm")
 
 		userID, err := db.GetUserIDByUsername(userName)
+		fmt.Println("RegisterHandler userID: ", userID)
 		if err != nil {
 			fmt.Println("Error getting username by id")
 			c.AbortWithError(http.StatusInternalServerError, err)
@@ -271,6 +272,7 @@ func LoginHandler(c *gin.Context) {
 	session.Save()
 
 	userID := session.Get("userID")
+	fmt.Println("LoginHandler userID: ", userID)
 	if userID != nil {
 		fmt.Println("User already logged in, redirecting")
 		session.AddFlash("You were logged in")

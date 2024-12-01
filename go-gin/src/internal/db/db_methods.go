@@ -67,7 +67,6 @@ func GetUserIDByUsername(userName string) (int, error) {
 	if user.UserID == 0 {
 		return -1, nil
 	} else {
-
 		return user.UserID, nil
 	}
 }
