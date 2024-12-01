@@ -10,36 +10,36 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_04_12_083347) do
+ActiveRecord::Schema[7.1].define(version: 20_240_412_083_347) do
   # These are extensions that must be enabled in order to support this database
-  enable_extension "plpgsql"
+  enable_extension 'plpgsql'
 
-  create_table "followers", force: :cascade do |t|
-    t.integer "who_id"
-    t.integer "whom_id"
-    t.index ["who_id", "whom_id"], name: "index_followers_on_who_id_and_whom_id"
+  create_table 'followers', force: :cascade do |t|
+    t.integer 'who_id'
+    t.integer 'whom_id'
+    t.index %w[who_id whom_id], name: 'index_followers_on_who_id_and_whom_id'
   end
 
-  create_table "latest", force: :cascade do |t|
-    t.integer "id"
+  create_table 'latest', force: :cascade do |t|
+    t.integer 'id'
   end
 
-  create_table "messages", force: :cascade do |t|
-    t.bigint "author_id"
-    t.string "text", null: false
-    t.boolean "flagged"
-    t.datetime "created_at", null: false
-    t.index ["author_id"], name: "index_messages_on_author_id"
-    t.index ["created_at"], name: "index_messages_on_created_at", order: :desc
-    t.index ["flagged"], name: "index_messages_on_flagged"
+  create_table 'messages', force: :cascade do |t|
+    t.bigint 'author_id'
+    t.string 'text', null: false
+    t.boolean 'flagged'
+    t.datetime 'created_at', null: false
+    t.index ['author_id'], name: 'index_messages_on_author_id'
+    t.index ['created_at'], name: 'index_messages_on_created_at', order: :desc
+    t.index ['flagged'], name: 'index_messages_on_flagged'
   end
 
-  create_table "users", force: :cascade do |t|
-    t.string "username", null: false
-    t.string "email", null: false
-    t.string "pw_hash", null: false
-    t.index ["username"], name: "index_users_on_username"
+  create_table 'users', force: :cascade do |t|
+    t.string 'username', null: false
+    t.string 'email', null: false
+    t.string 'pw_hash', null: false
+    t.index ['username'], name: 'index_users_on_username'
   end
 
-  add_foreign_key "messages", "users", column: "author_id"
+  add_foreign_key 'messages', 'users', column: 'author_id'
 end
