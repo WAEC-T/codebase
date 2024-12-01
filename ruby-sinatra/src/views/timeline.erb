@@ -20,9 +20,9 @@
   <div class=twitbox>
     <h3>What's on your mind <%= current_user.username %>?</h3>
     <form action="/add_message" method=post>
-      <p><input type=text name=text size=60>
-      <input type=submit value="Share"> 
-    </form>
+      <p><input type=text name=text size=60><!--
+      --><input type=submit value="Share"> 
+    </form> 
   </div>
 <% end %>
 <ul class=messages>
