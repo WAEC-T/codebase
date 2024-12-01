@@ -149,7 +149,7 @@ async fn public_timeline(
     }
 }
 
-#[get("/{username}")]
+#[get("/user/{username}")]
 async fn user_timeline(
     pool: web::Data<DatabasePool>,
     path: web::Path<String>,
@@ -207,7 +207,7 @@ async fn follow_user(
             .finish();
     }
     return HttpResponse::Found()
-        .append_header((header::LOCATION, format!("/{}", path)))
+        .append_header((header::LOCATION, format!("/user/{}", path)))
         .finish();
 }
 
@@ -232,7 +232,7 @@ async fn unfollow_user(
             .finish();
     }
     return HttpResponse::Found()
-        .append_header((header::LOCATION, format!("/{}", path)))
+        .append_header((header::LOCATION, format!("/user/{}", path)))
         .finish();
 }
 
