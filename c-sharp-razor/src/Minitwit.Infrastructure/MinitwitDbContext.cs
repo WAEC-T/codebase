@@ -26,25 +26,6 @@ public sealed class MinitwitDbContext : IdentityDbContext<Author, IdentityRole<i
         ChangeTracker.LazyLoadingEnabled = false;
     }
 
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    {
-        if (!optionsBuilder.IsConfigured)
-        {
-            // Get PostgreSQL environment variables
-            string username = Environment.GetEnvironmentVariable("POSTGRES_USER") ?? "user";
-            string password = Environment.GetEnvironmentVariable("POSTGRES_PASSWORD") ?? "pass";
-            string host = "192.168.0.146"; // Environment.GetEnvironmentVariable("POSTGRES_HOST") ?? "192.168.0.146" 
-            string port = Environment.GetEnvironmentVariable("POSTGRES_PORT") ?? "5432";
-            string database = Environment.GetEnvironmentVariable("POSTGRES_DB") ?? "waect";
-
-            // Construct PostgreSQL connection string
-            var connectionString = $"Host={host};Port={port};Database={database};Username={username};Password={password}";
-            Console.WriteLine($"Connecting to PostgreSQL with connection string: {connectionString}");
-            optionsBuilder.UseNpgsql(connectionString,
-                b => b.MigrationsAssembly("Minitwit.Infrastructure"));
-        }
-    }
-
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
 

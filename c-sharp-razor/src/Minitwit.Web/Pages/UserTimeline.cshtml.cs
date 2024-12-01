@@ -18,8 +18,13 @@ public class UserTimelineModel : PageModel
     private readonly IFollowRepository _followRepository;
     
     public ICollection<MessageViewModel>? Messages { get; set; }
+    
+    public bool IsFollowing { get; set; }
 
     public required Author? user { get; set; }
+
+    public Author TimelineAuthor { get; set; }
+    
     public required int currentPage { get; set; }
     public required int totalPages { get; set; }
 
@@ -38,18 +43,22 @@ public class UserTimelineModel : PageModel
         _followRepository = followRepository;
         
     }
-
+    
     public async Task<ActionResult> OnGet(string author)
     {
         user = await _userManager.GetUserAsync(User);
-
+        if (user == null)
+        {
+            return Unauthorized();
+        }
         await InitializeVariables(user!, author);
 
         return Page();
     }
 
     public async Task InitializeVariables(Author user, string author)
-    {
+    {   
+        Console.WriteLine(user.UserName + " " + author);
         if (Request.Query.ContainsKey("page"))
         {
             currentPage = int.Parse(Request.Query["page"]!);
@@ -58,10 +67,14 @@ public class UserTimelineModel : PageModel
         {
             currentPage = 1;
         }
-
-        Author timelineAuthor = await _authorRepository.GetAuthorByNameAsync(author);
-
-        await LoadMessages(user, timelineAuthor, currentPage);
+        
+        TimelineAuthor = await _authorRepository.GetAuthorByNameAsync(author);
+        if (TimelineAuthor == null)
+        {
+            throw new Exception($"Author with username '{author}' was not found.");
+        }
+        IsFollowing = await _followRepository.IsFollowingAsync(user.Id, TimelineAuthor.Id);
+        await LoadMessages(user, TimelineAuthor, currentPage);
     }
 
     private async Task LoadMessages(Author signedInAuthor, Author timelineAuthor, int page)
@@ -91,6 +104,35 @@ public class UserTimelineModel : PageModel
         {
             Messages = new List<MessageViewModel>();
         }
+    }
+    
+    public async Task<IActionResult> OnGetFollow(string author)
+    {   
+        Console.WriteLine("Following user" + author);
+        Author? currentUser = await _userManager.GetUserAsync(User);
+        Author? authorToFollow = await _authorRepository.GetAuthorByNameAsync(author);
+
+        if (currentUser == null || authorToFollow == null)
+            return NotFound();
+        
+        await _authorRepository.AddFollowAsync(currentUser.Id, authorToFollow.Id);
+        Console.WriteLine("Sucess in Following");
+        // Redirect back to the user's timeline page after following
+        return RedirectToPage("/UserTimeline", new { author = authorToFollow.UserName });
+    }
+
+    public async Task<IActionResult> OnGetUnfollow(string author)
+    {
+        Author? currentUser = await _userManager.GetUserAsync(User);
+        Author? authorToUnfollow = await _authorRepository.GetAuthorByNameAsync(author);
+
+        if (currentUser == null || authorToUnfollow == null)
+            return NotFound();
+
+        await _authorRepository.RemoveFollowAsync(currentUser.Id, authorToUnfollow.Id);
+
+        // Redirect back to the user's timeline page after unfollowing
+        return RedirectToPage("/UserTimeline", new { author = authorToUnfollow.UserName });
     }
 }
 
