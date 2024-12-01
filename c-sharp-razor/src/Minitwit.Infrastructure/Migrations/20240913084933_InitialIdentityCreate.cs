@@ -30,13 +30,15 @@ namespace Minitwit.Infrastructure.Migrations
                 name: "normalized_username",
                 table: "users",
                 type: "text",
-                nullable: true);
+                nullable: false,
+                defaultValue: "");
             
             migrationBuilder.AddColumn<string>(
                 name: "normalized_email",
                 table: "users",
                 type: "text",
-                nullable: true);
+                nullable: false,
+                defaultValue: "");
 
             migrationBuilder.AddColumn<string>(
                 name: "concurrency_stamp",

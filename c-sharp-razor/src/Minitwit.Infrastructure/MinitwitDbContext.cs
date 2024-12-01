@@ -99,13 +99,14 @@ public sealed class MinitwitDbContext : IdentityDbContext<Author, IdentityRole<i
         {
             entity.ToTable("messages");
             entity.HasKey(e => e.MessageId);
-
+            
             entity.Property(e => e.MessageId).HasColumnName("message_id");
             entity.Property(e => e.AuthorId).HasColumnName("author_id");
             entity.Property(e => e.Text).HasColumnName("text").IsRequired();
             entity.Property(e => e.TimeStamp)
                 .HasColumnName("pub_date")
                 .HasColumnType("timestamp");
+            entity.Property(e => e.Flagged).HasColumnName("flagged");
         });
 
         modelBuilder.Entity<Message>()

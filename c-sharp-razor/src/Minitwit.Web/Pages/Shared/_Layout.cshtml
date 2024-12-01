@@ -17,23 +17,31 @@
     <div class="navigation">
         @if (SignInManager.IsSignedIn(User) && User.Identity != null)
         {
-        <div>
-            <a href="/@(User.Identity.Name)">my timeline</a> |
-            <a href="/">public timeline</a> |
-            <a href="@Url.Page("/Account/Logout", new { area = "Identity", returnUrl = Url.Page("/Index", new { area = "" }) })">
-                sign out [@User.Identity?.Name]
-            </a>
-        </div>
+            <div>
+                <a href="/@(User.Identity.Name)">my timeline</a> |
+                <a href="/">public timeline</a> |
+                <a href="@Url.Page("/Account/Logout", new { area = "Identity", returnUrl = Url.Page("/Index", new { area = "" }) })">
+                    sign out [@User.Identity?.Name]
+                </a>
+            </div>
         }
         else
         {
-        <div>
-            <a href="/">public timeline</a> |
-            <a asp-area="Identity" asp-page="/Account/Register" class="nav-link text-dark">sign up</a> |
-            <a asp-area="Identity" asp-page="/Account/Login" class="nav-link text-dark">sign in</a>
-        </div>
+            <div>
+                <a asp-page="/PublicTimeline">public timeline</a> |
+                <a asp-area="Identity" asp-page="/Account/Register" class="nav-link text-dark">sign up</a> |
+                <a asp-area="Identity" asp-page="/Account/Login" class="nav-link text-dark">sign in</a>
+            </div>
         }
     </div>
+    
+    @if (TempData["FlashMessage"] != null)
+    {
+    <ul class="flashes">
+        <li>@TempData["FlashMessage"]</li>
+    </ul>
+    }
+    
     <div class=body>
         @RenderBody()
     </div>

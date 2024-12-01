@@ -2,6 +2,7 @@
 @using Minitwit.Core.Entities
 @using Minitwit.Core.Repository
 @using Minitwit.Web.Pages
+@using Minitwit.Web.Helpers
 
 @using FluentValidation
 @model Minitwit.Razor.Pages.UserTimelineModel
@@ -11,6 +12,7 @@
 @inject IAuthorRepository AuthorRepository
 @inject IMessageRepository MessageRepository
 
+
 @{
     var routeName = HttpContext.GetRouteValue("author")?.ToString();
     var currentUser = User.Identity?.Name;
@@ -19,7 +21,6 @@
     ViewData["Title"] = isLoggedIn 
         ? (isCurrentUser ? "My Timeline" : $"{routeName}'s Timeline") 
         : "My Timeline";
-    Layout = "Shared/_Layout";
 }
 
 <div>
@@ -30,7 +31,6 @@
         @if (isCurrentUser)
         {
             <div class="twitbox">
-                <h3>What's on your mind @currentUser?</h3>
                 @await Html.PartialAsync("Shared/_MessageBox", new NewMessage { Text = "" })
             </div>
         }
@@ -56,11 +56,23 @@
     <ul class="messages">
         @if (!Model.Messages?.Any() ?? true)
         {
-            <li><em>There's no message so far.</em></li>
+        <li><em>There's no message so far.</em></li>
         }
         else
         {
-            @await Html.PartialAsync("Shared/_MessageList", Model.Messages)
+        @foreach (var message in Model.Messages)
+        {
+        <li>
+            <img src="@Gravatar.GetGravatarUrl(message.User.Email)" alt="User Avatar" />
+            <p>
+                <strong>
+                    <a href="/@message.User.Username">@message.User.Username</a>
+                </strong>
+                @message.Message
+                <small>&mdash; @message.Timestamp.ToString("yyyy-MM-dd @ HH:mm")</small>
+            </p>
+        </li>
+        }
         }
     </ul>
 </div>

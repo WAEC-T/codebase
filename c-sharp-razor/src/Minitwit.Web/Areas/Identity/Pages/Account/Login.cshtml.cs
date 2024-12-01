@@ -122,8 +122,8 @@ namespace Minitwit.Web.Areas.Identity.Pages.Account
                     lockoutOnFailure: false
                 );
                 if (result.Succeeded)
-                {
-                    _logger.LogInformation("User logged in.");
+                {   
+                    TempData["FlashMessage"] = "You were logged in";
                     returnUrl = Url.Content($"~/{Input.Username}");
                     return LocalRedirect(returnUrl);
                 }

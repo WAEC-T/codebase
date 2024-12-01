@@ -19,10 +19,12 @@ public class Message
     [Required]
     public int AuthorId { get; set; }
 
-    [StringLength(160, MinimumLength = 5)]
     [Required]
     public required string Text { get; set; }
 
     [Required]
     public DateTime TimeStamp { get; set; }
+    
+    [Required]
+    public int Flagged { get; set; } 
 }

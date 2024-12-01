@@ -15,7 +15,8 @@ public class UserTimelineModel : PageModel
     private readonly UserManager<Author> _userManager;
     private readonly IAuthorRepository _authorRepository;
     private readonly SignInManager<Author> _signInManager;
-
+    private readonly IFollowRepository _followRepository;
+    
     public ICollection<MessageViewModel>? Messages { get; set; }
 
     public required Author? user { get; set; }
@@ -26,13 +27,16 @@ public class UserTimelineModel : PageModel
         IMessageService service,
         SignInManager<Author> signInManager,
         UserManager<Author> userManager,
-        IAuthorRepository authorRepository
+        IAuthorRepository authorRepository,
+        IFollowRepository followRepository
     )
     {
         _service = service;
         _userManager = userManager;
         _authorRepository = authorRepository;
         _signInManager = signInManager;
+        _followRepository = followRepository;
+        
     }
 
     public async Task<ActionResult> OnGet(string author)
@@ -89,3 +93,5 @@ public class UserTimelineModel : PageModel
         }
     }
 }
+
+

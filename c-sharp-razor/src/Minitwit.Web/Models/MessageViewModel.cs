@@ -6,5 +6,6 @@ public record MessageViewModel(
     int MessageId,
     UserModel User,
     string Message,
-    string Timestamp
+    DateTime Timestamp,
+    int Flagged
 );

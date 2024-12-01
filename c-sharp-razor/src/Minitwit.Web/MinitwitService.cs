@@ -56,7 +56,8 @@ public class MinitwitService : IMessageService
                     MessageDto.MessageId,
                     new UserModel(author),
                     MessageDto.Text,
-                    MessageDto.TimeStamp.ToString("o")
+                    MessageDto.TimeStamp,
+                    MessageDto.Flagged
                 )
             );
         }
@@ -77,7 +78,8 @@ public class MinitwitService : IMessageService
                     MessageDto.MessageId,
                     new UserModel(author),
                     MessageDto.Text,
-                    MessageDto.TimeStamp.ToString(CultureInfo.InvariantCulture)
+                    MessageDto.TimeStamp,
+                    MessageDto.Flagged
                 )
             );
         }
@@ -107,7 +109,8 @@ public class MinitwitService : IMessageService
                     MessageDto.MessageId,
                     new UserModel(author!),
                     MessageDto.Text,
-                    MessageDto.TimeStamp.ToString(CultureInfo.InvariantCulture)
+                    MessageDto.TimeStamp,
+                    MessageDto.Flagged
                 )
             );
         }

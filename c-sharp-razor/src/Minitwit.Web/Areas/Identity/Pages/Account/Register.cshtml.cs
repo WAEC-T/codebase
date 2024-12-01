@@ -89,7 +89,7 @@ namespace Minitwit.Web.Areas.Identity.Pages.Account
             [Compare("Password", ErrorMessage = "The two passwords do not match")]
             public string ConfirmPassword { get; set; }
         }
-
+        
         public async Task OnGetAsync(string returnUrl = null)
         {
             ReturnUrl = returnUrl;
@@ -97,7 +97,7 @@ namespace Minitwit.Web.Areas.Identity.Pages.Account
                 await _signInManager.GetExternalAuthenticationSchemesAsync()
             ).ToList();
         }
-
+        
         public async Task<IActionResult> OnPostAsync()
         {
             if (User.Identity.IsAuthenticated)
@@ -127,15 +127,15 @@ namespace Minitwit.Web.Areas.Identity.Pages.Account
             var newUser = new Author
             {
                 UserName = Input.Username,
-                Email = Input.Email
+                Email = Input.Email,
+                NormalizedEmail = Input.Email.ToUpperInvariant(),
             };
             var result = await _userManager.CreateAsync(newUser, Input.Password);
             
             if (result.Succeeded)
             {
-                _logger.LogInformation("User registered successfully");
-                TempData["SuccessMessage"] = "You were successfully registered and can login now";
-                return RedirectToPage("/Login");
+                TempData["FlashMessage"] = "You were successfully registered and can login now";
+                return RedirectToPage("/Account/Login", new { area = "Identity" });
             }
             
             foreach (var error in result.Errors)

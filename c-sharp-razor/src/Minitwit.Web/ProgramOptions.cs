@@ -46,7 +46,8 @@ public class ProgramOptions
     public static void AddDatabase(WebApplicationBuilder builder)
     {
         // string? databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
-        string databaseUrl = "postgresql://waect:DALEGREMIO@waectdatabase-waectdb03830e3f-xumxd6xbz9jb.c10ia6ywc903.eu-central-1.rds.amazonaws.com:5432/waect";
+        // string databaseUrl = "postgresql://waect:DALEGREMIO@waectdatabase-waectdb03830e3f-xumxd6xbz9jb.c10ia6ywc903.eu-central-1.rds.amazonaws.com:5432/waect";
+        string databaseUrl = "postgresql://user:pass@172.21.139.184:5432/waect";
         Console.WriteLine($"Testing connection with: {databaseUrl}");
         
         if (string.IsNullOrEmpty(databaseUrl))

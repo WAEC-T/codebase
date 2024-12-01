@@ -41,6 +41,10 @@ public class Program
         builder.Services.AddScoped<IMessageService, MinitwitService>();
         builder.Services.AddScoped<IFollowRepository, FollowRepository>();
         builder.Services.AddScoped<ILatestRepository, LatestRepository>();
+        
+        builder.Logging.ClearProviders();
+        builder.Logging.AddConsole();
+        builder.Logging.AddDebug();
 
         builder.Services.AddSession(options =>
         {
@@ -74,15 +78,14 @@ public class Program
             app.UseExceptionHandler("/Error");
             app.UseHsts();
         }
-
-        app.UseHttpsRedirection();
-        app.UseStaticFiles();
+        
         app.UseRouting();
         app.UseAuthentication();
         app.UseAuthorization();
         app.UseSession();
         app.MapControllers();
         app.MapRazorPages();
+        app.UseStaticFiles(); 
 
         app.Run();
     }

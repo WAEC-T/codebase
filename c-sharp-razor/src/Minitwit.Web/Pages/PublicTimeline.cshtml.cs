@@ -1,16 +1,14 @@
-﻿using System.ComponentModel.DataAnnotations;
-using FluentValidation;
+﻿using FluentValidation;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Minitwit.Core.Entities;
 using Minitwit.Core.Repository;
 using Minitwit.Web.Models;
-using ValidationException = FluentValidation.ValidationException;
 
 namespace Minitwit.Web.Pages;
 
-public class PublicModel : PageModel
+public class PublicTimelineModel : PageModel
 {
     private readonly IMessageService _service;
     private readonly IMessageRepository _MessageRepository;
@@ -23,7 +21,7 @@ public class PublicModel : PageModel
     public required int totalPages { get; set; }
     public required int currentPage { get; set; }
 
-    public PublicModel(
+    public PublicTimelineModel(
         IMessageService service,
         IMessageRepository MessageRepository,
         IAuthorRepository authorRepository,
@@ -31,7 +29,8 @@ public class PublicModel : PageModel
         IValidator<CreateMessage> validator,
         UserManager<Author> userManager
     )
-    {
+    {   
+        Console.WriteLine("In PublicModel");
         _service = service;
         _MessageRepository = MessageRepository;
         _authorRepository = authorRepository;
@@ -39,7 +38,8 @@ public class PublicModel : PageModel
         _validator = validator;
         _userManager = userManager;
     }
-
+    
+    [Route("/public")]
     public async Task<ActionResult> OnGet()
     {
         await InitializeVariables();
@@ -48,35 +48,27 @@ public class PublicModel : PageModel
 
     [BindProperty]
     public NewMessage? NewMessage { get; set; }
-
+    
     public async Task<IActionResult> OnPostCreateMessage()
-    {
+    {   
         if (!ModelState.IsValid)
-        {
+        {   
             return Page();
         }
-
+        
         var author = await _userManager.GetUserAsync(User);
-        var Message = new CreateMessage(author!.Id, NewMessage!.Text!);
-
+        if (author == null)
+        {   
+            return RedirectToPage("/Login");
+        }
+        var Message = new CreateMessage(author.Id, NewMessage!.Text!);
         await CreateMessage(Message);
-
-        return RedirectToPage("/UserTimeline", new { author = User.Identity?.Name });
+        string userTimelineUrl = $"/{User.Identity.Name}";
+        return Redirect(userTimelineUrl);
     }
 
     public async Task CreateMessage(CreateMessage newMessage)
     {
-        var validationResult = await _validator.ValidateAsync(newMessage);
-
-        if (!validationResult.IsValid)
-        {
-            Console.WriteLine(validationResult);
-            //Fatal exception
-            throw new ValidationException(
-                "The Message must be between 5 and 160 characters.(CreateMessage)"
-            );
-        }
-
         await _MessageRepository.AddCreateMessageAsync(newMessage);
     }
 
@@ -148,8 +140,7 @@ public class PublicModel : PageModel
 
     public async Task InitializeVariables(int page)
     {
-        Messages = await _service.GetMessagesAsync(page);
-
+        Messages = await _service.GetMessagesAsync(page) ?? new List<MessageViewModel>();
         user = _userManager.GetUserAsync(User).Result!;
         totalPages = await _MessageRepository.GetPageCountAsync();
         currentPage = page;
@@ -158,11 +149,5 @@ public class PublicModel : PageModel
 
 public class NewMessage
 {
-    [Required]
-    [StringLength(
-        160,
-        MinimumLength = 5,
-        ErrorMessage = "The Message must be between 5 and 160 characters(NewMessage)."
-    )]
     public string? Text { get; set; }
 }
