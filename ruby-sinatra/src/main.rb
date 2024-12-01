@@ -173,7 +173,7 @@ post '/add_message' do
   redirect('/')
 end
 
-get '/:username' do
+get '/user/:username' do
   @profile_user = User.find_by_username(params[:username])
   @title = "#{@profile_user.username}'s Timeline"
   @messages = Message
@@ -195,7 +195,7 @@ get '/:username/follow' do
 
   current_user.following << whom
   flash[:success] = "You are now following #{params[:username]}"
-  redirect("/#{params[:username]}")
+  redirect("/user/#{params[:username]}")
 end
 
 get '/:username/unfollow' do
@@ -207,7 +207,7 @@ get '/:username/unfollow' do
 
   current_user.following.delete(whom)
   flash[:success] = "You are no longer following #{params[:username]}"
-  redirect("/#{params[:username]}")
+  redirect("/user/#{params[:username]}")
 end
 
 namespace '/api' do

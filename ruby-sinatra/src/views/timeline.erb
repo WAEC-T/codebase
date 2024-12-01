@@ -28,7 +28,7 @@
 <ul class=messages>
 <% @messages.each do |message| %>
   <li><img alt="message author gravatar" src="<%= message.author.gravatar(48)%>"><p>
-  <strong><a href="<%= message.author.username %>"><%= message.author.username %></a></strong>
+  <strong><a href="/user/<%= message.author.username %>"><%= message.author.username %></a></strong>
   <%= Rack::Utils.escape_html(message.text) %>
   <small>&mdash; <%= message.pub_date.strftime("%Y-%m-%d @ %H:%M") %></small>
 <% end %>
