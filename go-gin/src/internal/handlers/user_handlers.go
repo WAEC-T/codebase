@@ -222,7 +222,7 @@ func RegisterHandler(c *gin.Context) {
 		userName := c.Request.FormValue("username")
 		email := c.Request.FormValue("email")
 		password := c.Request.FormValue("password")
-		passwordConfirm := c.Request.FormValue("password2")
+		password2 := c.Request.FormValue("password2")
 
 		userID, err := db.GetUserIDByUsername(userName)
 		fmt.Println("RegisterHandler userID: ", userID)
@@ -238,7 +238,7 @@ func RegisterHandler(c *gin.Context) {
 			errorData = "You have to enter a valid email address"
 		} else if password == "" {
 			errorData = "You have to enter a password"
-		} else if password != passwordConfirm {
+		} else if password != password2 {
 			errorData = "The two passwords do not match"
 		} else if fmt.Sprint(userID) != "-1" {
 			errorData = "The username is already taken"
