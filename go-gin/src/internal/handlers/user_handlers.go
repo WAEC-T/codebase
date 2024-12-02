@@ -129,7 +129,10 @@ func MyTimelineHandler(c *gin.Context) {
 
 	userName, err := db.GetUserNameByUserID(userID.(int))
 	if err != nil {
-		fmt.Println("Error getting username by id")
+		if err.Error() == "record not found" {
+			c.Redirect(http.StatusSeeOther, "/public")
+			return
+		}
 		c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
@@ -219,7 +222,7 @@ func RegisterHandler(c *gin.Context) {
 		userName := c.Request.FormValue("username")
 		email := c.Request.FormValue("email")
 		password := c.Request.FormValue("password")
-		passwordConfirm := c.Request.FormValue("passwordConfirm")
+		passwordConfirm := c.Request.FormValue("password2")
 
 		userID, err := db.GetUserIDByUsername(userName)
 		fmt.Println("RegisterHandler userID: ", userID)

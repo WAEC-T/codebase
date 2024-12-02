@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"go-gorilla/src/internal/config"
 	"go-gorilla/src/internal/db"
 	"go-gorilla/src/internal/routes"
@@ -43,7 +42,6 @@ func main() {
 	/*---------------------
 	* Setup route-handlers
 	*----------------------*/
-	fmt.Println("Server started on port 5000")
 	r := mux.NewRouter()
 	routes.SetRouteHandlers(r)
 	err = http.ListenAndServe(":5000", r)
