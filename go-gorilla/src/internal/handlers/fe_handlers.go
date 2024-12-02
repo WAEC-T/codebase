@@ -396,4 +396,5 @@ func User_timeline(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("Error when trying to execute the template: ", err)
 		return
 	}
+	fmt.Println("test")
 }
