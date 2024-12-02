@@ -4,7 +4,7 @@ COMPOSE_FILE_STANDARD = compose-test.yml
 TEST_COMMAND = pytest tests/test_flash_messages.py tests/test_api_endpoints.py
 LOCAL_DATABASE = ./database/docker-compose.yml
 DATABASE_TABLES = users, followers, messages, latest
-DELAY_TEST_EXECUTION_SECONDS = 3
+DELAY_TEST_EXECUTION_SECONDS = 10
 
 WHITE = \033[0;37m
 CYAN = \033[0;36m
