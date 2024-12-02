@@ -1,12 +1,10 @@
 package models
 
-import "time"
-
 type MessageUI struct {
 	MessageID    int
 	AuthorID     int
 	Text         string
-	PubDate      time.Time
+	PubDate      string
 	Flagged      bool
 	User         Users
 	Email        string

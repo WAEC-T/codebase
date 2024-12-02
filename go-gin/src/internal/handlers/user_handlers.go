@@ -31,27 +31,39 @@ func UserFollowActionHandler(c *gin.Context) {
 	action := c.Param("action")
 
 	if action == "/follow" {
-		db.FollowUser(userID.(int), profileUserID)
+		err := db.FollowUser(userID.(int), profileUserID)
+		if err != nil {
+			fmt.Println("follow user failed with:", err)
+			c.Redirect(http.StatusFound, "/"+profileUserName)
+			return
+		}
 		session.AddFlash("You are now following " + profileUserName)
 	}
 	if action == "/unfollow" {
-		db.UnfollowUser(userID.(int), profileUserID)
+		err := db.UnfollowUser(userID.(int), profileUserID)
+		if err != nil {
+			fmt.Println("unfollow user failed with:", err)
+			c.Redirect(http.StatusFound, "/"+profileUserName)
+			return
+		}
 		session.AddFlash("You are no longer following " + profileUserName)
 	}
-	session.Save()
+
+	if !helpers.SaveSessionOrRedirect(c, session.Save(), "/"+profileUserName) {
+		return
+	}
 	c.Redirect(http.StatusFound, "/"+profileUserName)
 }
 
 func PublicTimelineHandler(c *gin.Context) {
-	// need to pass a default value to getPublicMessages (GoLang doesn't support default values for arguments)
-	messages, err := db.GetPublicMessages(30) //30 per page
+	messages, err := db.GetPublicMessages(30)
 	if err != nil {
 		return
 	}
 	formattedMessages := helpers.FormatMessages(messages)
 
 	context := gin.H{
-		"TimelineBody": true, // This seems to be a flag you use to render specific parts of your layout
+		"TimelineBody": true,
 		"Endpoint":     "public_timeline",
 		"Messages":     formattedMessages,
 	}
@@ -74,7 +86,11 @@ func UserTimelineHandler(c *gin.Context) {
 	session := sessions.Default(c)
 	userID := session.Get("userID")
 	flashMessages := session.Flashes()
-	session.Save()
+
+	if !helpers.SaveSessionOrRedirect(c, session.Save(), "/") {
+		return
+	}
+
 	profileUserName := c.Param("username")
 	profileUser, err := db.GetUserByUsername(profileUserName)
 
@@ -138,7 +154,9 @@ func MyTimelineHandler(c *gin.Context) {
 	}
 
 	flashMessages := session.Flashes()
-	session.Save() // Clear flashes after retrieving
+	if !helpers.SaveSessionOrRedirect(c, session.Save(), "/") {
+		return
+	}
 
 	messages, err := db.GetMyMessages(userID.(int))
 	if err != nil {
@@ -182,7 +200,9 @@ func AddMessageHandler(c *gin.Context) {
 		if text == "" {
 			c.Redirect(http.StatusSeeOther, "/")
 			session.AddFlash("You have to enter a value")
-			session.Save()
+			if !helpers.SaveSessionOrRedirect(c, session.Save(), "/") {
+				return
+			}
 			return
 		} else {
 			err := db.AddMessage(text, userID.(int))
@@ -195,7 +215,9 @@ func AddMessageHandler(c *gin.Context) {
 
 			c.Redirect(http.StatusSeeOther, "/")
 			session.AddFlash("Your message was recorded")
-			session.Save()
+			if !helpers.SaveSessionOrRedirect(c, session.Save(), "/") {
+				return
+			}
 			return
 		}
 	}
@@ -258,7 +280,9 @@ func RegisterHandler(c *gin.Context) {
 			// Redirect to login page after successful registration
 			session.AddFlash("You were successfully registered and can login now")
 
-			session.Save()
+			if !helpers.SaveSessionOrRedirect(c, session.Save(), "/register") {
+				return
+			}
 			c.Redirect(http.StatusSeeOther, "/login")
 			return
 		}
@@ -272,14 +296,18 @@ func RegisterHandler(c *gin.Context) {
 func LoginHandler(c *gin.Context) {
 	session := sessions.Default(c)
 	flashMessages := session.Flashes()
-	session.Save()
+	if !helpers.SaveSessionOrRedirect(c, session.Save(), "/login") {
+		return
+	}
 
 	userID := session.Get("userID")
 	fmt.Println("LoginHandler userID: ", userID)
 	if userID != nil {
 		fmt.Println("User already logged in, redirecting")
 		session.AddFlash("You were logged in")
-		session.Save()
+		if !helpers.SaveSessionOrRedirect(c, session.Save(), "/login") {
+			return
+		}
 		c.Redirect(http.StatusFound, "/")
 		return
 	}
@@ -323,7 +351,9 @@ func LoginHandler(c *gin.Context) {
 			// Save userID in the session
 			session.Set("userID", userID)
 			session.AddFlash("You were logged in")
-			session.Save()
+			if !helpers.SaveSessionOrRedirect(c, session.Save(), "/login") {
+				return
+			}
 
 			c.Redirect(http.StatusFound, "/")
 			return
@@ -347,7 +377,9 @@ func LogoutHandler(c *gin.Context) {
 	session.AddFlash("You were logged out")
 
 	// Save the session to apply changes
-	session.Save()
+	if !helpers.SaveSessionOrRedirect(c, session.Save(), "/login") {
+		return
+	}
 
 	// Redirect to the login page
 	c.Redirect(http.StatusFound, "/login")

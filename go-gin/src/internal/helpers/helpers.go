@@ -5,9 +5,13 @@ import (
 	"encoding/hex"
 	"fmt"
 	"go-gin/src/internal/models"
+	"net/http"
 	"os"
 	"reflect"
 	"strings"
+	"time"
+
+	"github.com/gin-gonic/gin"
 )
 
 // Helper functions
@@ -42,7 +46,7 @@ func FormatMessages(messages []models.MessageUser) []models.MessageUI {
 		msg.Text = m.Text
 		msg.Username = m.Username
 		msg.Email = m.Email
-		msg.PubDate = m.PubDate // Assuming PubDate is already a time.Time type
+		msg.PubDate = Format_datetime(m.PubDate) // Assuming PubDate is already a time.Time type
 
 		// Create the profile link by encoding the username
 		msg.Profile_link = "/" + strings.ReplaceAll(msg.Username, " ", "%20")
@@ -97,4 +101,19 @@ func LogMessage(message string) {
 		fmt.Println("Error writing to file:", err)
 		return
 	}
+}
+
+func Format_datetime(timestamp time.Time) string {
+
+	// Format the time.Time object into your desired display format
+	return timestamp.Format("2006-01-02 @ 15:04") // Customize this layout as needed
+}
+
+func SaveSessionOrRedirect(c *gin.Context, err error, redirectURL string) bool {
+	if err != nil {
+		fmt.Println("session save failed with:", err)
+		c.Redirect(http.StatusFound, redirectURL)
+		return false
+	}
+	return true
 }

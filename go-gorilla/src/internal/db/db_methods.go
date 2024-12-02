@@ -184,7 +184,7 @@ func AddMessage(text string, author_id int) error {
 	newMessage := models.Messages{
 		AuthorID: author_id,
 		Content:  text,
-		PubDate:  currentTime, //TODO: ALIGN W. LADS: IS THIS CORRECT?
+		PubDate:  currentTime,
 		Flagged:  0,
 	}
 
