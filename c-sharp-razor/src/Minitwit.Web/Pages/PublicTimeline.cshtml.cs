@@ -30,7 +30,6 @@ public class PublicTimelineModel : PageModel
         UserManager<Author> userManager
     )
     {   
-        Console.WriteLine("In PublicModel");
         _service = service;
         _MessageRepository = MessageRepository;
         _authorRepository = authorRepository;

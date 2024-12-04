@@ -47,8 +47,7 @@ public class ProgramOptions
     {
         // string? databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
         // string databaseUrl = "postgresql://waect:DALEGREMIO@waectdatabase-waectdb03830e3f-xumxd6xbz9jb.c10ia6ywc903.eu-central-1.rds.amazonaws.com:5432/waect";
-        string databaseUrl = "postgresql://user:pass@172.21.129.141:5432/waect";
-        Console.WriteLine($"Testing connection with: {databaseUrl}");
+        string databaseUrl = "postgresql://user:pass@192.168.8.129:5432/waect";
         
         if (string.IsNullOrEmpty(databaseUrl))
         {
@@ -61,8 +60,6 @@ public class ProgramOptions
             var connectionString = ConvertDatabaseUrlToConnectionString(databaseUrl);
         
             using var conn = new NpgsqlConnection(connectionString);
-            conn.Open();
-            Console.WriteLine("Connection successful!");
 
             builder.Services.AddDbContext<MinitwitDbContext>(options =>
             {

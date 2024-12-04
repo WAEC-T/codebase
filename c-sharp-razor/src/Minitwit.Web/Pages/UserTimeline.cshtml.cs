@@ -9,6 +9,7 @@ using Minitwit.Web.Models;
 
 namespace Minitwit.Razor.Pages;
 
+[IgnoreAntiforgeryToken]
 public class UserTimelineModel : PageModel
 {
     private readonly IMessageService _service;
@@ -58,7 +59,6 @@ public class UserTimelineModel : PageModel
 
     public async Task InitializeVariables(Author user, string author)
     {   
-        Console.WriteLine(user.UserName + " " + author);
         if (Request.Query.ContainsKey("page"))
         {
             currentPage = int.Parse(Request.Query["page"]!);
@@ -107,16 +107,24 @@ public class UserTimelineModel : PageModel
     }
     
     public async Task<IActionResult> OnGetFollow(string author)
-    {   
-        Author? currentUser = await _userManager.GetUserAsync(User);
-        Author? authorToFollow = await _authorRepository.GetAuthorByNameAsync(author);
-        
+    {
+        var currentUser = await _userManager.GetUserAsync(User);
         if (currentUser == null)
+        {
+            return Unauthorized();
+        }
+        Console.WriteLine("In Follow Page");
+        var authorToFollow = await _authorRepository.GetAuthorByNameAsync(author);
+        if (authorToFollow == null)
+        {
             return NotFound();
-        
+        }
+
         await _authorRepository.AddFollowAsync(currentUser.Id, authorToFollow.Id);
-        TempData["FlashMessage"] = "You are now following " + authorToFollow.UserName;
-        return RedirectToPage("/UserTimeline", new { author = authorToFollow.UserName });
+        TempData["FlashMessage"] = $"You are now following {authorToFollow.UserName}";
+        
+        Response.Redirect($"/{authorToFollow.UserName}");
+        return new EmptyResult();
     }
 
     public async Task<IActionResult> OnGetUnfollow(string author)
@@ -129,8 +137,10 @@ public class UserTimelineModel : PageModel
         
         await _authorRepository.RemoveFollowAsync(currentUser.Id, authorToUnfollow.Id);
         TempData["FlashMessage"] = "You are no longer following " + authorToUnfollow.UserName;
-        return RedirectToPage("/UserTimeline", new { author = authorToUnfollow.UserName });
+        Response.Redirect($"/{authorToUnfollow.UserName}");
+        return new EmptyResult();
     }
+
 }
 
 
