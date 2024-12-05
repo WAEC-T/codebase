@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -122,7 +121,7 @@ public class UserTimelineModel : PageModel
 
         await _authorRepository.AddFollowAsync(currentUser.Id, authorToFollow.Id);
         TempData["FlashMessage"] = $"You are now following {authorToFollow.UserName}";
-        
+
         Response.Redirect($"/{authorToFollow.UserName}");
         return new EmptyResult();
     }
@@ -134,7 +133,7 @@ public class UserTimelineModel : PageModel
 
         if (currentUser == null)
             return NotFound();
-        
+
         await _authorRepository.RemoveFollowAsync(currentUser.Id, authorToUnfollow.Id);
         TempData["FlashMessage"] = "You are no longer following " + authorToUnfollow.UserName;
         Response.Redirect($"/{authorToUnfollow.UserName}");

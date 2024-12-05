@@ -1,4 +1,6 @@
-﻿using FluentValidation;
+﻿using System.Xml;
+using FluentValidation;
+using Google.Protobuf.WellKnownTypes;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -8,6 +10,7 @@ using Minitwit.Web.Models;
 
 namespace Minitwit.Web.Pages;
 
+[IgnoreAntiforgeryToken]
 public class PublicTimelineModel : PageModel
 {
     private readonly IMessageService _service;
@@ -15,8 +18,8 @@ public class PublicTimelineModel : PageModel
     private readonly IAuthorRepository _authorRepository;
     private readonly IFollowRepository _followRepository;
     private readonly IValidator<CreateMessage> _validator;
-    public required Author user { get; set; }
     private readonly UserManager<Author> _userManager;
+    public required Author user { get; set; }
     public required ICollection<MessageViewModel> Messages { get; set; }
     public required int totalPages { get; set; }
     public required int currentPage { get; set; }
@@ -38,15 +41,14 @@ public class PublicTimelineModel : PageModel
         _userManager = userManager;
     }
     
-    [Route("/public")]
     public async Task<ActionResult> OnGet()
-    {
+    {   
         await InitializeVariables();
         return Page();
     }
 
-    [BindProperty]
-    public NewMessage? NewMessage { get; set; }
+    [BindProperty(Name = "text", SupportsGet = false)]
+    public string Text { get; set; }
     
     public async Task<IActionResult> OnPostCreateMessage()
     {   
@@ -54,17 +56,19 @@ public class PublicTimelineModel : PageModel
         {   
             return Page();
         }
-        
         var author = await _userManager.GetUserAsync(User);
         if (author == null)
         {   
             return RedirectToPage("/Login");
         }
-        var Message = new CreateMessage(author.Id, NewMessage!.Text!);
+        
+        user = author;
+        var Message = new CreateMessage(author.Id, Text);
         await CreateMessage(Message);
         TempData["FlashMessage"] = "Your message was recorded";
         string userTimelineUrl = $"/{User.Identity.Name}";
-        return Redirect(userTimelineUrl);
+        Response.Redirect(userTimelineUrl);
+        return new EmptyResult();
     }
 
     public async Task CreateMessage(CreateMessage newMessage)

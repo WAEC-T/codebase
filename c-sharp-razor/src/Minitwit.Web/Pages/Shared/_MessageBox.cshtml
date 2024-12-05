@@ -1,10 +1,10 @@
 @model Minitwit.Web.Pages.NewMessage
 
-<div class="Messagebox" >
+<div class="Messagebox">
     <h3>What's on your mind @(User.Identity?.Name)?</h3>
-    <form method="post"  asp-page-handler="CreateMessage" asp-page="/PublicTimeline" >
-        <input class="form-control" asp-for="Text"/>
+    <form method="post" asp-page-handler="CreateMessage" asp-page="/PublicTimeline">
+        <input class="form-control" id="text" name="text" value="@Model.Text" />
         <span asp-validation-for="Text" style="display: flex; color: red;"></span>
-        <input type="submit" value="Share" style="margin: 10px 0"/>
+        <input type="submit" value="Share" style="margin: 10px 0" />
     </form>
 </div>
