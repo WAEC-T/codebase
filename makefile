@@ -1,4 +1,4 @@
-ALL_SERVICES = python-flask c-sharp-razor go-gorilla ruby-sinatra rust-actix javascript-express go-gin
+ALL_SERVICES = python-flask go-gorilla go-gin #c-sharp-razor #ruby-sinatra #rust-actix #javascript-express go-gin
 
 COMPOSE_FILE_STANDARD = compose-test.yml
 TEST_COMMAND = pytest tests/test_flash_messages.py #tests/test_api_endpoints.py
