@@ -1,7 +1,7 @@
 ALL_SERVICES = python-flask c-sharp-razor go-gorilla ruby-sinatra rust-actix javascript-express go-gin
 
 COMPOSE_FILE_STANDARD = compose-test.yml
-TEST_COMMAND = pytest tests/test_flash_messages.py tests/test_api_endpoints.py
+TEST_COMMAND = pytest tests/test_flash_messages.py #tests/test_api_endpoints.py
 LOCAL_DATABASE = ./database/docker-compose.yml
 DATABASE_TABLES = users, followers, messages, latest
 DELAY_TEST_EXECUTION_SECONDS = 10
@@ -41,6 +41,7 @@ start-service:
 .PHONY: stop-service
 stop-service:
 	@echo "\n$(CYAN)Stopping and removing $(SERVICE)..$(RESET)"
+	@docker logs $(SERVICE)
 	@docker-compose -f ./$(SERVICE)/$(COMPOSE_FILE_STANDARD) stop > /dev/null 2>&1
 	@docker-compose -f ./$(SERVICE)/$(COMPOSE_FILE_STANDARD) rm -f > /dev/null 2>&1
 

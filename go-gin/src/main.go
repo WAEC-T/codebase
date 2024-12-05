@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"go-gin/src/internal/config"
 	"go-gin/src/internal/db"
 	"go-gin/src/internal/routes"
@@ -20,6 +21,7 @@ func main() {
 	 * Load env vars
 	 *----------------------*/
 	uri := routes.LoadEnvVars()
+	fmt.Println("this is the URI: ", uri)
 
 	/*---------------------
 	 * Connect to DB
