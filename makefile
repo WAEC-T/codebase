@@ -1,10 +1,10 @@
-ALL_SERVICES = python-flask go-gorilla go-gin #c-sharp-razor #ruby-sinatra #rust-actix #javascript-express go-gin
+ALL_SERVICES = python-flask c-sharp-razor go-gorilla ruby-sinatra rust-actix javascript-express go-gin
 
 COMPOSE_FILE_STANDARD = compose-test.yml
-TEST_COMMAND = pytest tests/test_flash_messages.py #tests/test_api_endpoints.py
+TEST_COMMAND = pytest tests/test_flash_messages.py tests/test_api_endpoints.py
 LOCAL_DATABASE = ./database/docker-compose.yml
 DATABASE_TABLES = users, followers, messages, latest
-DELAY_TEST_EXECUTION_SECONDS = 10
+DELAY_TEST_EXECUTION_SECONDS = 3
 
 WHITE = \033[0;37m
 CYAN = \033[0;36m
@@ -36,11 +36,7 @@ clean-db:
 .PHONY: start-service
 start-service:
 	@echo "$(CYAN)Spinning service and running tests...$(RESET) \n"
-	@echo "Running: docker-compose -f ./$(SERVICE)/$(COMPOSE_FILE_STANDARD) up -d"
-	@docker-compose -f ./$(SERVICE)/$(COMPOSE_FILE_STANDARD) up -d || { echo "$(RED)Error while starting the service $(SERVICE).$(RESET)"; exit 1; }
-	@echo "Listing running containers:"
-	@docker ps || { echo "$(RED)Error while listing containers.$(RESET)"; exit 1; }
-	@echo "$(GREEN)Service $(SERVICE) started successfully.$(RESET)"
+	@docker-compose -f ./$(SERVICE)/$(COMPOSE_FILE_STANDARD) up -d > /dev/null 2>&1
 
 .PHONY: stop-service
 stop-service:
