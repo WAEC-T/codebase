@@ -36,8 +36,11 @@ clean-db:
 .PHONY: start-service
 start-service:
 	@echo "$(CYAN)Spinning service and running tests...$(RESET) \n"
-	@docker-compose -f ./$(SERVICE)/$(COMPOSE_FILE_STANDARD) up -d > /dev/null 2>&1
-	@docker ps
+	@echo "Running: docker-compose -f ./$(SERVICE)/$(COMPOSE_FILE_STANDARD) up -d"
+	@docker-compose -f ./$(SERVICE)/$(COMPOSE_FILE_STANDARD) up -d || { echo "$(RED)Error while starting the service $(SERVICE).$(RESET)"; exit 1; }
+	@echo "Listing running containers:"
+	@docker ps || { echo "$(RED)Error while listing containers.$(RESET)"; exit 1; }
+	@echo "$(GREEN)Service $(SERVICE) started successfully.$(RESET)"
 
 .PHONY: stop-service
 stop-service:
