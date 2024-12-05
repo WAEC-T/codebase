@@ -250,7 +250,7 @@ func ApiMsgsPerUserHandler(c *gin.Context) {
 	profileUserName := c.Param("username")
 	userId, err := db.GetUserIDByUsername(profileUserName)
 	if userId == -1 {
-		c.AbortWithStatus(http.StatusBadRequest)
+		c.AbortWithStatus(http.StatusNotFound)
 		return
 	}
 	if err != nil {
