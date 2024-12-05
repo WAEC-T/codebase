@@ -37,11 +37,11 @@ clean-db:
 start-service:
 	@echo "$(CYAN)Spinning service and running tests...$(RESET) \n"
 	@docker-compose -f ./$(SERVICE)/$(COMPOSE_FILE_STANDARD) up -d > /dev/null 2>&1
+	@docker logs $(SERVICE)
 
 .PHONY: stop-service
 stop-service:
 	@echo "\n$(CYAN)Stopping and removing $(SERVICE)..$(RESET)"
-	@docker logs $(SERVICE)
 	@docker-compose -f ./$(SERVICE)/$(COMPOSE_FILE_STANDARD) stop > /dev/null 2>&1
 	@docker-compose -f ./$(SERVICE)/$(COMPOSE_FILE_STANDARD) rm -f > /dev/null 2>&1
 
