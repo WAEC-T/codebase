@@ -1,16 +1,18 @@
+use std::sync::Arc;
+
 use crate::api::controllers::*;
 use crate::api::model::*;
 use crate::database::DatabasePool;
 use actix_web::{get, post, web, Responder};
 
 #[get("/latest")]
-pub async fn get_latest(pool: web::Data<DatabasePool>) -> impl Responder {
+pub async fn get_latest(pool: web::Data<Arc<DatabasePool>>) -> impl Responder {
     retrieve_latest(&mut pool.get().await.unwrap()).await
 }
 
 #[post("/register")]
 pub async fn post_register(
-    pool: web::Data<DatabasePool>,
+    pool: web::Data<Arc<DatabasePool>>,
     info: web::Json<RegisterInfo>,
     query: web::Query<Latest>,
 ) -> impl Responder {
@@ -19,7 +21,7 @@ pub async fn post_register(
 
 #[get("/msgs")]
 pub async fn get_messages(
-    pool: web::Data<DatabasePool>,
+    pool: web::Data<Arc<DatabasePool>>,
     amount: web::Query<MessageAmount>,
     query: web::Query<Latest>,
 ) -> impl Responder {
@@ -28,7 +30,7 @@ pub async fn get_messages(
 
 #[get("/msgs/{username}")]
 pub async fn get_messages_per_user(
-    pool: web::Data<DatabasePool>,
+    pool: web::Data<Arc<DatabasePool>>,
     path: web::Path<String>,
     amount: web::Query<MessageAmount>,
     query: web::Query<Latest>,
@@ -44,7 +46,7 @@ pub async fn get_messages_per_user(
 
 #[post("/msgs/{username}")]
 pub async fn post_messages_per_user(
-    pool: web::Data<DatabasePool>,
+    pool: web::Data<Arc<DatabasePool>>,
     path: web::Path<String>,
     msg: web::Json<MessageContent>,
     query: web::Query<Latest>,
@@ -60,7 +62,7 @@ pub async fn post_messages_per_user(
 
 #[get("/fllws/{username}")]
 pub async fn get_followers(
-    pool: web::Data<DatabasePool>,
+    pool: web::Data<Arc<DatabasePool>>,
     path: web::Path<String>,
     amount: web::Query<MessageAmount>,
     query: web::Query<Latest>,
@@ -76,7 +78,7 @@ pub async fn get_followers(
 
 #[post("/fllws/{username}")]
 pub async fn post_followers(
-    pool: web::Data<DatabasePool>,
+    pool: web::Data<Arc<DatabasePool>>,
     path: web::Path<String>,
     follow_param: web::Json<FollowParam>,
     query: web::Query<Latest>,
