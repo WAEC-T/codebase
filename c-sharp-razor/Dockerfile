@@ -22,7 +22,7 @@ WORKDIR /app
 COPY --from=builder /app/publish .
 
 # Set environment variables
-ENV ASPNETCORE_ENVIRONMENT=Production
+ENV ASPNETCORE_ENVIRONMENT=Development
 ENV ASPNETCORE_URLS=http://0.0.0.0:5001
 
 # Expose the port
