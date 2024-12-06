@@ -1,5 +1,4 @@
 from flask import Blueprint, redirect, url_for, session, flash, render_template, request
-from werkzeug.security import check_password_hash, generate_password_hash
 from app.extensions import db
 from app.models.user import User
 
@@ -20,7 +19,7 @@ def login():
 
         if user is None:
             error = "Invalid username"
-        elif not check_password_hash(user.pw_hash, password):
+        elif user.pw_hash != password:
             error = "Invalid password"
         else:
             # user authenticated
@@ -56,7 +55,7 @@ def register():
             error = "The username is already taken"
         else:
             new_user = User(
-                username=username, email=email, pw_hash=generate_password_hash(password)
+                username=username, email=email, pw_hash=password
             )
             db.session.add(new_user)
             db.session.commit()

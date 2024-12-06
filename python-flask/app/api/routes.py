@@ -1,7 +1,6 @@
 from datetime import datetime
 from flask import Blueprint
 from flask import jsonify, request, abort
-from werkzeug.security import generate_password_hash
 from app.models.user import User, Follower
 from app.models.message import Message
 from app.models.latest import Latest
@@ -40,7 +39,7 @@ def register():
         user = User(
             username=request_data["username"],
             email=request_data["email"],
-            pw_hash=generate_password_hash(request_data["pwd"]),
+            pw_hash=request_data["pwd"],
         )
         db.session.add(user)
         db.session.commit()
