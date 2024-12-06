@@ -5,7 +5,7 @@ use actix_web::{get, post, web, Responder};
 
 #[get("/latest")]
 pub async fn get_latest(pool: web::Data<DatabasePool>) -> impl Responder {
-    retrieve_latest(pool).await
+    retrieve_latest(&mut pool.get().await.unwrap()).await
 }
 
 #[post("/register")]
@@ -14,7 +14,7 @@ pub async fn post_register(
     info: web::Json<RegisterInfo>,
     query: web::Query<Latest>,
 ) -> impl Responder {
-    register_new_user(pool, info.into_inner(), query).await
+    register_new_user(&mut pool.get().await.unwrap(), info.into_inner(), query).await
 }
 
 #[get("/msgs")]
@@ -23,7 +23,7 @@ pub async fn get_messages(
     amount: web::Query<MessageAmount>,
     query: web::Query<Latest>,
 ) -> impl Responder {
-    list_feed_messages(pool, amount, query).await
+    list_feed_messages(&mut pool.get().await.unwrap(), amount, query).await
 }
 
 #[get("/msgs/{username}")]
@@ -33,7 +33,7 @@ pub async fn get_messages_per_user(
     amount: web::Query<MessageAmount>,
     query: web::Query<Latest>,
 ) -> impl Responder {
-    list_user_messages(pool, path.into_inner(), amount, query).await
+    list_user_messages(&mut pool.get().await.unwrap(), path.into_inner(), amount, query).await
 }
 
 #[post("/msgs/{username}")]
@@ -43,7 +43,7 @@ pub async fn post_messages_per_user(
     msg: web::Json<MessageContent>,
     query: web::Query<Latest>,
 ) -> impl Responder {
-    create_user_message(pool, path.into_inner(), msg.into_inner(), query).await
+    create_user_message(&mut pool.get().await.unwrap(), path.into_inner(), msg.into_inner(), query).await
 }
 
 #[get("/fllws/{username}")]
@@ -53,7 +53,7 @@ pub async fn get_followers(
     amount: web::Query<MessageAmount>,
     query: web::Query<Latest>,
 ) -> impl Responder {
-    list_user_followers(pool, path.into_inner(), amount, query).await
+    list_user_followers(&mut pool.get().await.unwrap(), path.into_inner(), amount, query).await
 }
 
 #[post("/fllws/{username}")]
@@ -63,5 +63,5 @@ pub async fn post_followers(
     follow_param: web::Json<FollowParam>,
     query: web::Query<Latest>,
 ) -> impl Responder {
-    update_user_followers(pool, path.into_inner(), follow_param.into_inner(), query).await
+    update_user_followers(&mut pool.get().await.unwrap(), path.into_inner(), follow_param.into_inner(), query).await
 }

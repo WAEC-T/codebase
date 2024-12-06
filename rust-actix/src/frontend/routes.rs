@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use crate::database::models::{Messages, Users};
 use crate::database::pool::DatabasePool;
 use crate::database::repository::{
@@ -91,7 +93,7 @@ fn format_messages(messages: Vec<(Messages, Users)>) -> Vec<MessageTemplate> {
 
 #[get("/")]
 async fn timeline(
-    pool: web::Data<DatabasePool>,
+    pool: web::Data<Arc<DatabasePool>>,
     flash: Option<FlashMessages>,
     session: Session,
 ) -> impl Responder {
@@ -122,7 +124,7 @@ async fn timeline(
 
 #[get("/public")]
 async fn public_timeline(
-    pool: web::Data<DatabasePool>,
+    pool: web::Data<Arc<DatabasePool>>,
     flash_messages: Option<FlashMessages>,
     session: Session,
 ) -> impl Responder {
@@ -145,7 +147,7 @@ async fn public_timeline(
 
 #[get("/user/{username}")]
 async fn user_timeline(
-    pool: web::Data<DatabasePool>,
+    pool: web::Data<Arc<DatabasePool>>,
     path: web::Path<String>,
     session: Session,
     flash_messages: Option<FlashMessages>,
@@ -183,7 +185,7 @@ async fn user_timeline(
 
 #[get("/{username}/follow")]
 async fn follow_user(
-    pool: web::Data<DatabasePool>,
+    pool: web::Data<Arc<DatabasePool>>,
     path: web::Path<String>,
     _request: HttpRequest,
     session: Session,
@@ -207,7 +209,7 @@ async fn follow_user(
 
 #[get("/{username}/unfollow")]
 async fn unfollow_user(
-    pool: web::Data<DatabasePool>,
+    pool: web::Data<Arc<DatabasePool>>,
     path: web::Path<String>,
     _request: HttpRequest,
     session: Session,
@@ -232,7 +234,7 @@ async fn unfollow_user(
 
 #[post("/add_message")]
 async fn add_message(
-    pool: web::Data<DatabasePool>,
+    pool: web::Data<Arc<DatabasePool>>,
     msg: web::Form<MessageInfo>,
     session: Session,
 ) -> impl Responder {
@@ -312,7 +314,7 @@ async fn login(flash_messages: Option<FlashMessages>, session: Session) -> impl 
 
 #[post("/login")]
 async fn post_login(
-    pool: web::Data<DatabasePool>,
+    pool: web::Data<Arc<DatabasePool>>,
     info: web::Form<LoginInfo>,
     _request: HttpRequest,
     session: Session,
@@ -367,7 +369,7 @@ async fn register(flash_messages: Option<FlashMessages>) -> impl Responder {
 
 #[post("/register")]
 async fn post_register<'a>(
-    pool: web::Data<DatabasePool>,
+    pool: web::Data<Arc<DatabasePool>>,
     info: web::Form<RegisterInfo>,
     session: Session,
 ) -> impl Responder {
