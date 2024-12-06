@@ -1,48 +1,35 @@
-﻿@page "/"
-@using Minitwit.Core.Entities
-@using Minitwit.Core.Repository
-@using Minitwit.Web.Pages
+@page "/public"
 @using Minitwit.Web.Helpers
 
-@using FluentValidation
 @model Minitwit.Web.Pages.PublicTimelineModel
 
-@inject SignInManager<Author> SignInManager
-@inject UserManager<Author> UserManager
-@inject IValidator<CreateMessage> Validator
-@inject IMessageRepository MessageRepository
-
 @{
-    ViewData["Title"] = "Public Timeline";
-    Layout = "Shared/_Layout";
+ViewData["Title"] = "Public Timeline";
+Layout = "Shared/_Layout";
 }
 
 <h2>Public Timeline</h2>
 
 @if (Model.Messages?.Any() == true)
 {
-    <ul class="messages">
-        @foreach (var message in Model.Messages)
-        {
-            <li>
-                <img src="@Gravatar.GetGravatarUrl(message.User.Email)" alt="User Avatar" />
-                <p>
-                    <strong>
-                        <a href="/@message.User.Username">@message.User.Username</a>
-                    </strong>
-                    @message.Message
-                    <small>&mdash; @message.Timestamp.ToString("yyyy-MM-dd @ HH:mm")</small>
-                </p>
-            </li>
-        }
-    </ul>
+<ul class="messages">
+    @foreach (var message in Model.Messages)
+    {
+    <li>
+        <img src="@Gravatar.GetGravatarUrl(message.User.Email)" alt="User Avatar" />
+        <p>
+            <strong>
+                <a href="/@message.User.Username">@message.User.Username</a>
+            </strong>
+            @message.Message
+            <small>&mdash; @message.Timestamp.ToString("yyyy-MM-dd @ HH:mm")</small>
+        </p>
+    </li>
+    }
+</ul>
 }
 
 else
 {
-    <em>There's no message so far.</em>
-}
-
-@section Scripts {
-    <partial name="/Areas/Identity/Pages/_ValidationScriptsPartial.cshtml" />
+<em>There's no message so far.</em>
 }

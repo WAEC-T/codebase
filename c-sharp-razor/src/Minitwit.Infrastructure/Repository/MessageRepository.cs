@@ -46,7 +46,7 @@ public class MessageRepository : BaseRepository, IMessageRepository
 
     public async Task<int> GetMessageCountAsync()
     {
-        //Use EF to get the total number of Messages from the database
+        //U se EF to get the total number of Messages from the database
         return await db.Messages.CountAsync();
     }
 
@@ -59,7 +59,6 @@ public class MessageRepository : BaseRepository, IMessageRepository
     {
         await db.Messages.AddAsync(Message);
         await db.SaveChangesAsync();
-        Console.WriteLine("Message added async");
     }
 
     public async Task<Message> AddCreateMessageAsync(CreateMessage Message)

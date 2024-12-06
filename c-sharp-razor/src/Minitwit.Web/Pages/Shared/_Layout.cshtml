@@ -19,8 +19,8 @@
         @if (SignInManager.IsSignedIn(User) && User.Identity != null)
         {
             <div>
-                <a href="/@(User.Identity.Name)">my timeline</a> |
-                <a href="/">public timeline</a> |
+                <a href="/">my timeline</a> |
+                <a href="/public">public timeline</a> |
                 <a href="@Url.Page("/Account/Logout", new { area = "Identity", returnUrl = Url.Page("/Index", new { area = "" }) })">
                     sign out [@User.Identity?.Name]
                 </a>

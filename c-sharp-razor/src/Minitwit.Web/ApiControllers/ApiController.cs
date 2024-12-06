@@ -67,7 +67,6 @@ public class ApiController : ControllerBase
             await LogRequest("{}", $"{{{ex.StackTrace}}}", latestLogFilePath);
 
             // Handle exception
-            Console.WriteLine("Error occurred while getting latest id: " + ex.Message);
             return StatusCode(500, "Internal server error");
         }
     }

@@ -115,8 +115,7 @@ namespace Minitwit.Web.Areas.Identity.Pages.Account
                     return Page();
                 }
                 TempData["FlashMessage"] = "You were logged in";
-                returnUrl = Url.Content($"~/{Username}");
-                return LocalRedirect(returnUrl);
+                return RedirectToPage("/MyTimeline"); 
             }
             
             return Page();
