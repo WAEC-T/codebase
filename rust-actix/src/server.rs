@@ -1,7 +1,7 @@
 use actix_files as fs;
 use actix_session::{storage::CookieSessionStore, SessionMiddleware};
 use actix_web::cookie::Key;
-use actix_web::middleware::Logger;
+// use actix_web::middleware::Logger;
 use actix_web::{web, App, HttpServer};
 use std::num::NonZeroUsize;
 use std::sync::Arc;
@@ -19,7 +19,7 @@ pub async fn start(port: u16) -> std::io::Result<()> {
     let pool = Arc::new(database::establish_pool().await.unwrap());
     HttpServer::new(move || {
         App::new()
-            .wrap(Logger::default())
+            //.wrap(Logger::default())
             .app_data(web::Data::new(pool.clone()))
             .wrap(AuthMiddleware)
             .service(api_services())
