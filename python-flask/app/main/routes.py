@@ -157,12 +157,7 @@ def unfollow_user(username):
 @main_bp.route("/cleardb")
 def clean_up():
     """Clears the current database and reinitializes it."""
-    print("Cleaning database from last run...")
-
     db.drop_all()
-
-    print("Setting up new version of DB...")
-
     db.create_all()
 
     return redirect(url_for("public_timeline"))

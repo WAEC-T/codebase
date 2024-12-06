@@ -24,7 +24,6 @@ def login():
         else:
             # user authenticated
             session["user_id"] = user.user_id
-            print(session["user_id"])
             flash("You were logged in")
             return redirect(url_for("main.timeline"))
 
