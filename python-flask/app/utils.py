@@ -23,17 +23,18 @@ def format_datetime(timestamp):
 
 def gravatar(email, size=80):
     """Return the gravatar image for the given email address."""
-    return "http://www.gravatar.com/avatar/%s?d=identicon&s=%d" % (
-        hashlib.md5(email.strip().lower().encode("utf-8")).hexdigest(),
-        size,
-    )
+    email_hash = hashlib.md5(email.strip().lower().encode("utf-8")).hexdigest()
+    return f"http://www.gravatar.com/avatar/{email_hash}?d=identicon&s={size}"
 
 
 def not_req_from_simulator(request):
+    """Verifies if the request is authorized by checking the Authorization header."""
     from_simulator = request.headers.get("Authorization")
     if from_simulator != "Basic c2ltdWxhdG9yOnN1cGVyX3NhZmUh":
         error = "You are not authorized to use this resource!"
         return jsonify({"status": 403, "error_msg": error}), 403
+
+    return None
 
 
 def update_latest(request):

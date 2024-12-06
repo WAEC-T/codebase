@@ -9,6 +9,7 @@ posts_bp = Blueprint("posts", __name__)
 
 @posts_bp.route("/add_message", methods=["POST"])
 def add_message():
+    """Add a new message to the database."""
     is_user_logged()
     if "user_id" not in session:
         abort(401)
@@ -23,6 +24,6 @@ def add_message():
 
         db.session.add(new_message)
         db.session.commit()
-        flash(f"Your message was recorded")
+        flash("Your message was recorded")
 
     return redirect(url_for("main.timeline"))

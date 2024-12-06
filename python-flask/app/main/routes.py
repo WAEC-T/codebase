@@ -8,6 +8,7 @@ from flask import (
     flash,
     g,
 )
+from sqlalchemy.exc import SQLAlchemyError
 from app.models.message import Message
 from app.models.user import User, Follower
 from app.extensions import db
@@ -175,8 +176,7 @@ def check_db_connection():
         result = db.session.execute("SELECT 1").scalar()
         if result == 1:
             return "Database connection is successful!"
-        else:
-            return "Database connection failed!", 500
-    except Exception as e:
-        # Catch any exceptions (like connection errors) and print them
+        return "Database connection failed!", 500
+    except SQLAlchemyError as e:
+        # Catch only database-related errors
         return f"Database connection failed! Error: {str(e)}", 500
