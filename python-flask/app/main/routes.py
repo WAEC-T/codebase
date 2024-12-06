@@ -6,12 +6,18 @@ from config import PER_PAGE
 
 main_bp = Blueprint('main', __name__)
 
+def is_user_logged():
+    """Checks if a user is logged in before each request."""
+    g.user = None
+    if 'user_id' in session:
+        g.user = User.query.filter_by(user_id=session['user_id']).first()
 
 @main_bp.route('/')
 def timeline():
     """Shows a users timeline or if no user is logged in it will
     redirect to the public timeline.  This timeline shows the user's
     messages as well as all the messages of followed users."""
+    is_user_logged()
     if 'user_id' not in session:
         return redirect(url_for('main.public_timeline'))
     user_id = session['user_id']
@@ -38,6 +44,7 @@ def timeline():
 @main_bp.route('/public')
 def public_timeline():
     """Displays the latest messages of all users."""
+    is_user_logged()
     messages = db.session.query(Message, User).join(User, Message.author_id == User.user_id).order_by(
         Message.pub_date.desc()).limit(PER_PAGE).all()
 
@@ -49,6 +56,7 @@ def public_timeline():
 @main_bp.route('/<username>')
 def user_timeline(username):
     """Displays a user's timeline."""
+    is_user_logged()
     profile_user = User.query.filter_by(username=username).first_or_404()
 
     followed = False
@@ -68,6 +76,7 @@ def user_timeline(username):
 @main_bp.route('/<username>/follow')
 def follow_user(username):
     """Adds the current user to the follower of the given user"""
+    is_user_logged()
     if 'user_id' not in session:
         abort(401)
 
@@ -76,14 +85,10 @@ def follow_user(username):
     if whom is None:
         abort(404)
 
-    existing_follower = Follower.query.filter_by(who_id=g.user.user_id,
-                                                 whom_id=whom.user_id).first()
-
-    if existing_follower is None:
-        new_follower = Follower(who_id=g.user.user_id, whom_id=whom.user_id)
-        db.session.add(new_follower)
-        db.session.commit()
-        flash(f'You are now following {username}')
+    new_follower = Follower(who_id=g.user.user_id, whom_id=whom.user_id)
+    db.session.add(new_follower)
+    db.session.commit()
+    flash(f'You are now following {username}')
 
     return redirect(url_for('main.user_timeline', username=username))
 
@@ -91,6 +96,7 @@ def follow_user(username):
 @main_bp.route('/<username>/unfollow')
 def unfollow_user(username):
     """Removes the curent user as follower of the given user"""
+    is_user_logged()
     if 'user_id' not in session:
         abort(401)
 

@@ -1,12 +1,14 @@
 from datetime import datetime
-from flask import Blueprint, request, redirect, url_for, flash, session, abort, render_template
+from flask import Blueprint, request, redirect, url_for, flash, session, abort
 from app.models.message import Message
+from app.main.routes import is_user_logged
 from app.extensions import db
 
 posts_bp = Blueprint('posts', __name__)
 
 @posts_bp.route('/add_message', methods=['POST'])
 def add_message():
+    is_user_logged()
     if 'user_id' not in session:
         abort(401)
 
