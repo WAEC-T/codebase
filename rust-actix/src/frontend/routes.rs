@@ -1,8 +1,10 @@
 use crate::database::models::{Messages, Users};
 use crate::database::pool::DatabasePool;
 use crate::database::repository::{
-    create_msg, create_user, follow, get_passwd_hash, get_public_messages, get_timeline, get_user_by_id, get_user_by_name, get_user_id, get_user_timeline, is_following, unfollow
+    create_msg, create_user, follow, get_public_messages, get_timeline, get_user_by_id,
+    get_user_by_name, get_user_id, get_user_timeline, is_following, unfollow,
 };
+use crate::database::PostgresConnection;
 use crate::frontend::flash_messages::*;
 use crate::frontend::template_structs::*;
 use crate::utils::datetime::format_datetime_to_message_string;
@@ -17,16 +19,26 @@ use actix_web::{
 use askama_actix::Template;
 use chrono::Utc;
 use md5::{Digest, Md5};
-use pwhash::bcrypt;
 
 const PAGE_MESSAGES_LIMIT: i32 = 30;
 
-async fn get_user_template_by_name(
-    pool: web::Data<DatabasePool>,
+async fn get_user_template_by_name<'a>(
+    conn: &mut PostgresConnection,
     username: &str,
 ) -> Option<UserTemplate> {
-    let mut conn = pool.get().await.unwrap();
-    let user = get_user_by_name(&mut conn, username).await;
+    if let Some(user) = get_user_by_name(conn, username).await {
+        Some(UserTemplate {
+            user_id: user.user_id,
+            username: user.username,
+            email: user.email,
+        })
+    } else {
+        None
+    }
+}
+
+async fn get_user_template(conn: &mut PostgresConnection, user_id: i32) -> Option<UserTemplate> {
+    let user = get_user_by_id(conn, user_id).await;
     if let Some(user) = user {
         Some(UserTemplate {
             user_id: user.user_id,
@@ -38,35 +50,14 @@ async fn get_user_template_by_name(
     }
 }
 
-async fn get_user_template(pool: web::Data<DatabasePool>, user_id: i32) -> Option<UserTemplate> {
-    let mut conn = pool.get().await.unwrap();
-    let user = get_user_by_id(&mut conn, user_id).await;
-    if let Some(user) = user {
-        Some(UserTemplate {
-            user_id: user.user_id,
-            username: user.username,
-            email: user.email,
-        })
-    } else {
-        None
-    }
-}
-
-async fn get_user(
-    pool: web::Data<DatabasePool>,
-    session: Session,
-) -> Option<UserTemplate> {
+async fn get_user(conn: &mut PostgresConnection, session: Session) -> Option<UserTemplate> {
     match session.get::<i32>("user_id") {
-        Ok(Some(user_id)) => {
-        get_user_template(pool, user_id).await
-    }
-    Ok(None) => {
-        None
-    }
-    Err(err) => {
-        eprintln!("Failed to retrieve `user_id` from session: {:?}", err);
-        None
-    }
+        Ok(Some(user_id)) => get_user_template(conn, user_id).await,
+        Ok(None) => None,
+        Err(err) => {
+            eprintln!("Failed to retrieve `user_id` from session: {:?}", err);
+            None
+        }
     }
 }
 
@@ -84,11 +75,14 @@ fn gravatar_url(email: &str) -> String {
 fn format_messages(messages: Vec<(Messages, Users)>) -> Vec<MessageTemplate> {
     let mut messages_for_template: Vec<MessageTemplate> = Vec::new();
     for (msg, user) in messages {
+        let gravatar_url_string = gravatar_url(&user.email); // Store the full URL in a variable.
+        let pub_date_string = format_datetime_to_message_string(Some(msg.pub_date));
+
         let message = MessageTemplate {
             text: msg.text,
             username: user.username,
-            gravatar_url: gravatar_url(&user.email),
-            pub_date: format_datetime_to_message_string(Some(msg.pub_date)),
+            gravatar_url: gravatar_url_string,
+            pub_date: pub_date_string,
         };
         messages_for_template.push(message)
     }
@@ -99,10 +93,10 @@ fn format_messages(messages: Vec<(Messages, Users)>) -> Vec<MessageTemplate> {
 async fn timeline(
     pool: web::Data<DatabasePool>,
     flash: Option<FlashMessages>,
-    session: Session
+    session: Session,
 ) -> impl Responder {
     let mut conn = pool.get().await.unwrap();
-    if let Some(user) = get_user(pool.clone(), session).await {
+    if let Some(user) = get_user(&mut conn, session).await {
         let messages =
             format_messages(get_timeline(&mut conn, user.user_id, PAGE_MESSAGES_LIMIT).await);
 
@@ -113,8 +107,8 @@ async fn timeline(
             user: Some(user),
             followed: Some(false),
             flashes: flash.unwrap_or_default().messages,
-            title: String::from("My Timeline"),
-            error: String::from(""),
+            title: "My Timeline",
+            error: "",
         }
         .render()
         .unwrap();
@@ -132,8 +126,8 @@ async fn public_timeline(
     flash_messages: Option<FlashMessages>,
     session: Session,
 ) -> impl Responder {
-    let user = get_user(pool.clone(), session).await;
     let mut conn = pool.get().await.unwrap();
+    let user = get_user(&mut conn, session).await;
     let messages = get_public_messages(&mut conn, PAGE_MESSAGES_LIMIT).await;
     let messages_for_template = format_messages(messages);
 
@@ -144,8 +138,8 @@ async fn public_timeline(
         user,
         followed: Some(false),
         flashes: flash_messages.unwrap_or_default().messages,
-        title: String::from("Public Timeline"),
-        error: String::from(""),
+        title: "Public Timeline",
+        error: "",
     }
 }
 
@@ -156,28 +150,28 @@ async fn user_timeline(
     session: Session,
     flash_messages: Option<FlashMessages>,
 ) -> impl Responder {
+    let mut conn = pool.get().await.unwrap();
     let username = path.into_inner();
-    let profile_user = get_user_template_by_name(pool.clone(), &username).await;
+    let profile_user = get_user_template_by_name(&mut conn, &username).await;
     if let Some(profile_user) = profile_user {
         let mut followed = false;
-        let user = get_user(pool.clone(), session).await;
-        let mut conn = pool.get().await.unwrap();
-        if let Some(user) = user.clone() {
-            followed = is_following(&mut conn, profile_user.clone().user_id, user.user_id).await
+        let user = get_user(&mut conn, session).await;
+        if let Some(ref user) = user {
+            followed = is_following(&mut conn, profile_user.user_id, user.user_id).await
         }
         let messages = format_messages(
             get_user_timeline(&mut conn, profile_user.user_id, PAGE_MESSAGES_LIMIT).await,
         );
-        let profile_user_name = profile_user.clone().username;
+        let profile_user_name = &profile_user.username;
         let rendered = TimelineTemplate {
             messages,
             request_endpoint: "user_timeline",
-            profile_user: Some(profile_user.clone()),
+            profile_user: Some(&profile_user),
             user,
             followed: Some(followed),
             flashes: flash_messages.unwrap_or_default().messages,
-            title: format!("{}'s Timeline", profile_user_name),
-            error: String::from(""),
+            title: &(profile_user_name.to_string() + "'s Timeline"),
+            error: "",
         }
         .render()
         .unwrap();
@@ -195,12 +189,12 @@ async fn follow_user(
     session: Session,
 ) -> impl Responder {
     if let Ok(Some(current_user)) = session.get::<i32>("user_id") {
-        let _target_username = path.clone();
+        let _target_username = &path;
         let mut conn = pool.get().await.unwrap();
-        let _target_id = get_user_id(&mut conn, &_target_username).await;
+        let _target_id = get_user_id(&mut conn, _target_username).await;
         follow(&mut conn, current_user, _target_id).await;
         let message = format!("You are now following {}", _target_username);
-        add_flash(session, message.as_str());
+        add_flash(&session, message.as_str());
     } else {
         return HttpResponse::Found()
             .append_header((header::LOCATION, "User not found"))
@@ -220,12 +214,12 @@ async fn unfollow_user(
 ) -> impl Responder {
     if let Ok(Some(current_user)) = session.get::<i32>("user_id") {
         let mut conn = pool.get().await.unwrap();
-        let _target_username = path.clone();
-        let _target_id = get_user_id(&mut conn, &_target_username).await;
+        let _target_username = &path;
+        let _target_id = get_user_id(&mut conn, _target_username).await;
         unfollow(&mut conn, current_user, _target_id).await;
 
         let message = format!("You are no longer following {}", _target_username);
-        add_flash(session, message.as_str());
+        add_flash(&session, message.as_str());
     } else {
         return HttpResponse::Found()
             .append_header((header::LOCATION, "User not found"))
@@ -247,10 +241,11 @@ async fn add_message(
             let mut conn = pool.get().await.unwrap();
             let timestamp = Utc::now();
             if msg.text.is_empty() {
-                if let Some(user) = get_user(pool.clone(), session).await {
-                    let messages =
-                        format_messages(get_timeline(&mut conn, user.user_id, PAGE_MESSAGES_LIMIT).await);
-            
+                if let Some(user) = get_user(&mut conn, session).await {
+                    let messages = format_messages(
+                        get_timeline(&mut conn, user.user_id, PAGE_MESSAGES_LIMIT).await,
+                    );
+
                     let context = TimelineTemplate {
                         messages,
                         request_endpoint: "timeline",
@@ -258,30 +253,27 @@ async fn add_message(
                         user: Some(user),
                         followed: Some(false),
                         flashes: Vec::new(),
-                        title: String::from("My Timeline"),
-                        error: String::from("Message cannot be empty!")
+                        title: "My Timeline",
+                        error: "Message cannot be empty!",
                     }
                     .render()
                     .unwrap();
-                    return HttpResponse::Ok().body(context)
+                    return HttpResponse::Ok().body(context);
                 } else {
                     return HttpResponse::TemporaryRedirect()
                         .append_header((header::LOCATION, "/public"))
-                        .finish()
+                        .finish();
                 }
-    
-            } 
+            }
             let _ = create_msg(&mut conn, &user_id, &msg.text, timestamp, &0).await;
-            add_flash(session, "Your message was recorded");
+            add_flash(&session, "Your message was recorded");
             HttpResponse::Found()
                 .append_header((header::LOCATION, "/"))
                 .finish()
         }
-        Ok(None) => {
-            HttpResponse::Unauthorized()
-                .status(StatusCode::UNAUTHORIZED)
-                .finish()
-        }
+        Ok(None) => HttpResponse::Unauthorized()
+            .status(StatusCode::UNAUTHORIZED)
+            .finish(),
         Err(err) => {
             eprintln!("Failed to retrieve `user_id` from session: {:?}", err);
             HttpResponse::InternalServerError().finish()
@@ -290,23 +282,20 @@ async fn add_message(
 }
 
 #[get("/login")]
-async fn login(
-    flash_messages: Option<FlashMessages>,
-    session: Session,
-) -> impl Responder {
+async fn login(flash_messages: Option<FlashMessages>, session: Session) -> impl Responder {
     match session.get::<i32>("user_id") {
         Ok(Some(_)) => {
-        add_flash(session, "You are already logged in");
-        HttpResponse::TemporaryRedirect()
-            .append_header((header::LOCATION, "/"))
-            .finish()
+            add_flash(&session, "You are already logged in");
+            HttpResponse::TemporaryRedirect()
+                .append_header((header::LOCATION, "/"))
+                .finish()
         }
         Ok(None) => {
             let rendered = LoginTemplate {
                 user: None,
                 flashes: flash_messages.unwrap_or_default().messages,
-                error: String::from(""),
-                username: String::from(""),
+                error: "",
+                username: "",
             }
             .render()
             .unwrap();
@@ -314,7 +303,7 @@ async fn login(
         }
         Err(err) => {
             eprintln!("Failed to retrieve `user_id` from session: {:?}", err);
-            add_flash(session, "An error occurred while processing your session.");
+            add_flash(&session, "An error occurred while processing your session.");
             HttpResponse::InternalServerError()
                 .body("An error occurred while processing your request.")
         }
@@ -329,21 +318,22 @@ async fn post_login(
     session: Session,
 ) -> impl Responder {
     let mut conn = pool.get().await.unwrap();
-    let mut error_message = String::new();
+    let mut error_message: &str = "";
 
-    let result = get_passwd_hash(&mut conn, &info.username).await;
+    let result = get_user_by_name(&mut conn, &info.username).await;
 
     if result.is_none() {
-        error_message = "Invalid username".to_string();
-    } else if let Some(stored_hash) = result {
-        if !bcrypt::verify(info.password.clone(), &stored_hash) {
-            error_message = "Invalid password".to_string();
+        error_message = "Invalid username";
+    } else if let Some(user) = result {
+        if !&info.password.eq(&user.pw_hash) {
+            error_message = "Invalid password";
         } else {
-            let user_id = get_user_id(&mut conn, &info.username).await;
-            session.insert("user_id", user_id).unwrap_or_else(|err| {
-                eprintln!("Failed to insert user_id into session: {:?}", err);
-            });
-            add_flash(session, "You were logged in");
+            session
+                .insert("user_id", user.user_id)
+                .unwrap_or_else(|err| {
+                    eprintln!("Failed to insert user_id into session: {:?}", err);
+                });
+            add_flash(&session, "You were logged in");
 
             return HttpResponse::Found()
                 .append_header((header::LOCATION, "/"))
@@ -352,82 +342,80 @@ async fn post_login(
     }
 
     let context = LoginTemplate {
-            user: None,
-            error: error_message,
-            username: info.username.clone(),
-            flashes: Vec::new(),  
-        }
-        .render()
-        .unwrap();
+        user: None,
+        error: error_message,
+        username: &info.username,
+        flashes: Vec::new(),
+    }
+    .render()
+    .unwrap();
 
     HttpResponse::Ok().body(context)
-
 }
 
 #[get("/register")]
 async fn register(flash_messages: Option<FlashMessages>) -> impl Responder {
     RegisterTemplate {
         flashes: flash_messages.unwrap_or_default().messages,
-        error: String::from(""),
-        email: String::from(""),
-        username: String::from(""),
-        password: String::from(""),
+        error: "",
+        email: "",
+        username: "",
+        password: "",
         user: None,
     }
 }
 
 #[post("/register")]
-async fn post_register(
+async fn post_register<'a>(
     pool: web::Data<DatabasePool>,
     info: web::Form<RegisterInfo>,
     session: Session,
 ) -> impl Responder {
     let mut conn = pool.get().await.unwrap();
-    let mut error_message = String::new();
+    let mut error_message = None;
 
     if info.username.is_empty() {
-        error_message = "You have to enter a username".to_string();
+        error_message = Some("You have to enter a username".to_string());
     } else if info.email.is_empty() || !info.email.contains('@') {
-        error_message = "You have to enter a valid email address".to_string();
+        error_message = Some("You have to enter a valid email address".to_string());
     } else if info.password.is_empty() {
-        error_message = "You have to enter a password".to_string();
+        error_message = Some("You have to enter a password".to_string());
     } else if info.password != info.password2 {
-        error_message = "The two passwords do not match".to_string();
+        error_message = Some("The two passwords do not match".to_string());
     } else if get_user_id(&mut conn, &info.username).await != -1 {
-        error_message = "The username is already taken".to_string();
+        error_message = Some("The username is already taken".to_string());
     }
 
-    if !error_message.is_empty() {
+    if let Some(error) = error_message {
         let context = RegisterTemplate {
             user: None,
-            email: info.email.clone(),
-            username: info.username.clone(),
-            password: info.password.clone(),
+            email: &info.email,
+            username: &info.username,
+            password: &info.password,
             flashes: Vec::new(),
-            error: error_message,
+            error: &error,
         }
         .render()
         .unwrap();
 
         HttpResponse::Ok().body(context)
-    }
-    else{
+    } else {
+        let _ = create_user(&mut conn, &info.username, &info.email, &info.password).await;
 
-    let hash = bcrypt::hash(info.password.clone()).unwrap();
-    let _ = create_user(&mut conn, &info.username, &info.email, &hash).await;
+        add_flash(
+            &session,
+            "You were successfully registered and can login now",
+        );
 
-    add_flash(session, "You were successfully registered and can login now");
-
-    return HttpResponse::SeeOther()
+        return HttpResponse::SeeOther()
             .append_header(("Location", "/login"))
             .finish();
     }
 }
 
-
 #[get("/logout")]
 async fn logout(session: Session) -> impl Responder {
-    add_flash(session.clone(), "You were logged out.");
+    add_flash(&session, "You were logged out.");
     session.remove("user_id");
     Redirect::to("/public").see_other()
 }

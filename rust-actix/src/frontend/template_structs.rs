@@ -22,31 +22,31 @@ pub struct TimelineTemplate<'a> {
     pub messages: Vec<MessageTemplate>,
     pub user: Option<UserTemplate>,
     pub request_endpoint: &'a str,
-    pub profile_user: Option<UserTemplate>,
+    pub profile_user: Option<&'a UserTemplate>,
     pub followed: Option<bool>,
     pub flashes: Vec<String>,
-    pub title: String,
-    pub error: String,
+    pub title: &'a str,
+    pub error: &'a str,
 }
 
 #[derive(Template)]
 #[template(path = "../templates/login.html")]
-pub struct LoginTemplate {
+pub struct LoginTemplate<'a> {
     pub user: Option<UserTemplate>,
-    pub error: String,
+    pub error: &'a str,
     pub flashes: Vec<String>,
-    pub username: String,
+    pub username: &'a str,
 }
 
 #[derive(Template)]
 #[template(path = "../templates/register.html")]
-pub struct RegisterTemplate {
+pub struct RegisterTemplate<'a> {
     pub user: Option<UserTemplate>,
-    pub email: String,
-    pub username: String,
-    pub password: String,
+    pub email: &'a str,
+    pub username: &'a str,
+    pub password: &'a str,
     pub flashes: Vec<String>,
-    pub error: String,
+    pub error: &'a str,
 }
 
 #[derive(Deserialize)]

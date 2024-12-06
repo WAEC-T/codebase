@@ -25,7 +25,7 @@ impl FromRequest for FlashMessages {
     }
 }
 
-pub fn add_flash(session: Session, message: &str) {
+pub fn add_flash(session: &Session, message: &str) {
     if let Ok(Some(messages)) = session.get::<String>("_flash") {
         let new_message = format!("{},{}", messages, message);
         session.insert("_flash", new_message).unwrap();

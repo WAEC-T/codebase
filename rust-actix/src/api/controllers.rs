@@ -12,7 +12,6 @@ use crate::{
 };
 use actix_web::{web, HttpResponse};
 use chrono::Utc;
-use pwhash::bcrypt;
 
 async fn get_user_id(pool: web::Data<DatabasePool>, username: &str) -> Option<i32> {
     let mut conn = pool.get().await.unwrap();
@@ -22,7 +21,7 @@ async fn get_user_id(pool: web::Data<DatabasePool>, username: &str) -> Option<i3
 }
 
 async fn update_latest(conn: &mut PostgresConnection, query: web::Query<Latest>) {
-    set_latest(conn, query.latest).await;
+    set_latest(conn, &query.latest).await;
 }
 
 pub async fn retrieve_latest(pool: web::Data<DatabasePool>) -> HttpResponse {
@@ -60,8 +59,7 @@ pub async fn register_new_user(
         };
         HttpResponse::BadRequest().json(reg_err)
     } else {
-        let hash = bcrypt::hash(info.pwd.clone()).unwrap();
-        let _ = create_user(&mut conn, &info.username, &info.email, &hash).await;
+        let _ = create_user(&mut conn, &info.username, &info.email, &info.pwd).await;
         HttpResponse::NoContent().json(String::from(""))
     }
 }

@@ -9,13 +9,13 @@ use diesel_async::RunQueryDsl;
 
 pub async fn get_user_id(conn: &mut PostgresConnection, name: &str) -> i32 {
     use schema::users::dsl::*;
-    
+
     users
-    .filter(username.eq(name))
-    .select(user_id)
-    .first::<i32>(conn)
-    .await
-    .unwrap_or(-1)
+        .filter(username.eq(name))
+        .select(user_id)
+        .first::<i32>(conn)
+        .await
+        .unwrap_or(-1)
 }
 
 pub async fn create_user(
@@ -27,7 +27,11 @@ pub async fn create_user(
     use schema::users::dsl::*;
 
     insert_into(users)
-        .values((username.eq(_username), email.eq(_email), pw_hash.eq(_pw_hash)))
+        .values((
+            username.eq(_username),
+            email.eq(_email),
+            pw_hash.eq(_pw_hash),
+        ))
         .returning(Users::as_returning())
         .get_result(conn)
         .await
@@ -43,7 +47,6 @@ pub async fn get_public_messages(
 
     messages::table
         .inner_join(users::table.on(messages::author_id.eq(users::user_id)))
-        .filter(messages::flagged.eq(0))
         .order_by(messages::pub_date.desc())
         .limit(limit.into())
         .select((Messages::as_select(), Users::as_select()))
@@ -62,13 +65,18 @@ pub async fn create_msg(
     use schema::messages::dsl::*;
 
     insert_into(messages)
-        .values((author_id.eq(_author_id), text.eq(_text), pub_date.eq(&_pub_date.naive_utc()), flagged.eq(_flagged)))
+        .values((
+            author_id.eq(_author_id),
+            text.eq(_text),
+            pub_date.eq(&_pub_date.naive_utc()),
+            flagged.eq(_flagged),
+        ))
         .returning(Messages::as_select())
         .get_result(conn)
         .await
         .expect("Error creating new message")
 }
-    
+
 pub async fn follow(conn: &mut PostgresConnection, follower_id: i32, followed_id: i32) {
     use schema::followers::dsl::*;
     insert_into(followers)
@@ -178,18 +186,6 @@ pub async fn get_timeline(
         .expect("")
 }
 
-pub async fn get_passwd_hash(conn: &mut PostgresConnection, username: &str) -> Option<String> {
-    use schema::users;
-
-    users::table
-        .filter(users::username.eq(username))
-        .select(users::pw_hash)
-        .first(conn)
-        .await
-        .optional()
-        .expect("Error loading messages and post")
-}
-
 pub async fn is_following(
     conn: &mut PostgresConnection,
     followed_id: i32,
@@ -218,7 +214,7 @@ pub async fn get_latest(conn: &mut PostgresConnection) -> i32 {
         .expect("Get latest failed")
 }
 
-pub async fn set_latest(conn: &mut PostgresConnection, latest: i32) {
+pub async fn set_latest(conn: &mut PostgresConnection, latest: &i32) {
     use schema::latest;
 
     let _: usize = diesel::update(latest::table.filter(latest::id.eq(1)))
@@ -227,52 +223,3 @@ pub async fn set_latest(conn: &mut PostgresConnection, latest: i32) {
         .await
         .expect("Set latest failed");
 }
-
-
-// pub async fn follow_try(conn: &mut PostgresConnection, follower_id: i32, followed_username: &str) {
-
-//     let query = "
-//     INSERT INTO followers (who_id, whom_id) VALUES ($1, (SELECT user_id FROM users WHERE username = $2 LIMIT 1));
-//     ";
-
-//     diesel::sql_query(query)
-//         .bind::<diesel::sql_types::Int4, _>(follower_id)
-//         .bind::<diesel::sql_types::Text, _>(followed_username) 
-//         .execute(conn)
-//         .await
-//         .expect("Error following user");
-// }
-
-
-// pub async fn create_user_2(
-//     conn: &mut PostgresConnection,
-//     name: &str,
-//     user_email: &str,
-//     pass: &str,
-// ) -> Users {
-//     use schema::users::dsl::*;
-
-//     diesel::insert_into(users)
-//         .values((username.eq(name), email.eq(user_email), pw_hash.eq(pass)))
-//         .returning(Users::as_returning())
-//         .get_result(conn)
-//         .await
-//         .expect("Error saving new post")
-// }
-
-// pub async fn create_user_raw(
-//     conn: &mut PostgresConnection,
-//     username: &str,
-//     email: &str,
-//     pw_hash: &str,
-// ) {
-//     let query = "INSERT INTO users (username, email, pw_hash) VALUES ($1, $2, $3) RETURNING user_id, username, email";
-
-//     sql_query(query)
-//         .bind::<diesel::sql_types::Text, _>(username)
-//         .bind::<diesel::sql_types::Text, _>(email)
-//         .bind::<diesel::sql_types::Text, _>(pw_hash)
-//         .execute(conn)
-//         .await
-//         .expect("Error creating new user");
-// }
