@@ -3,7 +3,7 @@ services:
     image: waect/python-flask
     build: .
     ports:
-      - "5022:5022"
+      - "5000:5000"
     env_file:
       - ../.env.local
     networks:
