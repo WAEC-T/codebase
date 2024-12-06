@@ -17,14 +17,16 @@ def format_datetime(timestamp):
     if timestamp is None:
         return "Unknown date"
     if isinstance(timestamp, datetime):
-        return timestamp.strftime('%Y-%m-%d @ %H:%M')
+        return timestamp.strftime("%Y-%m-%d @ %H:%M")
     return str(timestamp)
 
 
 def gravatar(email, size=80):
     """Return the gravatar image for the given email address."""
-    return 'http://www.gravatar.com/avatar/%s?d=identicon&s=%d' % \
-        (hashlib.md5(email.strip().lower().encode('utf-8')).hexdigest(), size)
+    return "http://www.gravatar.com/avatar/%s?d=identicon&s=%d" % (
+        hashlib.md5(email.strip().lower().encode("utf-8")).hexdigest(),
+        size,
+    )
 
 
 def not_req_from_simulator(request):
