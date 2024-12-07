@@ -1,4 +1,5 @@
 services:
+  # SH to test the connection to the database
   database:
     image: postgres:latest
     container_name: database
