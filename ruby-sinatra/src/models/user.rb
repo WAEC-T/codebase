@@ -1,24 +1,9 @@
 # frozen_string_literal: true
 
 require 'digest'
-require 'bcrypt'
 
 # Represents a user model in minitwit.
 class User < ActiveRecord::Base
-  has_and_belongs_to_many :followers,
-                          class_name: 'User',
-                          join_table: 'followers',
-                          foreign_key: 'whom_id',
-                          association_foreign_key: 'who_id',
-                          inverse_of: :following
-
-  has_and_belongs_to_many :following,
-                          class_name: 'User',
-                          join_table: 'followers',
-                          foreign_key: 'who_id',
-                          association_foreign_key: 'whom_id',
-                          inverse_of: :followers
-
   has_many :messages, foreign_key: :author_id
 
   # manually handle password encryption and authentication
@@ -33,12 +18,12 @@ class User < ActiveRecord::Base
     return unless unencrypted_password.present?
 
     @password = unencrypted_password
-    self.pw_hash = BCrypt::Password.create(unencrypted_password)
+    self.pw_hash = unencrypted_password
   end
 
   # authenticates the user by comparing the provided password with the stored hash
   def authenticate(unencrypted_password)
-    BCrypt::Password.new(pw_hash).is_password?(unencrypted_password) && self
+    pw_hash == unencrypted_password ? self : false
   end
 
   validates :username, presence: true, uniqueness: true

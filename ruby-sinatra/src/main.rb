@@ -10,6 +10,8 @@ require 'dotenv'
 
 Dir['./models/*.rb'].sort.each { |file| require file }
 
+set :logging, false
+
 PR_PAGE = 30
 
 DATABASE_URL = ENV.fetch('DATABASE_URL', nil)
@@ -17,6 +19,7 @@ puts "Loaded DATABASE_URL: #{DATABASE_URL}"
 
 USER_NOT_FOUND = 'User not found'
 NO_IS_REQUIRED = 'no is required'
+API_MESSAGE_RESPONSE = 100
 
 configure :production, :staging, :development, :test do
   db = URI.parse(DATABASE_URL)
@@ -60,7 +63,7 @@ def update_latest(request)
 end
 
 before '/api/*' do
-  update_latest(request)
+  update_latest(request) if request.path != '/api/latest'
   if request_is_not_from_simulator
     halt [403, { status: 403, error_msg: 'You are not authorized to use this resource!' }.to_json]
   end
@@ -72,19 +75,19 @@ get '/' do
   @title = 'My Timeline'
 
   @messages = Message
-              .unflagged
-              .authored_by(current_user.following + [current_user])
+              .joins('LEFT JOIN followers f ON f.whom_id = messages.author_id')
+              .where('f.who_id = ? OR messages.author_id = ?', session[:user_id], session[:user_id])
               .includes(:author)
               .order(pub_date: :desc)
-              .first(PR_PAGE)
+              .limit(PR_PAGE)
 
   erb :timeline, layout: :layout
 end
 
+# TODO: Figure out why it is only one query (probably the signout) - It needs to be 2 queries
 get '/public' do
   @title = 'Public Timeline'
   @messages = Message
-              .unflagged
               .includes(:author)
               .order(pub_date: :desc)
               .first(PR_PAGE)
@@ -97,6 +100,13 @@ get '/register' do
 end
 
 post '/register' do
+  existing_user = User.find_by(email: params[:email]) || User.find_by(username: params[:username])
+  if existing_user
+    flash[:error] = 'A user with this email or username already exists.'
+    redirect('/register')
+    return
+  end
+
   user = User.new(
     username: params[:username],
     email: params[:email],
@@ -160,8 +170,8 @@ end
 get '/user/:username' do
   @profile_user = User.find_by_username(params[:username])
   @title = "#{@profile_user.username}'s Timeline"
+  @follows = Follower.follows?(current_user.id, @profile_user.id)
   @messages = Message
-              .unflagged
               .authored_by(@profile_user)
               .includes(:author)
               .order(pub_date: :desc)
@@ -174,10 +184,9 @@ get '/:username/follow' do
   return status 401 unless logged_in?
 
   whom = User.find_by_username(params[:username])
-
   return status 404 if whom.nil?
 
-  current_user.following << whom
+  Follower.find_or_create_by(who_id: session[:user_id], whom_id: whom.id)
   flash[:success] = "You are now following #{params[:username]}"
   redirect("/user/#{params[:username]}")
 end
@@ -186,10 +195,9 @@ get '/:username/unfollow' do
   return status 401 unless logged_in?
 
   whom = User.find_by_username(params[:username])
-
   return status 404 if whom.nil?
 
-  current_user.following.delete(whom)
+  Follower.where(who_id: session[:user_id], whom_id: whom.id).delete_all
   flash[:success] = "You are no longer following #{params[:username]}"
   redirect("/user/#{params[:username]}")
 end
@@ -201,6 +209,13 @@ namespace '/api' do
 
   post '/register' do
     request_data = JSON.parse(request.body.read, symbolize_names: true)
+
+    existing_user = User.find_by(email: request_data[:email]) || User.find_by(username: request_data[:username])
+    if existing_user
+      status 400
+      body({ status: 400, error_msg: ' a user with this email or username already exists.' }.to_json)
+      return
+    end
 
     user = User.new(
       username: request_data[:username],
@@ -218,14 +233,11 @@ namespace '/api' do
   end
 
   get '/msgs' do
-    return [400, NO_IS_REQUIRED] if params[:no].nil?
-
-    count = params[:no].to_i
+    number_of_messages = params[:no]&.to_i&.positive? ? params[:no].to_i : API_MESSAGE_RESPONSE
 
     return Message
-           .unflagged
            .order(pub_date: :desc)
-           .first(count)
+           .first(number_of_messages)
            .map(&:sim_format)
            .to_json
   end
@@ -233,14 +245,12 @@ namespace '/api' do
   get '/msgs/:username' do |username|
     user = User.find_by_username(username)
     return [404, USER_NOT_FOUND] if user.nil?
-    return [400, NO_IS_REQUIRED] if params[:no].nil?
 
-    count = params[:no].to_i
+    number_of_messages = params[:no]&.to_i&.positive? ? params[:no].to_i : API_MESSAGE_RESPONSE
 
     return user.messages
-               .unflagged
                .order(pub_date: :desc)
-               .first(count)
+               .first(number_of_messages)
                .map(&:sim_format)
                .to_json
   end
@@ -267,16 +277,16 @@ namespace '/api' do
   get '/fllws/:username' do |username|
     user = User.find_by_username(username)
     return [404, USER_NOT_FOUND] if user.nil?
-    return [400, NO_IS_REQUIRED] if params[:no].nil?
 
-    count = params[:no].to_i
+    number_of_messages = params[:no]&.to_i&.positive? ? params[:no].to_i : API_MESSAGE_RESPONSE
 
-    following = user.following
-                    .first(count)
-                    .pluck(:username)
+    following_usernames = User.joins('JOIN followers ON followers.whom_id = users.user_id')
+                              .where('followers.who_id = ?', user.id)
+                              .limit(number_of_messages)
+                              .pluck('users.username')
 
     status 200
-    body({ follows: following }.to_json)
+    body({ follows: following_usernames }.to_json)
   end
 
   post '/fllws/:username' do |username|
@@ -288,13 +298,13 @@ namespace '/api' do
       to_follow = User.find_by_username(request_data[:follow])
       return [400, 'User to follow not found'] if to_follow.nil?
 
-      user.following.append(to_follow)
+      Follower.find_or_create_by(who_id: user.id, whom_id: to_follow.id)
       status 204
     elsif request_data.key?(:unfollow)
       to_unfollow = User.find_by_username(request_data[:unfollow])
       return [400, 'User to unfollow not found'] if to_unfollow.nil?
 
-      user.following.delete(to_unfollow)
+      Follower.where(who_id: user.id, whom_id: to_unfollow.id).delete_all
       status 204
     end
   end

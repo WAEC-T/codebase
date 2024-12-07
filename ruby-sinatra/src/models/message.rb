@@ -4,8 +4,6 @@
 class Message < ActiveRecord::Base
   belongs_to :author, class_name: 'User'
 
-  scope :unflagged, -> { where(flagged: false) }
-
   scope :authored_by, ->(users) { where(author: users) }
 
   validates_presence_of :text
