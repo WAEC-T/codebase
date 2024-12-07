@@ -3,7 +3,7 @@ using System.Text;
 
 namespace Minitwit.Web.Helpers;
 
-public class Gravatar
+public static class Gravatar
 {
     public static string GetGravatarUrl(string email, int size = 48)
     {

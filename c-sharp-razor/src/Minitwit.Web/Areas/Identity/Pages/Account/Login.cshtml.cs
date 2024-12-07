@@ -15,12 +15,10 @@ namespace Minitwit.Web.Areas.Identity.Pages.Account
     public class LoginModel : PageModel
     {
         private readonly SignInManager<Author> _signInManager;
-        private readonly ILogger<LoginModel> _logger;
 
-        public LoginModel(SignInManager<Author> signInManager, ILogger<LoginModel> logger)
+        public LoginModel(SignInManager<Author> signInManager)
         {
             _signInManager = signInManager;
-            _logger = logger;
         }
         
         /// <summary>
@@ -94,8 +92,6 @@ namespace Minitwit.Web.Areas.Identity.Pages.Account
 
         public async Task<IActionResult> OnPostAsync(string returnUrl = null)
         {
-            returnUrl ??= Url.Content("~/");
-
             ExternalLogins = (
                 await _signInManager.GetExternalAuthenticationSchemesAsync()
             ).ToList();

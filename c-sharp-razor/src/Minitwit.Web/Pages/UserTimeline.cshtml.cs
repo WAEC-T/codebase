@@ -70,7 +70,7 @@ public class UserTimelineModel : PageModel
         TimelineAuthor = await _authorRepository.GetAuthorByNameAsync(author);
         if (TimelineAuthor == null)
         {
-            throw new Exception($"Author with username '{author}' was not found.");
+            throw new KeyNotFoundException($"Author with username '{author}' was not found.");
         }
         IsFollowing = await _followRepository.IsFollowingAsync(user.Id, TimelineAuthor.Id);
         await LoadMessages(user, TimelineAuthor, currentPage);

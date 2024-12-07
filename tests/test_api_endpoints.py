@@ -13,7 +13,7 @@ HEADERS = {'Connection': 'close',
            f'Authorization': f'Basic {ENCODED_CREDENTIALS}'}
 
 # Get the database URL from the environment variable
-DATABASE_URL = "postgresql://user:pass@database/waect" # os.getenv("DATABASE_URL")
+DATABASE_URL = "postgresql://user:pass@database:5432/waect" # os.getenv("DATABASE_URL")
 
 print(DATABASE_URL)
 

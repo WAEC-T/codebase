@@ -8,7 +8,7 @@ using DotNetEnv;
 
 namespace Minitwit.Web;
 
-public class ProgramOptions
+static class ProgramOptions
 {
     public static void AddProgramOptions(WebApplicationBuilder builder)
     {
@@ -45,9 +45,7 @@ public class ProgramOptions
     
     public static void AddDatabase(WebApplicationBuilder builder)
     {
-        string? databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
-        // string databaseUrl = "postgresql://waect:DALEGREMIO@waectdatabase-waectdb03830e3f-xumxd6xbz9jb.c10ia6ywc903.eu-central-1.rds.amazonaws.com:5432/waect";
-        // string databaseUrl = "postgresql://user:pass@10.26.42.13:5432/waect";
+        string? databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL"); // "postgresql://user:pass@10.26.42.13:5432/waect";
         
         if (string.IsNullOrEmpty(databaseUrl))
         {

@@ -2,22 +2,12 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 #nullable disable
 
-using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Text.Encodings.Web;
-using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.AspNetCore.WebUtilities;
-using Microsoft.Extensions.Logging;
 using Minitwit.Core.Entities;
 
 namespace Minitwit.Web.Areas.Identity.Pages.Account
@@ -27,19 +17,13 @@ namespace Minitwit.Web.Areas.Identity.Pages.Account
     {
         private readonly SignInManager<Author> _signInManager;
         private readonly UserManager<Author> _userManager;
-        private readonly IUserStore<Author> _userStore;
-        private readonly IUserEmailStore<Author> _emailStore;
-        private readonly ILogger<RegisterModel> _logger;
-        private readonly IEmailSender _emailSender;
-
+        
         public RegisterModel(
             UserManager<Author> userManager,
-            SignInManager<Author> signInManager,
-            ILogger<RegisterModel> logger)
+            SignInManager<Author> signInManager)
         {
             _userManager = userManager;
             _signInManager = signInManager;
-            _logger = logger;
         }
 
         /// <summary>
@@ -132,33 +116,6 @@ namespace Minitwit.Web.Areas.Identity.Pages.Account
             }
 
             return Page();
-        }
-        
-        private Author CreateUser()
-        {
-            try
-            {
-                return Activator.CreateInstance<Author>();
-            }
-            catch
-            {
-                throw new InvalidOperationException(
-                    $"Can't create an instance of 'Author'. "
-                        + $"Ensure that 'Author' is not an abstract class and has a parameterless constructor, or alternatively "
-                        + $"override the register page in /Areas/Identity/Pages/Account/Register.cshtml"
-                );
-            }
-        }
-
-        private IUserEmailStore<Author> GetEmailStore()
-        {
-            if (!_userManager.SupportsUserEmail)
-            {
-                throw new NotSupportedException(
-                    "The default UI requires a user store with email support."
-                );
-            }
-            return (IUserEmailStore<Author>)_userStore;
         }
     }
 }

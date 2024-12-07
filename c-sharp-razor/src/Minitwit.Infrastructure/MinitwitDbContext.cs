@@ -26,12 +26,12 @@ public sealed class MinitwitDbContext : IdentityDbContext<Author, IdentityRole<i
         ChangeTracker.LazyLoadingEnabled = false;
     }
 
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    protected override void OnModelCreating(ModelBuilder builder)
     {
 
-        base.OnModelCreating(modelBuilder); // Ensure the base configuration is applied
+        base.OnModelCreating(builder); // Ensure the base configuration is applied
 
-        modelBuilder.Entity<Author>()
+        builder.Entity<Author>()
             .Ignore(u => u.AccessFailedCount)
             .Ignore(u => u.EmailConfirmed)
             .Ignore(u => u.LockoutEnabled)
@@ -41,7 +41,7 @@ public sealed class MinitwitDbContext : IdentityDbContext<Author, IdentityRole<i
             .Ignore(u => u.SecurityStamp)
             .Ignore(u => u.TwoFactorEnabled);
 
-        modelBuilder.Entity<Author>(entity =>
+        builder.Entity<Author>(entity =>
         {
             entity.ToTable("users");
             entity.HasKey(a => a.Id);
@@ -63,7 +63,7 @@ public sealed class MinitwitDbContext : IdentityDbContext<Author, IdentityRole<i
                 .IsConcurrencyToken();
         });
 
-        modelBuilder.Entity<Follow>(entity =>
+        builder.Entity<Follow>(entity =>
         {
             entity.ToTable("followers");
             entity.HasKey(f => new { f.FollowingAuthorId, f.FollowedAuthorId });
@@ -76,7 +76,7 @@ public sealed class MinitwitDbContext : IdentityDbContext<Author, IdentityRole<i
             entity.HasOne<Author>().WithMany().HasForeignKey(f => f.FollowedAuthorId);
         });
 
-        modelBuilder.Entity<Message>(entity =>
+        builder.Entity<Message>(entity =>
         {
             entity.ToTable("messages");
             entity.HasKey(e => e.MessageId);
@@ -90,10 +90,10 @@ public sealed class MinitwitDbContext : IdentityDbContext<Author, IdentityRole<i
             entity.Property(e => e.Flagged).HasColumnName("flagged");
         });
 
-        modelBuilder.Entity<Message>()
+        builder.Entity<Message>()
             .HasIndex(c => c.TimeStamp);
 
-        modelBuilder.Entity<Latest>(entity =>
+        builder.Entity<Latest>(entity =>
         {
             entity.ToTable("latest");
 

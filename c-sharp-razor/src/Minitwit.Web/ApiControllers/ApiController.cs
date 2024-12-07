@@ -41,6 +41,8 @@ public class ApiController : ControllerBase
     private const string msgsPostLogFilePath = "./LogMsgsPost.txt";
     private const string fllwsGetLogFilePath = "./LogFllwsGet.txt";
     private const string fllwsPostLogFilePath = "./LogFllwsPost.txt";
+    
+    private const string UnauthorizedMessage = "You are not authorized to use this resource";
 
     //Returns the id of the latest command read from a text file and defaults to -1
     [HttpGet("latest")]
@@ -49,7 +51,7 @@ public class ApiController : ControllerBase
         // Checks authorization
         if (NotReqFromSimulator(Request))
         {
-            return StatusCode(403, "You are not authorized to use this resource!");
+            return StatusCode(403, UnauthorizedMessage);
         }
 
         try
@@ -76,12 +78,13 @@ public class ApiController : ControllerBase
         [FromQuery] int latest,
         [FromBody] RegisterUserData data
     )
-    {
+    {   
 
         // Checks authorization
         if (NotReqFromSimulator(Request))
-        {
-            return StatusCode(403, "You are not authorized to use this resource");
+        {   
+            
+            return StatusCode(403, UnauthorizedMessage);
         }
 
         await Update_Latest(latest);
@@ -111,7 +114,7 @@ public class ApiController : ControllerBase
         if (NotReqFromSimulator(Request))
         {
 
-            return StatusCode(403, "You are not authorized to use this resource");
+            return StatusCode(403, UnauthorizedMessage);
         }
 
         await Update_Latest(latest);
@@ -150,7 +153,7 @@ public class ApiController : ControllerBase
         // Checks authorization
         if (NotReqFromSimulator(Request))
         {
-            return StatusCode(403, "You are not authorized to use this resource");
+            return StatusCode(403, UnauthorizedMessage);
         }
 
         await Update_Latest(latest);
@@ -201,23 +204,14 @@ public class ApiController : ControllerBase
         // Checks authorization
         if (NotReqFromSimulator(Request))
         {
-
-            return StatusCode(403, "You are not authorized to use this resource");
+            return StatusCode(403, UnauthorizedMessage);
         }
 
         try
         {
-            if (await _authorRepository.GetAuthorByNameAsync(username) == null)
-            {
-                await CreateUser(username, $"{username}@user.com", "password");
-            }
-
             Author user = await _authorRepository.GetAuthorByNameAsync(username);
-
             CreateMessage Message = new CreateMessage(user.Id, msgsdata.content);
-
-            var result = await _MessageRepository.AddCreateMessageAsync(Message);
-
+            await _MessageRepository.AddCreateMessageAsync(Message);
             await Update_Latest(latest);
 
             return StatusCode(204, "");
@@ -241,7 +235,7 @@ public class ApiController : ControllerBase
         // Checks authorization
         if (NotReqFromSimulator(Request))
         {
-            return StatusCode(403, "You are not authorized to use this resource");
+            return StatusCode(403, UnauthorizedMessage);
         }
 
         await Update_Latest(latest);
@@ -263,7 +257,7 @@ public class ApiController : ControllerBase
                 output.Add(authorFollowers.ElementAt(i).UserName);
             }
         }
-        catch (NullReferenceException ex)
+        catch (Exception ex)
         {
             await SimpleLogRequest(
                 $"{{User = {username}, Latest = {latest}, No = {no}}}",
@@ -272,16 +266,7 @@ public class ApiController : ControllerBase
             );
             return NotFound();
         }
-        catch (Exception ex)
-        {
-            await LogRequest(
-                $"{{User = {username}, Latest = {latest}, No = {no}}}",
-                $"{{{ex.StackTrace}}}",
-                fllwsGetLogFilePath
-            );
-            return NotFound();
-        }
-
+        
         return Ok(new { follows = output.Take(no) });
     }
 
@@ -349,21 +334,11 @@ public class ApiController : ControllerBase
                 return StatusCode(204, "");
             }
         }
-        catch (NullReferenceException ex)
+        catch (Exception ex)
         {
             await SimpleLogRequest(
                 $"User = {username}. Request body: {followData}",
                 $"{{{ex.StackTrace}}}",
-                fllwsPostLogFilePath
-            );
-
-            return NotFound();
-        }
-        catch (Exception e)
-        {
-            await LogRequest(
-                $"User = {username}. Request body: {followData}",
-                $"{{{e.StackTrace}}}",
                 fllwsPostLogFilePath
             );
 
@@ -440,7 +415,7 @@ public class ApiController : ControllerBase
         return (IUserEmailStore<Author>)_userStore;
     }
 
-    private Author CreateUser()
+    private static Author CreateUser()
     {
         try
         {
@@ -468,7 +443,7 @@ public class ApiController : ControllerBase
         return await _userManager.CreateAsync(user, password);
     }
 
-    public bool NotReqFromSimulator(HttpRequest request)
+    private static bool NotReqFromSimulator(HttpRequest request)
     {
         return request.Headers.Authorization != "Basic c2ltdWxhdG9yOnN1cGVyX3NhZmUh";
     }
@@ -500,7 +475,7 @@ public class ApiController : ControllerBase
         }
     }
 
-    private async Task SimpleLogRequest(string data, string errors, string logFilePath)
+    private static async Task SimpleLogRequest(string data, string errors, string logFilePath)
     {
         // format everything
         string logtext = $"{data}\n{errors}\n\n";
@@ -533,7 +508,7 @@ public class ApiController : ControllerBase
         }
     }
 
-    private string StringifyIdentityResultErrors(IdentityResult result)
+    private static string StringifyIdentityResultErrors(IdentityResult result)
     {
         // Stringify Errors
         StringBuilder stringBuilderError = new StringBuilder();
@@ -546,13 +521,13 @@ public class ApiController : ControllerBase
         return stringBuilderError.ToString();
     }
 
-    private ICollection<MessageViewModelApi> ConvertToMessageViewModelApiCollection(ICollection<Message> Messages, ICollection<Author> users)
+    private static ICollection<MessageViewModelApi> ConvertToMessageViewModelApiCollection(ICollection<Message> messages, ICollection<Author> users)
     {
-        var lst = Messages
-                .Select(Message => new MessageViewModelApi(
-                    users.FirstOrDefault(a => a.Id == Message.AuthorId)?.UserName ?? "Unknown",
-                    Message.Text,
-                    Message.TimeStamp
+        var lst = messages
+                .Select(message => new MessageViewModelApi(
+                    users.FirstOrDefault(a => a.Id == message.AuthorId)?.UserName ?? "Unknown",
+                    message.Text,
+                    message.TimeStamp
                 ))
                 .ToList();
 

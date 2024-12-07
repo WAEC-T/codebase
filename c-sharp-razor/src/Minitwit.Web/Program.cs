@@ -5,10 +5,10 @@ using Minitwit.Core.Entities;
 using Minitwit.Core.Repository;
 using Minitwit.Infrastructure;
 using Minitwit.Infrastructure.Repository;
-using Minitwit.Razor.Pages;
-using Minitwit.Web;
 
-public class Program
+namespace Minitwit.Web;
+
+static class Program
 {
     public static void Main(string[] args)
     {

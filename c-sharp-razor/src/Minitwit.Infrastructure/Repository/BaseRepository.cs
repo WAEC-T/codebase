@@ -5,7 +5,7 @@ public abstract class BaseRepository
     protected MinitwitDbContext db;
     protected int PageSize { get; set; }
 
-    public BaseRepository(MinitwitDbContext minitwitDbContext)
+    protected BaseRepository(MinitwitDbContext minitwitDbContext)
     {
         db = minitwitDbContext;
         PageSize = 30;

@@ -1,7 +1,7 @@
 namespace Minitwit.Web.Models.Models.Api;
 
 public class FollowData : IData
-{
+{   
     public string? follow { get; set; }
     public string? unfollow { get; set; }
 

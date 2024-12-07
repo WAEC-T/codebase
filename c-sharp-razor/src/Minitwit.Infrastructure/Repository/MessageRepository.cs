@@ -55,20 +55,20 @@ public class MessageRepository : BaseRepository, IMessageRepository
         return await GetMessageCountAsync() / PageSize + 1;
     }
 
-    public async Task AddMessageAsync(Message Message)
+    public async Task AddMessageAsync(Message messageDto)
     {
-        await db.Messages.AddAsync(Message);
+        await db.Messages.AddAsync(messageDto);
         await db.SaveChangesAsync();
     }
 
-    public async Task<Message> AddCreateMessageAsync(CreateMessage Message)
+    public async Task<Message> AddCreateMessageAsync(CreateMessage message)
     {
         Message entity = new Message()
         {
             MessageId = new int(),
-            Text = Message.Text,
+            Text = message.Text,
             TimeStamp = DateTime.Now,
-            AuthorId = Message.AuthorId
+            AuthorId = message.AuthorId
         };
 
         await AddMessageAsync(entity);

@@ -3,7 +3,7 @@ import requests
 import psycopg2
 
 BASE_URL = "http://localhost:5000"
-DATABASE_URL = "postgresql://user:pass@localhost:5432/waect"
+DATABASE_URL = "postgresql://user:pass@database:5432/waect"
 
 def register_user(username, email, password, user_session=None):
     """

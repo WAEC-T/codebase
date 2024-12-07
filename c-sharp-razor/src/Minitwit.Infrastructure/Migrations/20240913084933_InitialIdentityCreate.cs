@@ -7,7 +7,7 @@ namespace Minitwit.Infrastructure.Migrations
 {
     /// <inheritdoc />
     public partial class InitialIdentityCreate : Migration
-    {
+    {   
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {

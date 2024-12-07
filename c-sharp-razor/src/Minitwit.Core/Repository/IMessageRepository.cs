@@ -10,8 +10,8 @@ public interface IMessageRepository
 
     public Task<ICollection<Message>> GetMessagesFromAuthorByCountAsync(int authorId, int count);
 
-    public Task AddMessageAsync(Message MessageDto);
-    public Task<Message> AddCreateMessageAsync(CreateMessage Message);
+    public Task AddMessageAsync(Message messageDto);
+    public Task<Message> AddCreateMessageAsync(CreateMessage message);
     public Task<int> GetMessageCountAsync();
     public Task<int> GetPageCountAsync();
 }

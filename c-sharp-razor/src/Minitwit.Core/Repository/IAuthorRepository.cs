@@ -10,8 +10,6 @@ public interface IAuthorRepository
     public Task<ICollection<Author>> GetAuthorsByIdAsync(IEnumerable<int> authors);
     public Task<Author?> GetAuthorByIdAsync(int authorId);
     public Task<Author> GetAuthorByNameAsync(string name);
-    public Task<Author> GetAuthorByEmail(string email);
-
     public Task<ICollection<Message>> GetMessagesByAuthorAsync(int id);
     public Task<ICollection<Message>> GetMessagesByAuthor(int authorId, int page);
     public Task<ICollection<Message>> GetMessagesByAuthorAndFollowing(int authorId, int page);

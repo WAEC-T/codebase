@@ -24,13 +24,13 @@ public class FollowRepository : BaseRepository, IFollowRepository
         await db.SaveChangesAsync();
     }
 
-    public async Task<bool> IsFollowingAsync(int followingUserId, int followedUserId)
+    public async Task<bool> IsFollowingAsync(int followingUserId, int followedAuthorId)
     {
-        if (followingUserId == 0 || followedUserId == 0)
+        if (followingUserId == 0 || followedAuthorId == 0)
             return false;
 
         bool isFollowing = await db.Follows.AnyAsync(f =>
-            f.FollowingAuthorId == followingUserId && f.FollowedAuthorId == followedUserId
+            f.FollowingAuthorId == followingUserId && f.FollowedAuthorId == followedAuthorId
         );
 
         return isFollowing;

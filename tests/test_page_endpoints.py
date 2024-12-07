@@ -18,7 +18,7 @@ HEADERS = {
 }
 
 # Get the database URL from the environment variable
-DATABASE_URL = "postgresql://user:pass@localhost:5432/waect"
+DATABASE_URL = "postgresql://user:pass@10.26.42.4:5432/waect"
 
 def get_text_from_first_li(driver):
     try:

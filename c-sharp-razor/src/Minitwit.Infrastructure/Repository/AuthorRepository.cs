@@ -15,9 +15,9 @@ public class AuthorRepository : BaseRepository, IAuthorRepository
     }
 
     // ----- Add Author Methods ----- //
-    public async void AddAuthorAsync(Author author)
+    public async void AddAuthorAsync(Author authorDto)
     {
-        await db.Users.AddAsync(author);
+        await db.Users.AddAsync(authorDto);
         await db.SaveChangesAsync();
     }
 
@@ -28,9 +28,9 @@ public class AuthorRepository : BaseRepository, IAuthorRepository
         return await db.Users.ToListAsync();
     }
 
-    public async Task<ICollection<Author>> GetAuthorsByIdAsync(IEnumerable<int> authorIds)
+    public async Task<ICollection<Author>> GetAuthorsByIdAsync(IEnumerable<int> authors)
     {
-        return await db.Users.Where(a => authorIds.Contains(a.Id)).AsNoTracking().ToListAsync();
+        return await db.Users.Where(a => authors.Contains(a.Id)).AsNoTracking().ToListAsync();
     }
 
     public async Task<Author?> GetAuthorByIdAsync(int authorId)
@@ -45,44 +45,38 @@ public class AuthorRepository : BaseRepository, IAuthorRepository
         return author!;
     }
 
-    public async Task<Author> GetAuthorByEmail(string email)
-    {
-        Author? author = await db.Users.FirstOrDefaultAsync(a => a.Email == email)!;
-        return author!;
-    }
-
     // ----- Get Messages By Author and Page Methods ----- //
     public async Task<ICollection<Message>> GetMessagesByAuthorAsync(int id)
     {
         return await db.Messages.Where(e => e.AuthorId == id).ToListAsync();
     }
 
-    public async Task<ICollection<Message>> GetMessagesByAuthor(int id, int page)
+    public async Task<ICollection<Message>> GetMessagesByAuthor(int authorId, int page)
     {
-        var Messages = await GetMessagesByAuthorAsync(id);
+        var messages = await GetMessagesByAuthorAsync(authorId);
 
         //Check that author has Messages
-        if (Messages == null || Messages.Count == 0)
-            throw new Exception("This author has no Messages");
-
+        if (messages == null || messages.Count == 0)
+            throw new InvalidOperationException("The specified author has no messages.");
+        
         if (page < 1)
             page = 1;
 
         int pageSizeIndex = (page - 1) * PageSize;
 
-        if (Messages.Count < pageSizeIndex + PageSize)
-            return Messages
+        if (messages.Count < pageSizeIndex + PageSize)
+            return messages
                 .ToList()
-                .GetRange(pageSizeIndex, Messages.Count - pageSizeIndex)
+                .GetRange(pageSizeIndex, messages.Count - pageSizeIndex)
                 .OrderByDescending(c => c.TimeStamp)
                 .ToList();
-        if (Messages.Count > PageSize)
-            return Messages
+        if (messages.Count > PageSize)
+            return messages
                 .ToList()
                 .GetRange(pageSizeIndex, PageSize)
                 .OrderByDescending(c => c.TimeStamp)
                 .ToList();
-        return Messages.OrderByDescending(c => c.TimeStamp).ToList();
+        return messages.OrderByDescending(c => c.TimeStamp).ToList();
     }
 
     public async Task<ICollection<Message>> GetMessagesByAuthorAndFollowingAsync(int id)
@@ -97,15 +91,14 @@ public class AuthorRepository : BaseRepository, IAuthorRepository
         return Messages;
     }
 
-    public async Task<ICollection<Message>> GetMessagesByAuthorAndFollowing(int id, int page)
-    {
-        Author? author = await GetAuthorByIdAsync(id);
+    public async Task<ICollection<Message>> GetMessagesByAuthorAndFollowing(int authorId, int page)
+    {   
         //Get Messages from the author, and append Messages from followers to that list
-        ICollection<Author> following = await GetFollowingByIdAsync(id);
+        ICollection<Author> following = await GetFollowingByIdAsync(authorId);
         ICollection<Message> Messages = new List<Message>();
 
         // Add all the users Messages to the list without pagination
-        foreach (var MessageDto in await GetMessagesByAuthorAsync(id))
+        foreach (var MessageDto in await GetMessagesByAuthorAsync(authorId))
             Messages.Add(MessageDto);
 
         foreach (Author? follower in following)
@@ -118,7 +111,6 @@ public class AuthorRepository : BaseRepository, IAuthorRepository
             }
 
             //Add each Message from the follower to the list
-            //TODO Try to find alternative to foreach
             foreach (var MessageDto in followingMessages)
             {
                 Messages.Add(MessageDto);
@@ -165,11 +157,11 @@ public class AuthorRepository : BaseRepository, IAuthorRepository
     }
 
     // ----- Get Followers and Following Methods ----- //
-    public async Task<ICollection<Author>> GetFollowersByIdAsync(int id)
+    public async Task<ICollection<Author>> GetFollowersByIdAsync(int authorId)
     {
         // Query to retrieve the IDs of authors followed by the specified author
         List<int> followedAuthorIds = await db
-            .Follows.Where(f => f.FollowedAuthorId == id)
+            .Follows.Where(f => f.FollowedAuthorId == authorId)
             .Select(f => f.FollowingAuthorId)
             .ToListAsync();
 
@@ -181,11 +173,11 @@ public class AuthorRepository : BaseRepository, IAuthorRepository
         return followedAuthors;
     }
 
-    public async Task<ICollection<Author>> GetFollowingByIdAsync(int id)
+    public async Task<ICollection<Author>> GetFollowingByIdAsync(int authorId)
     {   
         // Query to retrieve the IDs of authors followed by the specified author
         var followingAuthorIds = await db
-            .Follows.Where(f => f.FollowingAuthorId == id)
+            .Follows.Where(f => f.FollowingAuthorId == authorId)
             .Select(f => f.FollowedAuthorId)
             .ToListAsync();
 
@@ -218,9 +210,9 @@ public class AuthorRepository : BaseRepository, IAuthorRepository
     }
 
     // ----- Delete Author Data Methods ----- //
-    public async Task DeleteMessagesByAuthorIdAsync(int id)
+    public async Task DeleteMessagesByAuthorIdAsync(int authorId)
     {
-        var Messages = await GetMessagesByAuthorAsync(id);
+        var Messages = await GetMessagesByAuthorAsync(authorId);
 
         foreach (var Message in Messages)
         {
@@ -236,7 +228,8 @@ public class AuthorRepository : BaseRepository, IAuthorRepository
         Author? user = await GetAuthorByIdAsync(id);
         if (user == null)
         {
-            throw new Exception("User not found");
+            throw new KeyNotFoundException($"Author with ID {id} was not found.");
+
         }
 
         var follows = await db
@@ -249,7 +242,7 @@ public class AuthorRepository : BaseRepository, IAuthorRepository
     {
         Author? user = await GetAuthorByIdAsync(id);
         if (user == null)
-            throw new Exception("User not found");
+            throw new KeyNotFoundException($"Author with ID {id} was not found.");
 
         db.Users.Remove(user);
         await db.SaveChangesAsync();

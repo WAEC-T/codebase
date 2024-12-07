@@ -65,12 +65,12 @@ public class MinitwitService : IMessageService
         return Messages;
     }
 
-    public async Task<ICollection<MessageViewModel>> GetMessagesFromAuthorAsync(int id, int page)
+    public async Task<ICollection<MessageViewModel>> GetMessagesFromAuthorAsync(int authorId, int page)
     {
-        ICollection<Message> MessageDtos = await _authorRepository.GetMessagesByAuthor(id, page);
+        ICollection<Message> MessageDtos = await _authorRepository.GetMessagesByAuthor(authorId, page);
         ICollection<MessageViewModel> Messages = new List<MessageViewModel>();
-        Author author = await _authorRepository.GetAuthorByIdAsync(id);
-
+        Author author = await _authorRepository.GetAuthorByIdAsync(authorId);
+        
         foreach (Message MessageDto in MessageDtos)
         {
             Messages.Add(
