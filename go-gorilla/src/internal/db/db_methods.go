@@ -1,7 +1,6 @@
 package db
 
 import (
-	"encoding/hex"
 	"fmt"
 	"go-gorilla/src/internal/config"
 	"go-gorilla/src/internal/models"
@@ -104,14 +103,12 @@ func GetPublicMessages(numMsgs int) ([]models.MessageUser, error) {
 }
 
 // registers a new user
-func RegisterUser(userName string, email string, password [16]byte) error {
-
-	pwHashString := hex.EncodeToString(password[:])
+func RegisterUser(userName string, email string, password string) error {
 
 	newUser := models.Users{
 		Username: userName,
 		Email:    email,
-		PwHash:   pwHashString,
+		Pwd:      password,
 	}
 
 	config.DB.Create(&newUser)
@@ -126,7 +123,6 @@ func RegisterUser(userName string, email string, password [16]byte) error {
 
 // fetches all messages for the current logged in user for 'My Timeline'
 func GetMyMessages(userID int) ([]models.MessageUser, []int, error) {
-
 	var messages []models.MessageUser
 
 	subQuery := config.DB.Table("followers").

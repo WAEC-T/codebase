@@ -168,12 +168,7 @@ func Register(w http.ResponseWriter, r *http.Request) {
 			return
 
 		} else {
-			hash := md5.Sum([]byte(password))
-			if err != nil {
-				fmt.Println("Error hashing the password")
-				return
-			}
-			err := db.RegisterUser(username, email, hash)
+			err := db.RegisterUser(username, email, password)
 			if err != nil {
 				fmt.Println("error: ", err)
 			}
@@ -198,8 +193,8 @@ func Login(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		pwHash := user.PwHash
-		if !helpers.CheckPasswordHash(password, pwHash) {
+		pwd := user.Pwd
+		if !helpers.CheckPassword(password, pwd) {
 			Reload(w, r, "Invalid password", "login.html")
 			return
 		}
