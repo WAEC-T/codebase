@@ -19,7 +19,9 @@ public sealed class MinitwitDbContext : IdentityDbContext<Author, IdentityRole<i
     public DbSet<Follow> Follows { get; set; } = null!;
 
     public DbSet<Latest> LatestEntries { get; set; } = null!;
-
+    
+    public DbSet<Author> Authors { get; set; } = null!;
+    
     public MinitwitDbContext(DbContextOptions<MinitwitDbContext> dbContextOptions)
         : base(dbContextOptions)
     {

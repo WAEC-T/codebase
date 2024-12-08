@@ -109,7 +109,6 @@ public class ApiController : ControllerBase
         // Checks authorization
         if (NotReqFromSimulator(Request))
         {
-
             return StatusCode(403, UnauthorizedMessage);
         }
 
@@ -119,14 +118,16 @@ public class ApiController : ControllerBase
             no = 100;
 
         try
-        {
-            var messages = await _messageRepository.GetMessagesByCountAsync(no);
-            var authorIds = messages.Select(c => c.AuthorId).Distinct();
-            var users = await _authorRepository.GetAuthorsByIdAsync(authorIds);
+        {   
+            // Fetch messages and authors in a single query
+            var messages = await _messageRepository.GetMessagesByUsernameAsync(no);
             
-            var lst = ConvertToMessageViewModelApiCollection(messages, users);
+            if (!messages.Any())
+            {
+                return NotFound($"No messages found");
+            }
 
-            return Ok(lst);
+            return Ok(messages);
         }
         catch (Exception ex)
         {

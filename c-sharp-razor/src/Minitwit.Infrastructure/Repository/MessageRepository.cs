@@ -44,6 +44,24 @@ public class MessageRepository : BaseRepository, IMessageRepository
         return Messages;
     }
     
+    public async Task<List<Dictionary<string, object>>> GetMessagesByUsernameAsync(int no)
+    {
+        var messages = await (
+            from message in db.Messages
+            join author in db.Authors on message.AuthorId equals author.Id
+            where message.Flagged == 0
+            orderby message.TimeStamp descending
+            select new Dictionary<string, object>
+            {
+                { "content", message.Text },
+                { "pub_date", message.TimeStamp },
+                { "user", author.UserName }
+            }
+        ).Take(no).ToListAsync();
+
+        return messages;
+    }
+    
     public async Task<int> GetMessageCountAsync()
     {
         //U se EF to get the total number of Messages from the database
