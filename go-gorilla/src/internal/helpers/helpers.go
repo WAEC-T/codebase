@@ -24,6 +24,7 @@ func Format_datetime(timestamp string) string {
 	// Format the time.Time object into your desired display format
 	return parsedTime.Format("2006-01-02 @ 15:04") // Customize this layout as needed
 }
+
 func IsNil(i interface{}) bool {
 	return i == nil || i == interface{}(nil)
 }

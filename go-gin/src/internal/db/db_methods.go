@@ -3,8 +3,8 @@ package db
 import (
 	"encoding/hex"
 	"fmt"
-	"go-gorilla/src/internal/config"
-	"go-gorilla/src/internal/models"
+	"go-gin/src/internal/config"
+	"go-gin/src/internal/models"
 	"log"
 	"os"
 	"time"
@@ -67,7 +67,6 @@ func GetUserIDByUsername(userName string) (int, error) {
 	if user.UserID == 0 {
 		return -1, nil
 	} else {
-
 		return user.UserID, nil
 	}
 }
@@ -100,6 +99,7 @@ func GetPublicMessages(numMsgs int) ([]models.MessageUser, error) {
 		fmt.Println("getPublicMessages error:", config.DB.Error.Error())
 		return nil, config.DB.Error
 	}
+
 	return messages, nil
 }
 
