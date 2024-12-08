@@ -245,6 +245,13 @@ func API_Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	username, err := db.GetUserByUsername(rv.Username)
+	if err == nil && username.Username != "" {
+		fmt.Println("Error getting user by username: ", err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
 	if r.Method == "POST" {
 		hash := md5.Sum([]byte(rv.Pwd))
 		db.RegisterUser(rv.Username, rv.Email, hash)
