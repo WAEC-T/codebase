@@ -14,20 +14,6 @@ public class AuthorRepository : BaseRepository, IAuthorRepository
         _followRepository = followRepository;
     }
 
-    // ----- Add Author Methods ----- //
-    public async void AddAuthorAsync(Author authorDto)
-    {
-        await db.Users.AddAsync(authorDto);
-        await db.SaveChangesAsync();
-    }
-
-    // ----- Get Author Methods ----- //
-
-    public async Task<ICollection<Author>> GetAllAuthorsAsync()
-    {
-        return await db.Users.ToListAsync();
-    }
-
     public async Task<ICollection<Author>> GetAuthorsByIdAsync(IEnumerable<int> authors)
     {
         return await db.Users.Where(a => authors.Contains(a.Id)).AsNoTracking().ToListAsync();
@@ -172,7 +158,7 @@ public class AuthorRepository : BaseRepository, IAuthorRepository
 
         return followedAuthors;
     }
-
+    
     public async Task<ICollection<Author>> GetFollowingByIdAsync(int authorId)
     {   
         // Query to retrieve the IDs of authors followed by the specified author
@@ -189,12 +175,6 @@ public class AuthorRepository : BaseRepository, IAuthorRepository
         return followingAuthors;
     }
 
-    public async Task<bool> AuthorExists(int id)
-    {
-        Author author = await GetAuthorByIdAsync(id);
-        return author.Id != null;
-    }
-
     // ----- Add/Remove Follow Methods ----- //
     public async Task AddFollowAsync(int followingAuthorId, int followedAuthorId)
     {
@@ -207,20 +187,6 @@ public class AuthorRepository : BaseRepository, IAuthorRepository
             e.FollowedAuthorId == followedAuthorId && e.FollowingAuthorId == followingAuthorId
         )!;
         await _followRepository.DeleteFollowAsync(follow);
-    }
-
-    // ----- Delete Author Data Methods ----- //
-    public async Task DeleteMessagesByAuthorIdAsync(int authorId)
-    {
-        var Messages = await GetMessagesByAuthorAsync(authorId);
-
-        foreach (var Message in Messages)
-        {
-            // Delete the Message itself
-            db.Messages.Remove(Message);
-        }
-
-        await db.SaveChangesAsync();
     }
 
     public async Task RemoveAllFollowersByAuthorIdAsync(int id)

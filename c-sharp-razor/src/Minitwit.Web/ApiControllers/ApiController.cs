@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Minitwit.Core.Entities;
 using Minitwit.Core.Repository;
 using Minitwit.Web.Models;
+using Minitwit.Web.Models.Models.Api;
 
 namespace Minitwit.Web.ApiControllers;
 
@@ -12,7 +13,7 @@ namespace Minitwit.Web.ApiControllers;
 public class ApiController : ControllerBase
 {
     private readonly IAuthorRepository _authorRepository;
-    private readonly IMessageRepository _MessageRepository;
+    private readonly IMessageRepository _messageRepository;
     private readonly ILatestRepository _latestRepository;
     private readonly UserManager<Author> _userManager;
     private readonly IUserStore<Author> _userStore;
@@ -20,35 +21,33 @@ public class ApiController : ControllerBase
 
     public ApiController(
         IAuthorRepository authorRepository,
-        IMessageRepository MessageRepository,
+        IMessageRepository messageRepository,
         ILatestRepository latestRepository,
         UserManager<Author> userManager,
         IUserStore<Author> userStore
     )
     {
         _authorRepository = authorRepository;
-        _MessageRepository = MessageRepository;
+        _messageRepository = messageRepository;
         _latestRepository = latestRepository;
         _userManager = userManager;
         _userStore = userStore;
         _emailStore = GetEmailStore();
     }
-
-    private const string latestLogFilePath = "./LogLatestGet.txt";
-    private const string registerLogFilePath = "./LogRegisterPost.txt";
-    private const string msgsGetLogFilePath = "./LogMsgsGet.txt";
-    private const string msgsPrivateGetLogFilePath = "./LogMsgsPrivateGet.txt";
-    private const string msgsPostLogFilePath = "./LogMsgsPost.txt";
-    private const string fllwsGetLogFilePath = "./LogFllwsGet.txt";
-    private const string fllwsPostLogFilePath = "./LogFllwsPost.txt";
+    
+    private const string LatestLogFilePath = "./LogLatestGet.txt";
+    private const string RegisterLogFilePath = "./LogRegisterPost.txt";
+    private const string MsgsGetLogFilePath = "./LogMsgsGet.txt";
+    private const string MsgsPrivateGetLogFilePath = "./LogMsgsPrivateGet.txt";
+    private const string MsgsPostLogFilePath = "./LogMsgsPost.txt";
+    private const string FllwsGetLogFilePath = "./LogFllwsGet.txt";
+    private const string FllwsPostLogFilePath = "./LogFllwsPost.txt";
     
     private const string UnauthorizedMessage = "You are not authorized to use this resource";
 
-    //Returns the id of the latest command read from a text file and defaults to -1
     [HttpGet("latest")]
     public async Task<IActionResult> GetLatest()
     {
-        // Checks authorization
         if (NotReqFromSimulator(Request))
         {
             return StatusCode(403, UnauthorizedMessage);
@@ -56,54 +55,51 @@ public class ApiController : ControllerBase
 
         try
         {
-            // Fetch entry
             var latestEntry = await _latestRepository.GetLatestAsync();
-
-            // Default to -1 if no entry is found
             var latestProcessedCommandId = latestEntry?.Value ?? -1;
 
             return Ok(new { latest = latestProcessedCommandId });
         }
         catch (Exception ex)
         {
-            await LogRequest("{}", $"{{{ex.StackTrace}}}", latestLogFilePath);
-
-            // Handle exception
+            await LogRequest("{}", $"{{{ex.StackTrace}}}", LatestLogFilePath);
             return StatusCode(500, "Internal server error");
         }
     }
-
+    
     [HttpPost("register")]
     public async Task<IActionResult> RegisterUser(
         [FromQuery] int latest,
         [FromBody] RegisterUserData data
     )
     {   
-
-        // Checks authorization
+        
         if (NotReqFromSimulator(Request))
         {   
-            
             return StatusCode(403, UnauthorizedMessage);
         }
-
+        
         await Update_Latest(latest);
-
+        var existingUser = await _userManager.FindByNameAsync(data.username);
+        if (existingUser != null)
+        {
+            return BadRequest(new { status = 400, error_msg = "The username is already taken" });
+        }
         var result = await CreateUser(data.username, data.email, data.pwd);
 
         if (result.Succeeded)
         {
             return StatusCode(204, "");
         }
-
+        
         await LogRequest(
             data.ToString(),
             StringifyIdentityResultErrors(result),
-            registerLogFilePath
+            RegisterLogFilePath
         );
         return BadRequest($"{result.Errors.ToList()}");
     }
-
+    
     [HttpGet("msgs")]
     public async Task<IActionResult> GetMessagesFromPublicTimeline(
         [FromQuery] int latest,
@@ -124,11 +120,11 @@ public class ApiController : ControllerBase
 
         try
         {
-            var Messages = await _MessageRepository.GetMessagesByCountAsync(no);
-            var authorIds = Messages.Select(c => c.AuthorId).Distinct();
+            var messages = await _messageRepository.GetMessagesByCountAsync(no);
+            var authorIds = messages.Select(c => c.AuthorId).Distinct();
             var users = await _authorRepository.GetAuthorsByIdAsync(authorIds);
-
-            var lst = ConvertToMessageViewModelApiCollection(Messages, users);
+            
+            var lst = ConvertToMessageViewModelApiCollection(messages, users);
 
             return Ok(lst);
         }
@@ -137,7 +133,7 @@ public class ApiController : ControllerBase
             await LogRequest(
                 $"{{Latest = {latest}, No = {no}}}",
                 $"{{{ex.StackTrace}}}",
-                msgsGetLogFilePath
+                MsgsGetLogFilePath
             );
             return NotFound();
         }
@@ -149,8 +145,8 @@ public class ApiController : ControllerBase
         [FromQuery] int latest,
         [FromQuery] int no = 100
     )
-    {
-        // Checks authorization
+    {   
+        // TODO: SH: make this 2 quires instead of one
         if (NotReqFromSimulator(Request))
         {
             return StatusCode(403, UnauthorizedMessage);
@@ -170,7 +166,7 @@ public class ApiController : ControllerBase
             }
 
             int authorId = author.Id;
-            ICollection<Message> Messages = await _MessageRepository.GetMessagesFromAuthorByCountAsync(
+            ICollection<Message> Messages = await _messageRepository.GetMessagesFromAuthorByCountAsync(
                 authorId,
                 no
             );
@@ -186,7 +182,7 @@ public class ApiController : ControllerBase
             await LogRequest(
                 $"{{User = {username}, Latest = {latest}, No = {no}}}",
                 $"{{{ex.StackTrace}}}",
-                msgsPrivateGetLogFilePath
+                MsgsPrivateGetLogFilePath
             );
 
             return StatusCode(500, "An error occurred while processing the request.");
@@ -200,8 +196,6 @@ public class ApiController : ControllerBase
         [FromBody] MsgsData msgsdata
     )
     {
-
-        // Checks authorization
         if (NotReqFromSimulator(Request))
         {
             return StatusCode(403, UnauthorizedMessage);
@@ -210,15 +204,15 @@ public class ApiController : ControllerBase
         try
         {
             Author user = await _authorRepository.GetAuthorByNameAsync(username);
-            CreateMessage Message = new CreateMessage(user.Id, msgsdata.content);
-            await _MessageRepository.AddCreateMessageAsync(Message);
-            await Update_Latest(latest);
+            CreateMessage Message = new CreateMessage(user.Id, msgsdata.content); 
+            await _messageRepository.AddCreateMessageAsync(Message); 
+            await Update_Latest(latest); 
 
             return StatusCode(204, "");
         }
         catch (Exception ex)
         {
-            await LogRequest(msgsdata.ToString(), $"{{{ex.StackTrace}}}", msgsPostLogFilePath);
+            await LogRequest(msgsdata.ToString(), $"{{{ex.StackTrace}}}", MsgsPostLogFilePath);
 
             return NotFound();
         }
@@ -231,25 +225,18 @@ public class ApiController : ControllerBase
         [FromQuery] int no = 100
     )
     {
-
-        // Checks authorization
         if (NotReqFromSimulator(Request))
         {
             return StatusCode(403, UnauthorizedMessage);
         }
 
-        await Update_Latest(latest);
+        await Update_Latest(latest); 
         var output = new List<string>();
-
+        
         try
         {
-            if (await _authorRepository.GetAuthorByNameAsync(username) == null)
-            {
-                await CreateUser(username, $"{username}@user.com", "password");
-            }
-            
-            Author author = await _authorRepository.GetAuthorByNameAsync(username);
-            var authorFollowers = await _authorRepository.GetFollowingByIdAsync(author.Id);
+            Author author = await _authorRepository.GetAuthorByNameAsync(username); 
+            var authorFollowers = await _authorRepository.GetFollowingByIdAsync(author.Id); 
             for (int i = 0; i < authorFollowers.Count; i++)
             {
                 if (i > no - 1)
@@ -262,7 +249,7 @@ public class ApiController : ControllerBase
             await SimpleLogRequest(
                 $"{{User = {username}, Latest = {latest}, No = {no}}}",
                 $"{{{ex.StackTrace}}}",
-                fllwsGetLogFilePath
+                FllwsGetLogFilePath
             );
             return NotFound();
         }
@@ -277,8 +264,6 @@ public class ApiController : ControllerBase
         [FromBody] FollowData followData
     )
     {
-
-        // Checks authorization
         if (NotReqFromSimulator(Request))
         {
             return StatusCode(403, "You are not authorized to use this resource");
@@ -286,7 +271,6 @@ public class ApiController : ControllerBase
 
         await Update_Latest(latest);
 
-        // Check if exactly one action is specified
         if (string.IsNullOrEmpty(followData.follow) && string.IsNullOrEmpty(followData.unfollow))
         {
             return BadRequest("Only one of 'follow' xor 'unfollow' should be provided.");
@@ -300,12 +284,6 @@ public class ApiController : ControllerBase
         {
             if (!string.IsNullOrEmpty(followData.follow))
             {
-
-                if (await _authorRepository.GetAuthorByNameAsync(username) == null)
-                {
-                    await CreateUser(username, $"{username}@user.com", "password");
-                }
-
                 var followed = await _authorRepository.GetAuthorByNameAsync(followData.follow);
                 var follower = await _authorRepository.GetAuthorByNameAsync(username);
 
@@ -339,71 +317,14 @@ public class ApiController : ControllerBase
             await SimpleLogRequest(
                 $"User = {username}. Request body: {followData}",
                 $"{{{ex.StackTrace}}}",
-                fllwsPostLogFilePath
+                FllwsPostLogFilePath
             );
 
             return NotFound();
         }
         return NotFound();
     }
-
-    // Data containers
-
-    private interface IData
-    {
-        public string GetData();
-    }
-
-    public class MsgsData : IData
-    {
-        public string content { get; set; }
-
-        public string GetData()
-        {
-            return ToString();
-        }
-
-        public override string ToString()
-        {
-            return $"{{content: {content}}}";
-        }
-    }
-
-    public class FollowData : IData
-    {
-        public string? follow { get; set; }
-        public string? unfollow { get; set; }
-
-        public string GetData()
-        {
-            return ToString();
-        }
-
-        public override string ToString()
-        {
-            return $"{{follow: {follow}, unfollow: {unfollow}}}";
-        }
-    }
-
-    public class RegisterUserData : IData
-    {
-        public string username { get; set; }
-        public string email { get; set; }
-        public string pwd { get; set; }
-
-        public string GetData()
-        {
-            return ToString();
-        }
-
-        public override string ToString()
-        {
-            return $"{{Username: {username}, Email: {email}, Password: {pwd}}}";
-        }
-    }
-
-    // Helper methods
-
+    
     private IUserEmailStore<Author> GetEmailStore()
     {
         if (!_userManager.SupportsUserEmail)
@@ -432,14 +353,14 @@ public class ApiController : ControllerBase
     }
 
     private async Task<IdentityResult> CreateUser(string username, string email, string password)
-    {
+    {   
         var user = CreateUser();
-
+        
         var setUserName = _userStore.SetUserNameAsync(user, username, CancellationToken.None);
         var setEmail = _emailStore.SetEmailAsync(user, email, CancellationToken.None);
 
         await Task.WhenAll(setUserName, setEmail);
-
+        
         return await _userManager.CreateAsync(user, password);
     }
 
@@ -448,23 +369,19 @@ public class ApiController : ControllerBase
         return request.Headers.Authorization != "Basic c2ltdWxhdG9yOnN1cGVyX3NhZmUh";
     }
 
-    //Writes the id of the latest command to a text file
     private async Task Update_Latest(int latestId = -1)
     {
         try
         {
-            // Fetch the latest entry from the latest table
             var latestEntry = await _latestRepository.GetLatestAsync();
 
             if (latestEntry == null)
             {
-                // If no entry exists, create a new one
-                latestEntry = new Latest { Id = 1, Value = latestId }; // Assuming Id is always 1
+                latestEntry = new Latest { Id = 1, Value = latestId };
                 await _latestRepository.AddLatestAsync(latestEntry);
             }
             else
             {
-                // If the entry exists, update the value
                 latestEntry.Value = latestId;
                 await _latestRepository.UpdateLatestAsync(latestEntry);
             }
@@ -477,7 +394,6 @@ public class ApiController : ControllerBase
 
     private static async Task SimpleLogRequest(string data, string errors, string logFilePath)
     {
-        // format everything
         string logtext = $"{data}\n{errors}\n\n";
 
         await using (StreamWriter writer = new StreamWriter(logFilePath, true))
@@ -488,7 +404,6 @@ public class ApiController : ControllerBase
 
     private async Task LogRequest(string data, string errors, string logFilePath)
     {
-        // Stringify header
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.Append("{");
 
@@ -499,7 +414,6 @@ public class ApiController : ControllerBase
         stringBuilder.Append("}");
         string headers = stringBuilder.ToString();
 
-        // format everything
         string logtext = $"{headers}\n{data}\n{errors}\n\n";
 
         await using (StreamWriter writer = new StreamWriter(logFilePath, true))
@@ -507,10 +421,9 @@ public class ApiController : ControllerBase
             await writer.WriteAsync(logtext);
         }
     }
-
+    
     private static string StringifyIdentityResultErrors(IdentityResult result)
     {
-        // Stringify Errors
         StringBuilder stringBuilderError = new StringBuilder();
         stringBuilderError.Append("{");
         foreach (var error in result.Errors.ToList())

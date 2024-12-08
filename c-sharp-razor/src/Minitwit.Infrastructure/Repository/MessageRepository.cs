@@ -31,7 +31,7 @@ public class MessageRepository : BaseRepository, IMessageRepository
 
         return Messages;
     }
-
+        
     public async Task<ICollection<Message>> GetMessagesFromAuthorByCountAsync(int authorId, int count)
     {
         //Use EF to get the specified count of Messages from an author from the database
@@ -43,7 +43,7 @@ public class MessageRepository : BaseRepository, IMessageRepository
 
         return Messages;
     }
-
+    
     public async Task<int> GetMessageCountAsync()
     {
         //U se EF to get the total number of Messages from the database
