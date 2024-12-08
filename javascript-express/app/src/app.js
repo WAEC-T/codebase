@@ -3,20 +3,16 @@ const express = require('express');
 let path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
-// Refactored packages
 const flash = require('express-flash');
 const session = require('express-session');
 const expressLayouts = require('express-ejs-layouts');
-const bcrypt = require('bcrypt');
 const MD5 = require('crypto-js/md5');
-//const { pool, init_DB, query, execute, get_user_id} = require('../../utils/db');
 
 // Import the sequlize functionality
-const { Users, Messages, Followers, get_user_id } = require('../../utils/sequilize');
+const { Users, Messages, Followers, get_user_id } = require('../../database/sequilize');
 
 // Configuration
 const PER_PAGE = 30;
-const SECRET_KEY = 'development key';
 
 let app = express();
 
@@ -26,7 +22,7 @@ app.set('view engine', 'ejs');
 
 // Session
 app.use(session({
-  secret: SECRET_KEY,
+  secret: process.env.SECRET_KEY,
   resave: false,
   saveUninitialized: true,
   cookie: {
@@ -61,11 +57,7 @@ app.locals.gravatarUrl = gravatarUrl;
 
 // Routes
 app.get('/', async (req, res) => {
-  // Implement your logic here
   try {
-    console.log('We got a visitor from: ', req.socket.remoteAddress);
-
-    // Implement your logic here
     let user = null;
     if (req.session?.user) {
       user = await Users.findOne({ where: { user_id: req.session.user.user_id } });
@@ -192,10 +184,7 @@ app.post('/register', async (req, res) => {
       return res.render('register.ejs', { error: 'The username is already taken', flashes: req.flash('success') });
     }
 
-    // Insert user into the database
-    const hashedPassword = bcrypt.hashSync(password, 10);
-
-    await Users.create({ username: username, email: email, pw_hash: hashedPassword });
+    await Users.create({ username: username, email: email, pw_hash: password });
 
     req.flash('success', 'You were successfully registered and can login now');
     res.redirect('/login');
@@ -223,10 +212,7 @@ app.post('/login', async (req, res) => {
       return res.render('login.ejs', { error: 'Invalid username', flashes: req.flash('success') });
     }
 
-    // Check if password matches
-    const passwordMatch = bcrypt.compareSync(password, user.pw_hash);
-
-    if (!passwordMatch) {
+    if (password !== user.pw_hash) {
       return res.render('login.ejs', { error: 'Invalid password', flashes: req.flash('success') });
     }
 
@@ -402,15 +388,10 @@ app.use(function (req, res, next) {
   next(createError(404));
 });
 
-// error handler
 app.use(function (err, req, res, next) {
-  // set locals, only providing error in development
-  res.locals.Messages = err.Messages;
+  res.locals.message = err.message || 'An error occurred';
   res.locals.error = req.app.get('env') === 'development' ? err : {};
-
-  // render the error page
-  res.status(err.status || 500);
-  res.render('error');
+  res.status(err.status || 500).render('error');
 });
 
 app.listen(5000, () => {
