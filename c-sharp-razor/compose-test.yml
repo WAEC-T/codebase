@@ -1,0 +1,13 @@
+services:
+  c-sharp-razor:
+    build: .
+    ports:
+      - "5000:5000"
+    env_file:
+      - ../.env.local
+    networks:
+      - waect-network
+
+networks:
+  waect-network:
+    external: true
