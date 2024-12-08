@@ -35,7 +35,7 @@ func main() {
 	*----------------------*/
 	funcMap := routes.SetupRouting()
 
-	config.Tpl, err = template.New("timeline.html").Funcs(funcMap).ParseGlob("templates/*.html")
+	config.Tpl, err = template.New("timeline.html").Funcs(funcMap).ParseGlob("../templates/*.html")
 	if err != nil {
 		log.Fatalf("Error parsing template: %v", err)
 	}

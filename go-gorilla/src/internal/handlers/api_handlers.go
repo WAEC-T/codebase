@@ -168,7 +168,7 @@ func API_Messages(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if r.Method == "GET" {
-		messages, err := db.GetPublicMessages(100) //TODO: Agree on number
+		messages, err := db.GetPublicMessages(100)
 
 		if err != nil {
 			fmt.Println("Error encoding JSON response:", err)

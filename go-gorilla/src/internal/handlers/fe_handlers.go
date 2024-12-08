@@ -110,8 +110,6 @@ func Public_timeline(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	following, err := db.GetFollowing(userID, 30) //TODO: LIMIT OF FOLLOWERS WE QUERY?
-
 	// Prepare data for rendering
 	flash := GetFlash(w, r)
 	data := Data{
@@ -120,7 +118,7 @@ func Public_timeline(w http.ResponseWriter, r *http.Request) {
 		User:          user,
 		Req:           r.RequestURI,
 		FlashMessages: flash,
-		Followed:      following,
+		Followed:      nil,
 		Endpoint:      "public_timeline",
 	}
 
@@ -134,12 +132,7 @@ func Public_timeline(w http.ResponseWriter, r *http.Request) {
 
 // """Registers the user."""
 func Register(w http.ResponseWriter, r *http.Request) {
-	user, _, err := GetUser(r)
-	if err == nil && !(helpers.IsNil(user)) {
-		fmt.Println("Redirecting to -> /")
-		http.Redirect(w, r, "/", http.StatusSeeOther)
-
-	} else if r.Method == "GET" {
+	if r.Method == "GET" {
 		config.Tpl.ExecuteTemplate(w, "register.html", nil)
 
 	} else if r.Method == "POST" {
@@ -192,11 +185,7 @@ func Register(w http.ResponseWriter, r *http.Request) {
 
 // """Logs the user in."""
 func Login(w http.ResponseWriter, r *http.Request) {
-	user, _, err := GetUser(r)
-	if err == nil && !(helpers.IsNil(user)) {
-		http.Redirect(w, r, "/", http.StatusSeeOther)
-
-	} else if r.Method == "GET" {
+	if r.Method == "GET" {
 		Reload(w, r, "", "login.html")
 
 	} else if r.Method == "POST" {
@@ -220,11 +209,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 			MaxAge:   3600, // 1 hour in seconds
 			HttpOnly: true, // Recommended for security
 		}
-		user_id, err := db.GetUserIDByUsername(username)
-		if err != nil {
-			panic("This is not allowed happen!")
-		}
-		session.Values["user_id"] = user_id
+		session.Values["user_id"] = user.UserID
 		session.Save(r, w)
 		SetFlash(w, r, "You were logged in")
 		http.Redirect(w, r, "/", http.StatusSeeOther)
@@ -264,6 +249,10 @@ func MyTimeline(w http.ResponseWriter, r *http.Request) {
 		profile_user := user
 
 		following, err := db.GetFollowing(user_id, 30) //TODO: LIMIT OF FOLLOWERS WE QUERY?
+		if err != nil {
+			fmt.Println("Error when trying to query the database for the following")
+			return
+		}
 
 		d := Data{
 			User:          user,
@@ -367,6 +356,9 @@ func User_timeline(w http.ResponseWriter, r *http.Request) {
 	username := vars["username"]
 
 	following, err := db.GetFollowing(user_id, 30) //TODO: LIMIT OF FOLLOWERS WE QUERY?
+	if err != nil {
+		fmt.Println("Error when trying to query the database for the following")
+	}
 	profile_user, err := db.GetUserByUsername(username)
 	if err != nil || helpers.IsNil(profile_user) {
 		SetFlash(w, r, "The user does not exist")

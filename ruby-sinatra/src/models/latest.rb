@@ -1,14 +1,16 @@
-# frozen_string_literal: 
+# frozen_string_literal: true
 
+# Api latest model to store the value in the last operation.
 class Latest < ActiveRecord::Base
-  self.table_name = "latest"
+  self.table_name = 'latest'
 
   class << self
     def primary_key_name
-      "id"
+      'id'
     end
+
     def value_column_name
-      "value"
+      'value'
     end
 
     def set(latest_value)

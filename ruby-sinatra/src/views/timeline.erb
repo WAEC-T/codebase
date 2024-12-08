@@ -1,11 +1,11 @@
 
 <%# <h2>{{ self.title() }}</h2> %>
-<h2>Timeline</h2>
+<h2><%= @title %></h2>
 <% if logged_in? && @profile_user %>
   <div class=followstatus>
   <% if current_user.id == @profile_user.id %>
     This is you!
-  <% elsif current_user.follows?(@profile_user) %>
+  <% elsif @follows %>
     You are currently following this user.
     <a class=unfollow href="<%= "/#{@profile_user.username}/unfollow" %>">Unfollow user</a>.
   <% else %>
@@ -13,21 +13,24 @@
     <a class=follow href="<%= "/#{@profile_user.username}/follow" %>">Follow user</a>.
   <% end %>
   </div>
-<% elsif logged_in? %>
+<% elsif @title == "My Timeline" %>
+  <% if flash[:error] %>
+    <div class=error><strong>Error:</strong><%= flash[:error] %></div>
+  <% end %>
   <div class=twitbox>
     <h3>What's on your mind <%= current_user.username %>?</h3>
     <form action="/add_message" method=post>
-      <p><input type=text name=text size=60>
-      <input type=submit value="Share">
-    </form>
+      <p><input type=text name=text size=60><!--
+      --><input type=submit value="Share"> 
+    </form> 
   </div>
 <% end %>
 <ul class=messages>
 <% @messages.each do |message| %>
   <li><img alt="message author gravatar" src="<%= message.author.gravatar(48)%>"><p>
-  <strong><a href="<%= message.author.username %>"><%= message.author.username %></a></strong>
+  <strong><a href="/user/<%= message.author.username %>"><%= message.author.username %></a></strong>
   <%= Rack::Utils.escape_html(message.text) %>
-  <small>&mdash; <%= message.pub_date %></small>
+  <small>&mdash; <%= message.pub_date.strftime("%Y-%m-%d @ %H:%M") %></small>
 <% end %>
 <% if @messages.empty? %>
   <li><em>There's no message so far.</em>

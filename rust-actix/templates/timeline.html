@@ -10,6 +10,7 @@
 {% endblock %}
 {% block body %}
   <h2>{{ title }}</h2>
+  {% if !error.is_empty() %}<div class=error><strong>Error:</strong> {{ error }}</div>{% endif %}
   {% if user.is_some()%}
     {% if request_endpoint == "user_timeline" %}
       <div class=followstatus>
@@ -36,7 +37,7 @@
   <ul class=messages>
   {% for message in messages %}
     <li><img src="{{ message.gravatar_url }}"><p>
-      <strong><a href="{{ message.username }}">{{ message.username }}</a></strong>
+      <strong><a href="/user/{{ message.username }}">{{ message.username }}</a></strong>
       {{ message.text }}
       <small>&mdash; {{ message.pub_date }}</small>
   {% else %}
