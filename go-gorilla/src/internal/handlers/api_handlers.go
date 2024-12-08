@@ -245,9 +245,9 @@ func API_Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	username, err := db.GetUserByUsername(rv.Username)
-	if err == nil && username.Username != "" {
-		fmt.Println("Error getting user by username: ", err)
+	user, err := db.GetUserByUsername(rv.Username)
+	if err == nil && user.Username != "" {
+		fmt.Println("User already exists: ", err)
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
