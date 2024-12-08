@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"crypto/md5"
 	"encoding/json"
 	"fmt"
 	"go-gorilla/src/internal/auth"
@@ -168,7 +167,7 @@ func API_Messages(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if r.Method == "GET" {
-		messages, err := db.GetPublicMessages(100) //TODO: Agree on number
+		messages, err := db.GetPublicMessages(100)
 
 		if err != nil {
 			fmt.Println("Error encoding JSON response:", err)
@@ -245,9 +244,15 @@ func API_Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	user, err := db.GetUserByUsername(rv.Username)
+	if err == nil && user.Username != "" {
+		fmt.Println("User already exists: ", err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
 	if r.Method == "POST" {
-		hash := md5.Sum([]byte(rv.Pwd))
-		db.RegisterUser(rv.Username, rv.Email, hash)
+		db.RegisterUser(rv.Username, rv.Email, rv.Pwd)
 		w.WriteHeader(http.StatusNoContent)
 	}
 	if config.DB.Error != nil {

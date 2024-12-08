@@ -110,8 +110,6 @@ func Public_timeline(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	following, err := db.GetFollowing(userID, 30) //TODO: LIMIT OF FOLLOWERS WE QUERY?
-
 	// Prepare data for rendering
 	flash := GetFlash(w, r)
 	data := Data{
@@ -120,7 +118,7 @@ func Public_timeline(w http.ResponseWriter, r *http.Request) {
 		User:          user,
 		Req:           r.RequestURI,
 		FlashMessages: flash,
-		Followed:      following,
+		Followed:      nil,
 		Endpoint:      "public_timeline",
 	}
 
@@ -134,12 +132,7 @@ func Public_timeline(w http.ResponseWriter, r *http.Request) {
 
 // """Registers the user."""
 func Register(w http.ResponseWriter, r *http.Request) {
-	user, _, err := GetUser(r)
-	if err == nil && !(helpers.IsNil(user)) {
-		fmt.Println("Redirecting to -> /")
-		http.Redirect(w, r, "/", http.StatusSeeOther)
-
-	} else if r.Method == "GET" {
+	if r.Method == "GET" {
 		config.Tpl.ExecuteTemplate(w, "register.html", nil)
 
 	} else if r.Method == "POST" {
@@ -175,12 +168,7 @@ func Register(w http.ResponseWriter, r *http.Request) {
 			return
 
 		} else {
-			hash := md5.Sum([]byte(password))
-			if err != nil {
-				fmt.Println("Error hashing the password")
-				return
-			}
-			err := db.RegisterUser(username, email, hash)
+			err := db.RegisterUser(username, email, password)
 			if err != nil {
 				fmt.Println("error: ", err)
 			}
@@ -192,11 +180,7 @@ func Register(w http.ResponseWriter, r *http.Request) {
 
 // """Logs the user in."""
 func Login(w http.ResponseWriter, r *http.Request) {
-	user, _, err := GetUser(r)
-	if err == nil && !(helpers.IsNil(user)) {
-		http.Redirect(w, r, "/", http.StatusSeeOther)
-
-	} else if r.Method == "GET" {
+	if r.Method == "GET" {
 		Reload(w, r, "", "login.html")
 
 	} else if r.Method == "POST" {
@@ -209,8 +193,8 @@ func Login(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		pwHash := user.PwHash
-		if !helpers.CheckPasswordHash(password, pwHash) {
+		pwd := user.Pwd
+		if !helpers.CheckPassword(password, pwd) {
 			Reload(w, r, "Invalid password", "login.html")
 			return
 		}
@@ -220,11 +204,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 			MaxAge:   3600, // 1 hour in seconds
 			HttpOnly: true, // Recommended for security
 		}
-		user_id, err := db.GetUserIDByUsername(username)
-		if err != nil {
-			panic("This is not allowed happen!")
-		}
-		session.Values["user_id"] = user_id
+		session.Values["user_id"] = user.UserID
 		session.Save(r, w)
 		SetFlash(w, r, "You were logged in")
 		http.Redirect(w, r, "/", http.StatusSeeOther)
@@ -255,15 +235,13 @@ func MyTimeline(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/public", http.StatusFound)
 	} else {
 
-		messages, err := db.GetMyMessages(user_id)
+		messages, following, err := db.GetMyMessages(user_id)
 		if err != nil {
 			fmt.Println("Timeline: Error when trying to query the database", err)
 			return
 		}
 		flash := GetFlash(w, r)
 		profile_user := user
-
-		following, err := db.GetFollowing(user_id, 30) //TODO: LIMIT OF FOLLOWERS WE QUERY?
 
 		d := Data{
 			User:          user,
@@ -285,15 +263,19 @@ func MyTimeline(w http.ResponseWriter, r *http.Request) {
 
 // """Registers a new message for the user."""
 func Add_message(w http.ResponseWriter, r *http.Request) {
-	user, user_id, err := GetUser(r)
-	if err != nil || helpers.IsNil(user) {
-		http.Error(w, "You need to login before you can post a message", http.StatusUnauthorized)
+	session, err := GetSession(r)
+	if err != nil {
+		return
+	}
+
+	user_id, ok := session.Values["user_id"]
+	if !ok {
 		return
 	}
 	text := r.FormValue("text")
 	if text != "" {
 		// Correct SQL query with pub_date and flagged as integer (0 for unflagged)
-		err := db.AddMessage(text, user_id)
+		err := db.AddMessage(text, user_id.(int))
 
 		if err != nil {
 			http.Error(w, "Unable to add message", http.StatusInternalServerError)
@@ -307,9 +289,13 @@ func Add_message(w http.ResponseWriter, r *http.Request) {
 
 // """Adds the current user as follower of the given user."""
 func Follow_user(w http.ResponseWriter, r *http.Request) {
-	user, user_id, err := GetUser(r)
-	if err != nil || helpers.IsNil(user) {
-		http.Error(w, "You need to login before you can follow the user", http.StatusUnauthorized)
+	session, err := GetSession(r)
+	if err != nil {
+		return
+	}
+
+	user_id, ok := session.Values["user_id"]
+	if !ok {
 		return
 	}
 	vars := mux.Vars(r)
@@ -320,7 +306,7 @@ func Follow_user(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Followuser: Error when trying to find the user in the database in follow", http.StatusNotFound)
 		return
 	}
-	err = db.FollowUser(user_id, profileUserID)
+	err = db.FollowUser(user_id.(int), profileUserID)
 	if err != nil {
 		fmt.Println("Error when trying to insert data into the database")
 		return
@@ -332,9 +318,13 @@ func Follow_user(w http.ResponseWriter, r *http.Request) {
 
 // """Removes the current user as follower of the given user."""
 func Unfollow_user(w http.ResponseWriter, r *http.Request) {
-	user, user_id, err := GetUser(r)
-	if err != nil || helpers.IsNil(user) {
-		http.Error(w, "You need to login before you can follow the user", http.StatusUnauthorized)
+	session, err := GetSession(r)
+	if err != nil {
+		return
+	}
+
+	user_id, ok := session.Values["user_id"]
+	if !ok {
 		return
 	}
 	vars := mux.Vars(r)
@@ -345,7 +335,7 @@ func Unfollow_user(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Error when trying to find the user in the database in unfollow", http.StatusNotFound)
 		return
 	}
-	err = db.UnfollowUser(user_id, profileUserID)
+	err = db.UnfollowUser(user_id.(int), profileUserID)
 	if err != nil {
 		fmt.Println("Error when trying to delete data from database")
 		return
@@ -367,6 +357,9 @@ func User_timeline(w http.ResponseWriter, r *http.Request) {
 	username := vars["username"]
 
 	following, err := db.GetFollowing(user_id, 30) //TODO: LIMIT OF FOLLOWERS WE QUERY?
+	if err != nil {
+		fmt.Println("Error when trying to query the database for the following")
+	}
 	profile_user, err := db.GetUserByUsername(username)
 	if err != nil || helpers.IsNil(profile_user) {
 		SetFlash(w, r, "The user does not exist")
