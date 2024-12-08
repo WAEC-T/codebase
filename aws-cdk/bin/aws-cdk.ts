@@ -2,16 +2,27 @@
 import 'source-map-support/register';
 import * as cdk from 'aws-cdk-lib';
 import { RDSStack } from '../lib/rds-stack';
+import { BucketResourceStack } from '../lib/s3-stack';
 
 const commonTags = { Application: 'WAECT-T' }
 
 const app = new cdk.App();
 
-const RDSSTack = new RDSStack(app, 'waectDATABASE', {
+const rdsStack = new RDSStack(app, 'waectDATABASE', {
   env: {
-    account: process.env.CDK_DEFAULT_ACCOUNT, // Use environment variables for flexibility
+    account: process.env.CDK_DEFAULT_ACCOUNT,
     region: process.env.CDK_DEFAULT_REGION,
   },
 });
 
-cdk.Tags.of(RDSSTack).add(commonTags.Application, 'WAECT-T');
+cdk.Tags.of(rdsStack).add(commonTags.Application, 'WAECT-T');
+
+const bucketResourceStack = new BucketResourceStack(app, 'waectS3Bucket', {
+  env: {
+    account: process.env.CDK_DEFAULT_ACCOUNT,
+    region: process.env.CDK_DEFAULT_REGION,
+  },
+})
+
+cdk.Tags.of(bucketResourceStack).add(commonTags.Application, 'WAECT-T');
+
