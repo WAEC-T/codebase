@@ -240,19 +240,13 @@ func MyTimeline(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/public", http.StatusFound)
 	} else {
 
-		messages, err := db.GetMyMessages(user_id)
+		messages, following, err := db.GetMyMessages(user_id)
 		if err != nil {
 			fmt.Println("Timeline: Error when trying to query the database", err)
 			return
 		}
 		flash := GetFlash(w, r)
 		profile_user := user
-
-		following, err := db.GetFollowing(user_id, 30) //TODO: LIMIT OF FOLLOWERS WE QUERY?
-		if err != nil {
-			fmt.Println("Error when trying to query the database for the following")
-			return
-		}
 
 		d := Data{
 			User:          user,
@@ -274,15 +268,19 @@ func MyTimeline(w http.ResponseWriter, r *http.Request) {
 
 // """Registers a new message for the user."""
 func Add_message(w http.ResponseWriter, r *http.Request) {
-	user, user_id, err := GetUser(r)
-	if err != nil || helpers.IsNil(user) {
-		http.Error(w, "You need to login before you can post a message", http.StatusUnauthorized)
+	session, err := GetSession(r)
+	if err != nil {
+		return
+	}
+
+	user_id, ok := session.Values["user_id"]
+	if !ok {
 		return
 	}
 	text := r.FormValue("text")
 	if text != "" {
 		// Correct SQL query with pub_date and flagged as integer (0 for unflagged)
-		err := db.AddMessage(text, user_id)
+		err := db.AddMessage(text, user_id.(int))
 
 		if err != nil {
 			http.Error(w, "Unable to add message", http.StatusInternalServerError)
@@ -296,9 +294,13 @@ func Add_message(w http.ResponseWriter, r *http.Request) {
 
 // """Adds the current user as follower of the given user."""
 func Follow_user(w http.ResponseWriter, r *http.Request) {
-	user, user_id, err := GetUser(r)
-	if err != nil || helpers.IsNil(user) {
-		http.Error(w, "You need to login before you can follow the user", http.StatusUnauthorized)
+	session, err := GetSession(r)
+	if err != nil {
+		return
+	}
+
+	user_id, ok := session.Values["user_id"]
+	if !ok {
 		return
 	}
 	vars := mux.Vars(r)
@@ -309,7 +311,7 @@ func Follow_user(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Followuser: Error when trying to find the user in the database in follow", http.StatusNotFound)
 		return
 	}
-	err = db.FollowUser(user_id, profileUserID)
+	err = db.FollowUser(user_id.(int), profileUserID)
 	if err != nil {
 		fmt.Println("Error when trying to insert data into the database")
 		return
@@ -321,9 +323,13 @@ func Follow_user(w http.ResponseWriter, r *http.Request) {
 
 // """Removes the current user as follower of the given user."""
 func Unfollow_user(w http.ResponseWriter, r *http.Request) {
-	user, user_id, err := GetUser(r)
-	if err != nil || helpers.IsNil(user) {
-		http.Error(w, "You need to login before you can follow the user", http.StatusUnauthorized)
+	session, err := GetSession(r)
+	if err != nil {
+		return
+	}
+
+	user_id, ok := session.Values["user_id"]
+	if !ok {
 		return
 	}
 	vars := mux.Vars(r)
@@ -334,7 +340,7 @@ func Unfollow_user(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Error when trying to find the user in the database in unfollow", http.StatusNotFound)
 		return
 	}
-	err = db.UnfollowUser(user_id, profileUserID)
+	err = db.UnfollowUser(user_id.(int), profileUserID)
 	if err != nil {
 		fmt.Println("Error when trying to delete data from database")
 		return
