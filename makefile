@@ -51,6 +51,7 @@ test-single-service:
 	@echo "$(BLUE)=====================================$(RESET) \n"
 	@if [ -d "$(SERVICE)" ] && [ -f "$(SERVICE)/$(COMPOSE_FILE_STANDARD)" ]; then \
 		$(MAKE) -s start-service SERVICE=$(SERVICE) && sleep $(DELAY_TEST_EXECUTION_SECONDS); \
+		docker logs $(SERVICE)  \
 		$(TEST_COMMAND) || { echo "$(RED)Tests failed for $(SERVICE). Exiting.$(RESET)"; exit 1; }; \
 		$(MAKE) -s stop-service SERVICE=$(SERVICE); \
 	else \
