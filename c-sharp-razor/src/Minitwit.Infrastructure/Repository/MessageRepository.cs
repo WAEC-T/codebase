@@ -62,6 +62,33 @@ public class MessageRepository : BaseRepository, IMessageRepository
         return messages;
     }
     
+    public async Task<ICollection<MessageWithAuthor>> GetMessagesFromAuthor(int authorId, int page)
+    {
+        int pageSize = 20; // Example page size, adjust as needed
+        int skip = (page - 1) * pageSize;
+        
+        var messagesWithAuthors = await (
+                from message in db.Messages
+                join author in db.Authors on message.AuthorId equals author.Id
+                where message.AuthorId == authorId || (
+                    from follower in db.Follows
+                    where follower.FollowingAuthorId == authorId
+                    select follower.FollowedAuthorId
+                ).Contains(message.AuthorId)
+                orderby message.TimeStamp descending
+                select new MessageWithAuthor
+                {
+                    Message = message,
+                    Author = author
+                }
+            )
+            .Skip(skip)
+            .Take(pageSize)
+            .ToListAsync();
+
+        return messagesWithAuthors;
+    }
+    
     public async Task<int> GetMessageCountAsync()
     {
         //U se EF to get the total number of Messages from the database

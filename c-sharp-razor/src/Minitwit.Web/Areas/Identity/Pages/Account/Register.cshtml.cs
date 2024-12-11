@@ -81,20 +81,12 @@ namespace Minitwit.Web.Areas.Identity.Pages.Account
                 return Page();
             }
 
-            // Check for existing username or email
             if (await _userManager.FindByNameAsync(Username) != null)
             {
                 ModelState.AddModelError("Input.Username", "The username is already taken");
                 return Page();
             }
-
-            if (await _userManager.FindByEmailAsync(Email) != null)
-            {
-                ModelState.AddModelError("Input.Email", "The email is already registered");
-                return Page();
-            }
-
-            // Create new user
+            
             var newUser = new Author
             {
                 UserName = Username,

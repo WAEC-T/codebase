@@ -182,10 +182,16 @@ public class AuthorRepository : BaseRepository, IAuthorRepository
     }
 
     public async Task RemoveFollowAsync(int followingAuthorId, int followedAuthorId)
-    {
-        Follow follow = await db.Follows.FirstOrDefaultAsync(e =>
+    {   
+        Follow? follow = await db.Follows.FirstOrDefaultAsync(e =>
             e.FollowedAuthorId == followedAuthorId && e.FollowingAuthorId == followingAuthorId
-        )!;
+        );
+
+        if (follow == null)
+        {
+            throw new KeyNotFoundException("The follow relationship does not exist.");
+        }
+
         await _followRepository.DeleteFollowAsync(follow);
     }
 

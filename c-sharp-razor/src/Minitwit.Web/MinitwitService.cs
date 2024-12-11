@@ -25,6 +25,7 @@ public class MinitwitService : IMessageService
         IMessageRepository MessageRepository,
         IAuthorRepository authorRepository
     )
+    
     {
         _MessageRepository = MessageRepository;
         _authorRepository = authorRepository;
@@ -32,25 +33,17 @@ public class MinitwitService : IMessageService
 
     public async Task<ICollection<MessageViewModel>> GetMessagesAsync(int page)
     {
-        // Fetch Messages for the given page.
         ICollection<Message> MessageDtos = await _MessageRepository.GetMessagesByPageAsync(page);
-
-        // Extract unique author IDs from the Messages.
         var authorIds = MessageDtos.Select(c => c.AuthorId).Distinct();
-
-        // Fetch only the authors who authored the fetched Messages.
+        
         ICollection<Author> authors = await _authorRepository.GetAuthorsByIdAsync(authorIds);
 
-        // Initialize a list to hold the MessageViewModels.
         List<MessageViewModel> Messages = new List<MessageViewModel>();
 
-        // Process each MessageDto sequentially.
         foreach (var MessageDto in MessageDtos)
         {
-            // Find the author for the current Message.
             Author? author = authors.FirstOrDefault(a => a.Id == MessageDto.AuthorId);
 
-            // Create and add the MessageViewModel to the list.
             Messages.Add(
                 new MessageViewModel(
                     MessageDto.MessageId,
@@ -92,30 +85,17 @@ public class MinitwitService : IMessageService
         int page
     )
     {
-        ICollection<Message> MessageDtos = await _authorRepository.GetMessagesByAuthorAndFollowing(
-            authorId,
-            page
-        );
-        ICollection<Author> authors = await _authorRepository.GetFollowingByIdAsync(authorId);
-        authors.Add(await _authorRepository.GetAuthorByIdAsync(authorId));
-        ICollection<MessageViewModel> Messages = new List<MessageViewModel>();
+        var messagesWithAuthors =await _MessageRepository.GetMessagesFromAuthor(authorId, page);
+        
+        var Messages = messagesWithAuthors.Select(ma => new MessageViewModel(
+                ma.Message.MessageId,
+                new UserModel(ma.Author),
+                ma.Message.Text,
+                ma.Message.TimeStamp,
+                ma.Message.Flagged
+            )).ToList();
 
-        foreach (Message MessageDto in MessageDtos)
-        {
-            Author? author = authors.FirstOrDefault(a => a.Id == MessageDto.AuthorId);
-
-            Messages.Add(
-                new MessageViewModel(
-                    MessageDto.MessageId,
-                    new UserModel(author!),
-                    MessageDto.Text,
-                    MessageDto.TimeStamp,
-                    MessageDto.Flagged
-                )
-            );
-        }
-
-        return Messages;
+            return Messages;
     }
 
     public async Task<ICollection<MessageViewModel>> GetMessagesFromAuthor(string authorName, int page)

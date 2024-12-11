@@ -54,7 +54,7 @@ public class MyTimelineModel : PageModel
         {
             return Page();
         }
-        var author = await _userManager.GetUserAsync(User);
+        var author = await _userManager.GetUserAsync(User); 
         if (author == null)
         {   
             return RedirectToPage("/Login");
