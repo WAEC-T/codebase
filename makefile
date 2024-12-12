@@ -1,4 +1,4 @@
-ALL_SERVICES = go-gorilla go-gin
+ALL_SERVICES = python-flask c-sharp-razor go-gorilla ruby-sinatra rust-actix javascript-express go-gin
 
 COMPOSE_FILE_STANDARD = compose-test.yml
 TEST_COMMAND = pytest tests/test_flash_messages.py tests/test_api_endpoints.py
@@ -36,11 +36,7 @@ clean-db:
 .PHONY: start-service
 start-service:
 	@echo "$(CYAN)Spinning service and running tests...$(RESET) \n"
-	@echo "Running: docker-compose -f ./$(SERVICE)/$(COMPOSE_FILE_STANDARD) up -d"
-	@docker-compose -f ./$(SERVICE)/$(COMPOSE_FILE_STANDARD) up -d || { echo "$(RED)Error while starting the service $(SERVICE).$(RESET)"; exit 1; }
-	@echo "Listing running containers:"
-	@docker ps || { echo "$(RED)Error while listing containers.$(RESET)"; exit 1; }
-	@echo "$(GREEN)Service $(SERVICE) started successfully.$(RESET)"
+	@docker-compose -f ./$(SERVICE)/$(COMPOSE_FILE_STANDARD) up -d > /dev/null 2>&1
 
 .PHONY: stop-service
 stop-service:
@@ -56,7 +52,6 @@ test-single-service:
 	@if [ -d "$(SERVICE)" ] && [ -f "$(SERVICE)/$(COMPOSE_FILE_STANDARD)" ]; then \
 		$(MAKE) -s start-service SERVICE=$(SERVICE) && sleep $(DELAY_TEST_EXECUTION_SECONDS); \
 		$(TEST_COMMAND) || { echo "$(RED)Tests failed for $(SERVICE). Exiting.$(RESET)"; exit 1; }; \
-		docker logs go-gin; \
 		$(MAKE) -s stop-service SERVICE=$(SERVICE); \
 	else \
 		if [ ! -d "$(SERVICE)" ]; then \
