@@ -64,12 +64,8 @@ func API_Follow(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
-			if err := db.FollowUser(user_id, follow_user_id); err != nil {
-				w.WriteHeader(http.StatusNotFound)
-				return
-			}
-
-			w.WriteHeader(http.StatusNoContent)
+			db.FollowUser(user_id, follow_user_id)
+			w.WriteHeader(http.StatusNotFound)
 			return
 
 		} else if rv.Unfollow != "" {
