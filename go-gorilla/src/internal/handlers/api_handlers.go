@@ -40,27 +40,20 @@ func API_Follow(w http.ResponseWriter, r *http.Request) {
 	//Set follow-request type
 	var rv models.FollowData
 
-	// Decode JSON body for POST requests
 	if r.Method == "POST" {
+
+		// Decode JSON body for POST requests
 		if err := json.NewDecoder(r.Body).Decode(&rv); err != nil {
 			fmt.Println("Error decoding request body:", err)
 			http.Error(w, "Invalid request body", http.StatusBadRequest)
 			return
 		}
 
-		// Check if neither follow nor unfollow is provided
-		if rv.Follow == "" && rv.Unfollow == "" {
-			fmt.Println("Missing follow/unfollow field in request body")
-			http.Error(w, "Missing 'follow' or 'unfollow' field", http.StatusBadRequest)
-			return
-		}
-
 		// Check if it's a follow request
 		if rv.Follow != "" {
-			follow_username := rv.Follow
-			follow_user_id, err := db.GetUserIDByUsername(follow_username)
+			follow_user_id, err := db.GetUserIDByUsername(rv.Follow)
 			if err != nil || user_id == -1 {
-				fmt.Println("Follow user not found or invalid user ID:", follow_username)
+				fmt.Println("Failed to get user ID for follow/unfollow actions")
 				w.WriteHeader(http.StatusNotFound)
 				return
 			}

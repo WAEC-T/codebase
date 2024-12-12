@@ -195,28 +195,36 @@ func ApiMsgsPerUserHandler(c *gin.Context) {
 }
 
 func ApiFllwsHandler(c *gin.Context) {
+	//Update latest value
 	UpdateLatestHandler(c)
 
+	//Ensure authentication
 	not_req_from_sim_statusCode, not_req_from_sim_errStr := auth.Not_req_from_simulator(c)
 	if not_req_from_sim_statusCode == 403 && not_req_from_sim_errStr != "" {
 		fmt.Println("Request denied: not from simulator")
 		return
 	}
 
+	//Get username
 	profileUserName := c.Param("username")
+
+	//Get userID
 	userId, err := db.GetUserIDByUsername(profileUserName)
 	if err != nil || userId == -1 {
 		fmt.Println("Failed to get user ID for follow/unfollow actions")
 		c.AbortWithStatus(http.StatusNotFound)
 		return
 	}
-	if c.Request.Method == http.MethodPost {
-		// POST request
-		var requestBody struct {
-			Follow   string `json:"follow"`
-			Unfollow string `json:"unfollow"`
-		}
 
+	//Set follow-request type
+	var requestBody struct {
+		Follow   string `json:"follow"`
+		Unfollow string `json:"unfollow"`
+	}
+
+	if c.Request.Method == http.MethodPost {
+
+		// Decode JSON body for POST requests
 		if err := json.NewDecoder(c.Request.Body).Decode(&requestBody); err != nil {
 			c.AbortWithStatusJSON(http.StatusNotFound, "Failed decoding request")
 			return
