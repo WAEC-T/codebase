@@ -1,4 +1,4 @@
-ALL_SERVICES = go-gin go-gorilla
+ALL_SERVICES = go-gorilla go-gin
 
 COMPOSE_FILE_STANDARD = compose-test.yml
 TEST_COMMAND = pytest tests/test_flash_messages.py tests/test_api_endpoints.py
