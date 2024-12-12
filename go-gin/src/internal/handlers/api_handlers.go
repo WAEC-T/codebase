@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"crypto/md5"
 	"encoding/json"
 	"fmt"
 	"go-gin/src/internal/db"
@@ -162,8 +161,7 @@ func ApiRegisterHandler(c *gin.Context) {
 			return
 
 		} else {
-			hash := md5.Sum([]byte(password))
-			err := db.RegisterUser(username, email, hash)
+			err := db.RegisterUser(username, email, password)
 			if err != nil {
 				fmt.Println("Failed registration attempt due to an error during registration")
 				errorData.status = 400
@@ -254,7 +252,9 @@ func ApiMsgsPerUserHandler(c *gin.Context) {
 		return
 	}
 	if err != nil {
-		c.AbortWithError(http.StatusInternalServerError, err)
+		if errAbort := c.AbortWithError(http.StatusInternalServerError, err); errAbort != nil {
+			fmt.Printf("Failed to abort with error: %v", errAbort)
+		}
 		return
 	}
 

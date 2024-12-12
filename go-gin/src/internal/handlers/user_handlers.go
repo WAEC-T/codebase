@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"crypto/md5"
 	"fmt"
 	"go-gin/src/internal/db"
 	"go-gin/src/internal/helpers"
@@ -99,8 +98,9 @@ func UserTimelineHandler(c *gin.Context) {
 		return
 	}
 	if err != nil {
-		fmt.Println("Error fetching user for timeline")
-		c.AbortWithError(http.StatusInternalServerError, err)
+		if errAbort := c.AbortWithError(http.StatusInternalServerError, err); errAbort != nil {
+			fmt.Printf("Failed to abort with error: %v", errAbort)
+		}
 		return
 	}
 
@@ -113,8 +113,9 @@ func UserTimelineHandler(c *gin.Context) {
 	messages, err := db.GetUserMessages(pUserId, 30)
 
 	if err != nil {
-		fmt.Println("Error fetching user messages")
-		c.AbortWithError(http.StatusInternalServerError, err)
+		if errAbort := c.AbortWithError(http.StatusInternalServerError, err); errAbort != nil {
+			fmt.Printf("Failed to abort with error: %v", errAbort)
+		}
 		return
 	}
 
@@ -148,7 +149,9 @@ func MyTimelineHandler(c *gin.Context) {
 			c.Redirect(http.StatusSeeOther, "/public")
 			return
 		}
-		c.AbortWithError(http.StatusInternalServerError, err)
+		if errAbort := c.AbortWithError(http.StatusInternalServerError, err); errAbort != nil {
+			fmt.Printf("Failed to abort with error: %v", errAbort)
+		}
 		return
 	}
 
@@ -157,10 +160,11 @@ func MyTimelineHandler(c *gin.Context) {
 		return
 	}
 
-	messages, err := db.GetMyMessages(userID.(int))
+	messages, following, err := db.GetMyMessages(userID.(int))
 	if err != nil {
-		fmt.Println("Error getting users messages")
-		c.AbortWithError(http.StatusInternalServerError, err)
+		if errAbort := c.AbortWithError(http.StatusInternalServerError, err); errAbort != nil {
+			fmt.Printf("Failed to abort with error: %v", errAbort)
+		}
 		return
 	}
 
@@ -173,7 +177,7 @@ func MyTimelineHandler(c *gin.Context) {
 		"UserID":       userID,
 		"UserName":     userName,
 		"Messages":     formattedMessages,
-		"Followed":     false,
+		"Followed":     following,
 		"ProfileUser":  userID,
 		"Flashes":      flashMessages,
 	})
@@ -248,8 +252,9 @@ func RegisterHandler(c *gin.Context) {
 		userID, err := db.GetUserIDByUsername(userName)
 		fmt.Println("RegisterHandler userID: ", userID)
 		if err != nil {
-			fmt.Println("Error getting username by id")
-			c.AbortWithError(http.StatusInternalServerError, err)
+			if errAbort := c.AbortWithError(http.StatusInternalServerError, err); errAbort != nil {
+				fmt.Printf("Failed to abort with error: %v", errAbort)
+			}
 			return
 		}
 
@@ -264,8 +269,7 @@ func RegisterHandler(c *gin.Context) {
 		} else if fmt.Sprint(userID) != "-1" {
 			errorData = "The username is already taken"
 		} else {
-			hash := md5.Sum([]byte(password))
-			err := db.RegisterUser(userName, email, hash)
+			err := db.RegisterUser(userName, email, password)
 			if err != nil {
 				fmt.Println("Failed registration attempt due to an error during registration")
 				errorData = "Failed to register user"
@@ -300,7 +304,6 @@ func LoginHandler(c *gin.Context) {
 	}
 
 	userID := session.Get("userID")
-	fmt.Println("LoginHandler userID: ", userID)
 	if userID != nil {
 		fmt.Println("User already logged in, redirecting")
 		session.AddFlash("You were logged in")
@@ -330,25 +333,18 @@ func LoginHandler(c *gin.Context) {
 
 		user, err := db.GetUserByUsername(userName)
 		if err != nil {
-			c.AbortWithError(http.StatusInternalServerError, err)
+			if errAbort := c.AbortWithError(http.StatusInternalServerError, err); errAbort != nil {
+				fmt.Printf("Failed to abort with error: %v", errAbort)
+			}
 			return
 		}
-
 		if user.Username == "" {
 			errorData = "Invalid username"
-		} else if !helpers.CheckPasswordHash(password, user.PwHash) {
+		} else if !helpers.CheckPassword(password, user.Pwd) {
 			errorData = "Invalid password"
 		} else {
-			userID, err := db.GetUserIDByUsername(userName)
-
-			if err != nil {
-				fmt.Println("Failed to retrieve userID during login")
-				c.AbortWithError(http.StatusInternalServerError, err)
-				return
-			}
-
 			// Save userID in the session
-			session.Set("userID", userID)
+			session.Set("userID", user.UserID)
 			session.AddFlash("You were logged in")
 			if !helpers.SaveSessionOrRedirect(c, session.Save(), "/login") {
 				return

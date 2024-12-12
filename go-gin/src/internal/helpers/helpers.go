@@ -2,7 +2,6 @@ package helpers
 
 import (
 	"crypto/md5"
-	"encoding/hex"
 	"fmt"
 	"go-gin/src/internal/models"
 	"net/http"
@@ -15,13 +14,6 @@ import (
 )
 
 // Helper functions
-
-func CheckPasswordHash(userEnteredPwd string, dbpwd string) bool {
-	hash := md5.Sum([]byte(userEnteredPwd))
-	str := hex.EncodeToString(hash[:])
-	return str == dbpwd
-}
-
 func GravatarURL(email string, size int) string {
 	if size <= 0 {
 		size = 80 // Default size
@@ -116,4 +108,8 @@ func SaveSessionOrRedirect(c *gin.Context, err error, redirectURL string) bool {
 		return false
 	}
 	return true
+}
+
+func CheckPassword(userEnteredPwd string, dbpwd string) bool {
+	return userEnteredPwd == dbpwd
 }
