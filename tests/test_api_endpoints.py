@@ -178,7 +178,8 @@ def test_follow_user():
     query = {'no': 20, 'latest': 9}
     response = session.get(url, params=query)
     assert response.ok
-
+    
+    print(response.json())
     json_data = response.json()
     assert "bb" in json_data["follows"]
     assert "cc" in json_data["follows"]
