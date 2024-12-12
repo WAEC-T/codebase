@@ -133,7 +133,7 @@ func ApiMsgsHandler(c *gin.Context) {
 
 		jsonMessages, _ := json.Marshal(messages)
 		c.Header("Content-Type", "application/json")
-		c.JSON(http.StatusOK, string(jsonMessages))
+		c.JSON(http.StatusOK, jsonMessages)
 	}
 }
 
@@ -173,7 +173,7 @@ func ApiMsgsPerUserHandler(c *gin.Context) {
 		// Log successful retrieval of messages
 		jsonMessages, _ := json.Marshal(messages)
 		c.Header("Content-Type", "application/json")
-		c.JSON(http.StatusOK, string(jsonMessages))
+		c.JSON(http.StatusOK, jsonMessages)
 
 	} else if c.Request.Method == http.MethodPost {
 		var messageReq MessageData
