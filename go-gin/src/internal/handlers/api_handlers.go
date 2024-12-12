@@ -131,9 +131,8 @@ func ApiMsgsHandler(c *gin.Context) {
 			c.AbortWithStatusJSON(http.StatusBadRequest, "Failed to fetch messages from DB")
 		}
 
-		jsonMessages, _ := json.Marshal(messages)
 		c.Header("Content-Type", "application/json")
-		c.JSON(http.StatusOK, jsonMessages)
+		c.JSON(http.StatusOK, messages)
 	}
 }
 
@@ -171,9 +170,8 @@ func ApiMsgsPerUserHandler(c *gin.Context) {
 		}
 
 		// Log successful retrieval of messages
-		jsonMessages, _ := json.Marshal(messages)
 		c.Header("Content-Type", "application/json")
-		c.JSON(http.StatusOK, jsonMessages)
+		c.JSON(http.StatusOK, messages)
 
 	} else if c.Request.Method == http.MethodPost {
 		var messageReq MessageData
