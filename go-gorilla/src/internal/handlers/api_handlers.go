@@ -58,6 +58,7 @@ func API_Follow(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
+			// Follow the user
 			if err := db.FollowUser(user_id, follow_user_id); err != nil {
 				w.WriteHeader(http.StatusNotFound)
 				return
@@ -68,16 +69,18 @@ func API_Follow(w http.ResponseWriter, r *http.Request) {
 
 		// Check if it's an unfollow request
 		if rv.Unfollow != "" {
-			unfollow_username := rv.Unfollow
-			unfollow_user_id, err := db.GetUserIDByUsername(unfollow_username)
+			unfollow_user_id, err := db.GetUserIDByUsername(rv.Unfollow)
 			if err != nil || user_id == -1 {
-				fmt.Println("Unfollow user not found or invalid user ID:", unfollow_username)
 				w.WriteHeader(http.StatusNotFound)
 				return
 			}
 
-			// Convert unfollow_user_id to string and unfollow the user
-			db.UnfollowUser(user_id, unfollow_user_id)
+			// Unfollow the user
+			if err := db.UnfollowUser(user_id, unfollow_user_id); err != nil {
+				w.WriteHeader(http.StatusNotFound)
+				return
+			}
+
 			w.WriteHeader(http.StatusNoContent)
 			return
 		}
