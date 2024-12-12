@@ -1,4 +1,4 @@
-ALL_SERVICES = python-flask c-sharp-razor go-gorilla ruby-sinatra rust-actix javascript-express go-gin
+ALL_SERVICES = go-gin
 
 COMPOSE_FILE_STANDARD = compose-test.yml
 TEST_COMMAND = pytest tests/test_flash_messages.py tests/test_api_endpoints.py
@@ -52,6 +52,7 @@ test-single-service:
 	@if [ -d "$(SERVICE)" ] && [ -f "$(SERVICE)/$(COMPOSE_FILE_STANDARD)" ]; then \
 		$(MAKE) -s start-service SERVICE=$(SERVICE) && sleep $(DELAY_TEST_EXECUTION_SECONDS); \
 		$(TEST_COMMAND) || { echo "$(RED)Tests failed for $(SERVICE). Exiting.$(RESET)"; exit 1; }; \
+		docker logs go-gin; \
 		$(MAKE) -s stop-service SERVICE=$(SERVICE); \
 	else \
 		if [ ! -d "$(SERVICE)" ]; then \

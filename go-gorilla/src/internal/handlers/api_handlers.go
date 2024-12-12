@@ -111,7 +111,6 @@ func API_Follow(w http.ResponseWriter, r *http.Request) {
 
 		// Encode the wrapped object
 		if err := json.NewEncoder(w).Encode(response); err != nil {
-			fmt.Println("Error encoding followers as JSON:", err)
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
