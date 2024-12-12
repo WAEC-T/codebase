@@ -131,8 +131,11 @@ func ApiMsgsHandler(c *gin.Context) {
 			c.AbortWithStatusJSON(http.StatusBadRequest, "Failed to fetch messages from DB")
 		}
 
-		c.Header("Content-Type", "application/json")
-		c.JSON(http.StatusOK, messages)
+		// Use the raw ResponseWriter to encode the JSON directly
+		w := c.Writer
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(messages)
 	}
 }
 
@@ -169,9 +172,11 @@ func ApiMsgsPerUserHandler(c *gin.Context) {
 			c.AbortWithStatusJSON(http.StatusInternalServerError, "Failed to fetch messages from DB")
 		}
 
-		// Log successful retrieval of messages
-		c.Header("Content-Type", "application/json")
-		c.JSON(http.StatusOK, messages)
+		// Use the raw ResponseWriter to encode the JSON directly
+		w := c.Writer
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(messages)
 
 	} else if c.Request.Method == http.MethodPost {
 		var messageReq MessageData
