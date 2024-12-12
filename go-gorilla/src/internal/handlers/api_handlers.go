@@ -15,19 +15,19 @@ import (
 )
 
 func API_Follow(w http.ResponseWriter, r *http.Request) {
-	//Get username
-	vars := mux.Vars(r)
-	username := vars["username"]
-
 	//Update latest value
 	API_UpdateLatestHandler(w, r)
 
 	//Ensure authentication
 	is_auth := auth.Is_authenticated(w, r)
 	if !is_auth {
-		fmt.Println("Unauthorized access attempt to Follow: ", username)
+		fmt.Println("Request denied: not from simulator")
 		return
 	}
+
+	//Get username
+	vars := mux.Vars(r)
+	username := vars["username"]
 
 	//Get userID
 	user_id, err := db.GetUserIDByUsername(username)
