@@ -1,7 +1,6 @@
 package db
 
 import (
-	"encoding/hex"
 	"fmt"
 	"go-gorilla/src/internal/config"
 	"go-gorilla/src/internal/models"
@@ -104,14 +103,12 @@ func GetPublicMessages(numMsgs int) ([]models.MessageUser, error) {
 }
 
 // registers a new user
-func RegisterUser(userName string, email string, password [16]byte) error {
-
-	pwHashString := hex.EncodeToString(password[:])
+func RegisterUser(userName string, email string, password string) error {
 
 	newUser := models.Users{
 		Username: userName,
 		Email:    email,
-		PwHash:   pwHashString,
+		Pwd:      password,
 	}
 
 	config.DB.Create(&newUser)
@@ -125,8 +122,7 @@ func RegisterUser(userName string, email string, password [16]byte) error {
 }
 
 // fetches all messages for the current logged in user for 'My Timeline'
-func GetMyMessages(userID int) ([]models.MessageUser, error) {
-
+func GetMyMessages(userID int) ([]models.MessageUser, []int, error) {
 	var messages []models.MessageUser
 
 	subQuery := config.DB.Table("followers").
@@ -138,7 +134,7 @@ func GetMyMessages(userID int) ([]models.MessageUser, error) {
 	// Find the IDs from the subquery
 	if err := subQuery.Find(&followerIDs).Error; err != nil {
 		fmt.Println(err.Error())
-		return nil, err
+		return nil, nil, err
 	}
 
 	// Use the retrieved followerIDs in the main query
@@ -151,9 +147,9 @@ func GetMyMessages(userID int) ([]models.MessageUser, error) {
 
 	if config.DB.Error != nil {
 		fmt.Println(config.DB.Error.Error())
-		return nil, config.DB.Error
+		return nil, nil, config.DB.Error
 	}
-	return messages, nil
+	return messages, followerIDs, nil
 }
 
 // getFollowing fetches up to `limit` users that the user identified by userID is following
@@ -200,8 +196,6 @@ func AddMessage(text string, author_id int) error {
 
 // followUser adds a new follower to the database
 func FollowUser(userID int, profileUserID int) error {
-
-	// following relationship already exists
 	var count int64
 	config.DB.Model(&models.Followers{}).Where("who_id = ? AND whom_id = ?", userID, profileUserID).Count(&count)
 	if count > 0 {

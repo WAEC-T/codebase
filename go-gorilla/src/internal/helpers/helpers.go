@@ -1,12 +1,8 @@
 package helpers
 
 import (
-	"crypto/md5"
-	"encoding/hex"
 	"fmt"
 	"time"
-
-	"golang.org/x/crypto/bcrypt"
 )
 
 func Format_datetime(timestamp string) string {
@@ -29,13 +25,6 @@ func IsNil(i interface{}) bool {
 	return i == nil || i == interface{}(nil)
 }
 
-func HashPassword(password string) (string, error) {
-	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
-	return string(bytes), err
-}
-
-func CheckPasswordHash(userEnteredPwd string, dbpwd string) bool {
-	hash := md5.Sum([]byte(userEnteredPwd))
-	str := hex.EncodeToString(hash[:])
-	return str == dbpwd
+func CheckPassword(userEnteredPwd string, dbpwd string) bool {
+	return userEnteredPwd == dbpwd
 }

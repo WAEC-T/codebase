@@ -6,7 +6,7 @@ import pytz
 
 RESULTS_SECTION = '\033[32m-------------------------------\n      EXPERIMENT INFO:\n-------------------------------\033[0m\n'
 
-def collect_data(otii_project, device):
+def collect_data(otii_project, device, iteration=None):
     """Collect data from the most recent recording."""
     project = otii_project
     recording = project.get_last_recording()
@@ -16,7 +16,7 @@ def collect_data(otii_project, device):
     current_records = recording.get_channel_data(device.id, 'mc', 0, samples_amount)
     voltage_records = recording.get_channel_data(device.id, 'mv', 0, samples_amount)
 
-    dataframe = create_experiment_dataframe(power_records, current_records, voltage_records, timestamp_from_start_test(recording.name))
+    dataframe = create_experiment_dataframe(power_records, current_records, voltage_records, timestamp_from_start_test(recording.name), iteration)
     return dataframe, recording.name
 
 def timestamp_from_start_test(experiment_start_datetime):
@@ -26,13 +26,16 @@ def timestamp_from_start_test(experiment_start_datetime):
     dt_utc = dt_local.astimezone(pytz.UTC)
     return dt_utc.timestamp()
 
-def create_experiment_dataframe(power_records, current_records, voltage_records, start_timestamp):
+def create_experiment_dataframe(power_records, current_records, voltage_records, start_timestamp, iteration):
     power_df = handle_timestamp(pd.DataFrame(power_records).rename(columns={'values': 'power'}), start_timestamp)
     current_df = handle_timestamp(pd.DataFrame(current_records).rename(columns={'values': 'current'}), start_timestamp)
     voltage_df = handle_timestamp(pd.DataFrame(voltage_records).rename(columns={'values': 'voltage'}), start_timestamp)
 
     merged_df = pd.merge(power_df[['timestamp', 'power']], current_df[['timestamp', 'current']], on='timestamp', how='outer')
     merged_df = pd.merge(merged_df, voltage_df[['timestamp', 'voltage']], on='timestamp', how='outer')
+
+    if iteration is not None:
+        merged_df['iteration'] = iteration
 
     return merged_df
 
