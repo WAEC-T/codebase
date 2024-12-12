@@ -59,9 +59,11 @@ func API_Follow(w http.ResponseWriter, r *http.Request) {
 			}
 
 			if err := db.FollowUser(user_id, follow_user_id); err != nil {
-				w.WriteHeader(http.StatusNoContent)
+				w.WriteHeader(http.StatusNotFound)
 				return
 			}
+			w.WriteHeader(http.StatusNoContent)
+			return
 		}
 
 		// Check if it's an unfollow request
