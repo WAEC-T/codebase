@@ -51,8 +51,16 @@ test-single-service:
 	@echo "$(BLUE)=====================================$(RESET) \n"
 	@if [ -d "$(SERVICE)" ] && [ -f "$(SERVICE)/$(COMPOSE_FILE_STANDARD)" ]; then \
 		$(MAKE) -s start-service SERVICE=$(SERVICE) && sleep $(DELAY_TEST_EXECUTION_SECONDS); \
-		$(TEST_COMMAND) || { echo "$(RED)Tests failed for $(SERVICE). Exiting.$(RESET)"; exit 1; }; \
-		docker logs go-gin; \
+		$(TEST_COMMAND) || { \
+			echo "$(RED)Tests failed for $(SERVICE). Capturing container logs...$(RESET)"; \
+			docker ps --filter "name=$(SERVICE)" --format "{{.Names}}" | while read container; do \
+				echo "$(BLUE)Logs for container $$container:$(RESET)"; \
+				docker logs $$container; \
+			done; \
+			echo "$(RED)Tests failed for $(SERVICE). Exiting.$(RESET)"; \
+			$(MAKE) -s stop-service SERVICE=$(SERVICE); \
+			exit 1; \
+		}; \
 		$(MAKE) -s stop-service SERVICE=$(SERVICE); \
 	else \
 		if [ ! -d "$(SERVICE)" ]; then \
