@@ -193,8 +193,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		pwd := user.Pwd
-		if !helpers.CheckPassword(password, pwd) {
+		if !helpers.CheckPassword(password, user.Pwd) {
 			Reload(w, r, "Invalid password", "login.html")
 			return
 		}

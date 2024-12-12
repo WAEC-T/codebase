@@ -1,29 +1,28 @@
 package main
 
 import (
-	"go-gorilla/src/internal/config"
-	"go-gorilla/src/internal/db"
-	"go-gorilla/src/internal/routes"
+	"go-gin/src/internal/config"
+	"go-gin/src/internal/db"
+	"go-gin/src/internal/routes"
 	"log"
-	"net/http"
-	"text/template"
 
-	"github.com/gorilla/mux"
-	_ "github.com/lib/pq"
+	"github.com/gin-gonic/gin"
 )
 
 var err error
 
 func main() {
 
+	//Set to ReleaseMode to disable logging
+	gin.SetMode(gin.ReleaseMode)
 	/*---------------------
 	 * Load env vars
 	 *----------------------*/
 	uri := routes.LoadEnvVars()
 
-	/*-----------------------
+	/*---------------------
 	 * Connect to DB
-	 *----------------------*/
+	*----------------------*/
 	config.DB, err = db.ConnectDB(uri) // Ensure this matches the function name in the db package
 	if err != nil {
 		log.Fatalf("Failed to connect to database: %v", err)
@@ -32,20 +31,15 @@ func main() {
 	/*---------------------
 	* Setup routing
 	*----------------------*/
-	funcMap := routes.SetupRouting()
-
-	config.Tpl, err = template.New("timeline.html").Funcs(funcMap).ParseGlob("templates/*.html")
-	if err != nil {
-		log.Fatalf("Error parsing template: %v", err)
-	}
+	r := gin.New()
+	routes.SetRouteHandlers(r)
 
 	/*---------------------
-	* Setup route-handlers
+	* Start the server
 	*----------------------*/
-	r := mux.NewRouter()
-	routes.SetRouteHandlers(r)
-	err = http.ListenAndServe(":5000", r)
+	err = r.Run(":5000") // Start the server on port 5000
 	if err != nil {
 		log.Fatalf("Failed to start server: %v", err)
 	}
+
 }

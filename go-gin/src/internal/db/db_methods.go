@@ -2,8 +2,8 @@ package db
 
 import (
 	"fmt"
-	"go-gorilla/src/internal/config"
-	"go-gorilla/src/internal/models"
+	"go-gin/src/internal/config"
+	"go-gin/src/internal/models"
 	"log"
 	"os"
 	"time"

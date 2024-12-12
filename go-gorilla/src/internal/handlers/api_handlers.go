@@ -15,19 +15,19 @@ import (
 )
 
 func API_Follow(w http.ResponseWriter, r *http.Request) {
-	//Get username
-	vars := mux.Vars(r)
-	username := vars["username"]
-
 	//Update latest value
 	API_UpdateLatestHandler(w, r)
 
 	//Ensure authentication
 	is_auth := auth.Is_authenticated(w, r)
 	if !is_auth {
-		fmt.Println("Unauthorized access attempt to Follow: ", username)
+		fmt.Println("Request denied: not from simulator")
 		return
 	}
+
+	//Get username
+	vars := mux.Vars(r)
+	username := vars["username"]
 
 	//Get userID
 	user_id, err := db.GetUserIDByUsername(username)
@@ -40,48 +40,47 @@ func API_Follow(w http.ResponseWriter, r *http.Request) {
 	//Set follow-request type
 	var rv models.FollowData
 
-	// Decode JSON body for POST requests
 	if r.Method == "POST" {
+
+		// Decode JSON body for POST requests
 		if err := json.NewDecoder(r.Body).Decode(&rv); err != nil {
 			fmt.Println("Error decoding request body:", err)
 			http.Error(w, "Invalid request body", http.StatusBadRequest)
 			return
 		}
 
-		// Check if neither follow nor unfollow is provided
-		if rv.Follow == "" && rv.Unfollow == "" {
-			fmt.Println("Missing follow/unfollow field in request body")
-			http.Error(w, "Missing 'follow' or 'unfollow' field", http.StatusBadRequest)
-			return
-		}
-
 		// Check if it's a follow request
 		if rv.Follow != "" {
-			follow_username := rv.Follow
-			follow_user_id, err := db.GetUserIDByUsername(follow_username)
+			follow_user_id, err := db.GetUserIDByUsername(rv.Follow)
 			if err != nil || user_id == -1 {
-				fmt.Println("Follow user not found or invalid user ID:", follow_username)
+				fmt.Println("Failed to get user ID for follow/unfollow actions")
 				w.WriteHeader(http.StatusNotFound)
 				return
 			}
 
-			db.FollowUser(user_id, follow_user_id)
+			// Follow the user
+			if err := db.FollowUser(user_id, follow_user_id); err != nil {
+				w.WriteHeader(http.StatusNotFound)
+				return
+			}
 			w.WriteHeader(http.StatusNoContent)
 			return
 		}
 
 		// Check if it's an unfollow request
 		if rv.Unfollow != "" {
-			unfollow_username := rv.Unfollow
-			unfollow_user_id, err := db.GetUserIDByUsername(unfollow_username)
+			unfollow_user_id, err := db.GetUserIDByUsername(rv.Unfollow)
 			if err != nil || user_id == -1 {
-				fmt.Println("Unfollow user not found or invalid user ID:", unfollow_username)
 				w.WriteHeader(http.StatusNotFound)
 				return
 			}
 
-			// Convert unfollow_user_id to string and unfollow the user
-			db.UnfollowUser(user_id, unfollow_user_id)
+			// Unfollow the user
+			if err := db.UnfollowUser(user_id, unfollow_user_id); err != nil {
+				w.WriteHeader(http.StatusNotFound)
+				return
+			}
+
 			w.WriteHeader(http.StatusNoContent)
 			return
 		}
@@ -112,7 +111,6 @@ func API_Follow(w http.ResponseWriter, r *http.Request) {
 
 		// Encode the wrapped object
 		if err := json.NewEncoder(w).Encode(response); err != nil {
-			fmt.Println("Error encoding followers as JSON:", err)
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
@@ -180,9 +178,6 @@ func API_Messages(w http.ResponseWriter, r *http.Request) {
 }
 
 func API_Messages_per_user(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	username := vars["username"]
-
 	//Update latest handler
 	API_UpdateLatestHandler(w, r)
 
@@ -191,6 +186,9 @@ func API_Messages_per_user(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("Unauthorized access attempt to Messages_perUser")
 		return
 	}
+
+	vars := mux.Vars(r)
+	username := vars["username"]
 
 	user_id, err := db.GetUserIDByUsername(username)
 	if err != nil || user_id == -1 {
@@ -214,14 +212,19 @@ func API_Messages_per_user(w http.ResponseWriter, r *http.Request) {
 		var rv models.Messages
 
 		err := json.NewDecoder(r.Body).Decode(&rv)
-		fmt.Print(r)
 		if err != nil {
 			fmt.Println("Error decoding request body: ", err)
 			w.WriteHeader(http.StatusForbidden)
 			return
 		}
 
-		db.AddMessage(rv.Content, user_id)
+		err = db.AddMessage(rv.Content, user_id)
+		if err != nil {
+			fmt.Println("Error getting user ID", err)
+			w.WriteHeader(http.StatusNotFound)
+			return
+		}
+
 		w.WriteHeader(http.StatusNoContent)
 	}
 }
@@ -232,6 +235,7 @@ func API_Register(w http.ResponseWriter, r *http.Request) {
 
 	is_auth := auth.Is_authenticated(w, r)
 	if !is_auth {
+		w.WriteHeader(http.StatusBadRequest)
 		fmt.Println("Unauthorized access attempt to Messages_perUser")
 		return
 	}
