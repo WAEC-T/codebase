@@ -130,6 +130,7 @@ def test_get_latest_user_msgs():
 
     got_it_earlier = False
     for msg in response.json():
+        print(msg)
         if msg['content'] == 'Blub!' and msg['user'] == username:
             got_it_earlier = True
 
