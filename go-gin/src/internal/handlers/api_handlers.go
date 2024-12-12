@@ -6,6 +6,7 @@ import (
 	"go-gin/src/internal/auth"
 	"go-gin/src/internal/config"
 	"go-gin/src/internal/db"
+	"go-gin/src/internal/helpers"
 	"net/http"
 	"strconv"
 
@@ -131,11 +132,10 @@ func ApiMsgsHandler(c *gin.Context) {
 			c.AbortWithStatusJSON(http.StatusBadRequest, "Failed to fetch messages from DB")
 		}
 
-		// Use the raw ResponseWriter to encode the JSON directly
-		w := c.Writer
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(messages)
+		filteredMessages := helpers.FilterMessages(messages)
+		jsonFilteredMessages, _ := json.Marshal(filteredMessages)
+		c.Header("Content-Type", "application/json")
+		c.String(http.StatusOK, string(jsonFilteredMessages))
 	}
 }
 
@@ -172,11 +172,10 @@ func ApiMsgsPerUserHandler(c *gin.Context) {
 			c.AbortWithStatusJSON(http.StatusInternalServerError, "Failed to fetch messages from DB")
 		}
 
-		// Use the raw ResponseWriter to encode the JSON directly
-		w := c.Writer
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(messages)
+		filteredMessages := helpers.FilterMessages(messages)
+		jsonFilteredMessages, _ := json.Marshal(filteredMessages)
+		c.Header("Content-Type", "application/json")
+		c.String(http.StatusOK, string(jsonFilteredMessages))
 
 	} else if c.Request.Method == http.MethodPost {
 		var messageReq MessageData

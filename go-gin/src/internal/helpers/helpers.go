@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"go-gin/src/internal/models"
 	"net/http"
+	"reflect"
 	"strings"
 	"time"
 
@@ -20,6 +21,27 @@ func GravatarURL(email string, size int) string {
 	email = strings.ToLower(strings.TrimSpace(email))
 	hash := md5.Sum([]byte(email))
 	return fmt.Sprintf("http://www.gravatar.com/avatar/%x?d=identicon&s=%d", hash, size)
+}
+
+func FilterMessages(messages []models.MessageUser) []models.FilteredMsg {
+	var filteredMessages []models.FilteredMsg
+	for _, m := range messages {
+		var filteredMsg models.FilteredMsg
+		// content
+		if reflect.TypeOf(m.Text).Kind() == reflect.String {
+			filteredMsg.Content = m.Text
+		}
+
+		// publication date
+
+		// user
+		if reflect.TypeOf(m.Username).Kind() == reflect.String {
+			filteredMsg.User = m.Username
+		}
+
+		filteredMessages = append(filteredMessages, filteredMsg)
+	}
+	return filteredMessages
 }
 
 func FormatMessages(messages []models.MessageUser) []models.MessageUI {
