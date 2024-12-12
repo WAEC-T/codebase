@@ -15,19 +15,19 @@ import (
 )
 
 func API_Follow(w http.ResponseWriter, r *http.Request) {
+	//Get username
+	vars := mux.Vars(r)
+	username := vars["username"]
+
 	//Update latest value
 	API_UpdateLatestHandler(w, r)
 
 	//Ensure authentication
 	is_auth := auth.Is_authenticated(w, r)
 	if !is_auth {
-		fmt.Println("Unauthorized")
+		fmt.Println("Unauthorized access attempt to Follow: ", username)
 		return
 	}
-
-	//Get username
-	vars := mux.Vars(r)
-	username := vars["username"]
 
 	//Get userID
 	user_id, err := db.GetUserIDByUsername(username)
@@ -57,59 +57,64 @@ func API_Follow(w http.ResponseWriter, r *http.Request) {
 
 		// Check if it's a follow request
 		if rv.Follow != "" {
-			follow_user_id, err := db.GetUserIDByUsername(rv.Follow)
+			follow_username := rv.Follow
+			follow_user_id, err := db.GetUserIDByUsername(follow_username)
 			if err != nil || user_id == -1 {
-				fmt.Println("Follow user not found or invalid user ID:", follow_user_id)
+				fmt.Println("Follow user not found or invalid user ID:", follow_username)
 				w.WriteHeader(http.StatusNotFound)
 				return
 			}
 
 			db.FollowUser(user_id, follow_user_id)
+			w.WriteHeader(http.StatusNoContent)
+			return
+		}
+
+		// Check if it's an unfollow request
+		if rv.Unfollow != "" {
+			unfollow_username := rv.Unfollow
+			unfollow_user_id, err := db.GetUserIDByUsername(unfollow_username)
+			if err != nil || user_id == -1 {
+				fmt.Println("Unfollow user not found or invalid user ID:", unfollow_username)
+				w.WriteHeader(http.StatusNotFound)
+				return
+			}
+
+			// Convert unfollow_user_id to string and unfollow the user
+			db.UnfollowUser(user_id, unfollow_user_id)
+			w.WriteHeader(http.StatusNoContent)
+			return
+		}
+
+	} else if r.Method == "GET" {
+		followers, errx := db.GetFollowing(user_id, 100)
+		if errx != nil {
+			fmt.Println("Error getting followers for", username)
 			w.WriteHeader(http.StatusNotFound)
 			return
+		}
 
-		} else if rv.Unfollow != "" {
-			unfollow_user_id, err := db.GetUserIDByUsername(rv.Unfollow)
-			if err != nil || user_id == -1 {
-				w.WriteHeader(http.StatusNotFound)
-				return
-			}
+		// empty slice for follower usernames
+		followerNames := []string{}
 
-			if err := db.UnfollowUser(user_id, unfollow_user_id); err != nil {
-				w.WriteHeader(http.StatusNoContent)
-				return
-			}
+		// Append the usernames to the followerNames slice
+		for _, follower := range followers {
+			followerNames = append(followerNames, follower.Username)
+		}
 
-		} else if r.Method == "GET" {
-			followers, errx := db.GetFollowing(user_id, 100)
-			if errx != nil {
-				fmt.Println("Error getting followers for", username)
-				w.WriteHeader(http.StatusNotFound)
-				return
-			}
+		// Wrap the response in an object with a key "followers"
+		response := map[string][]string{
+			"follows": followerNames,
+		}
 
-			// empty slice for follower usernames
-			followerNames := []string{}
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
 
-			// Append the usernames to the followerNames slice
-			for _, follower := range followers {
-				followerNames = append(followerNames, follower.Username)
-			}
-
-			// Wrap the response in an object with a key "followers"
-			response := map[string][]string{
-				"follows": followerNames,
-			}
-
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusOK)
-
-			// Encode the wrapped object
-			if err := json.NewEncoder(w).Encode(response); err != nil {
-				fmt.Println("Error encoding followers as JSON:", err)
-				w.WriteHeader(http.StatusInternalServerError)
-				return
-			}
+		// Encode the wrapped object
+		if err := json.NewEncoder(w).Encode(response); err != nil {
+			fmt.Println("Error encoding followers as JSON:", err)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
 		}
 	}
 }
