@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"go-gin/src/internal/models"
 	"net/http"
-	"os"
-	"reflect"
 	"strings"
 	"time"
 
@@ -51,48 +49,6 @@ func FormatMessages(messages []models.MessageUser) []models.MessageUI {
 	}
 
 	return formattedMessages
-}
-
-func FilterMessages(messages []models.MessageUser) []models.FilteredMsg {
-	var filteredMessages []models.FilteredMsg
-	for _, m := range messages {
-		var filteredMsg models.FilteredMsg
-		// content
-		if reflect.TypeOf(m.Text).Kind() == reflect.String {
-			filteredMsg.Content = m.Text
-		}
-
-		// publication date
-
-		// user
-		if reflect.TypeOf(m.Username).Kind() == reflect.String {
-			filteredMsg.User = m.Username
-		}
-
-		filteredMessages = append(filteredMessages, filteredMsg)
-	}
-	return filteredMessages
-}
-
-func LogMessage(message string) {
-	// Specify the file path
-	filePath := "./tmp/logging/logger.txt"
-
-	// Open or create the file for writing
-	file, err := os.OpenFile(filePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o644)
-	if err != nil {
-		fmt.Println("Error creating file:", err)
-		return
-	}
-	defer file.Close()
-
-	data := []byte(message + "\n")
-
-	_, err = file.Write(data)
-	if err != nil {
-		fmt.Println("Error writing to file:", err)
-		return
-	}
 }
 
 func Format_datetime(timestamp time.Time) string {

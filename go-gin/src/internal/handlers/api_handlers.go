@@ -3,21 +3,14 @@ package handlers
 import (
 	"encoding/json"
 	"fmt"
+	"go-gin/src/internal/auth"
+	"go-gin/src/internal/config"
 	"go-gin/src/internal/db"
-	"go-gin/src/internal/helpers"
-	"io"
 	"net/http"
 	"strconv"
-	"strings"
 
 	"github.com/gin-gonic/gin"
 )
-
-// struct for error data (need to be JSON before return)
-type ErrorData struct {
-	status    int
-	error_msg string
-}
 
 type UserData struct {
 	Username string
@@ -27,16 +20,6 @@ type UserData struct {
 
 type MessageData struct {
 	Content string `json:"content"`
-}
-
-func Not_req_from_simulator(c *gin.Context) (statusCode int, errStr string) {
-	auth := c.Request.Header.Get("Authorization")
-	if auth != "Basic c2ltdWxhdG9yOnN1cGVyX3NhZmUh" {
-		statusCode = 403
-		errStr = "You are not authorized to use this resource!"
-		return statusCode, errStr
-	}
-	return
 }
 
 func UpdateLatestHandler(c *gin.Context) {
@@ -81,103 +64,50 @@ Takes data from the POST and registers a user in the db
 returns: ("", 204) or ({"status": 400, "error_msg": error}, 400)
 */
 func ApiRegisterHandler(c *gin.Context) {
+	//Update latest
 	UpdateLatestHandler(c)
 
-	errorData := ErrorData{
-		status:    0,
-		error_msg: "",
+	not_req_from_sim_statusCode, not_req_from_sim_errStr := auth.Not_req_from_simulator(c)
+	if not_req_from_sim_statusCode == 403 && not_req_from_sim_errStr != "" {
+		fmt.Println("Request denied: not from simulator")
+		c.AbortWithStatusJSON(http.StatusForbidden, "Request denied: not from simulator")
+		return
 	}
 
 	// Check if user already exists
-	userID, exists := c.Get("UserID")
-	if exists {
-		fmt.Println("Attempt to register an existing user")
-		errorData.status = 400
-		errorData.error_msg = "User already exists: " + fmt.Sprintf("%v", userID)
-		c.AbortWithStatusJSON(400, errorData)
+	//TODO: DO IT
+
+	// Read the request body
+	var registerReq UserData
+	err := json.NewDecoder(c.Request.Body).Decode(&registerReq)
+	if err != nil {
+		fmt.Println("Error failed to read request body")
+		c.AbortWithStatusJSON(400, "Error failed to read request body")
+		return
+	}
+
+	// Get user ID
+	user, err := db.GetUserByUsername(registerReq.Username)
+	if err == nil && user.Username != "" {
+		fmt.Println("Error getting username by id")
+		c.AbortWithStatusJSON(400, "Error getting username by id")
 		return
 	}
 
 	if c.Request.Method == http.MethodPost {
-		// Read the request body
-		var registerReq UserData
-		body, err := io.ReadAll(c.Request.Body)
+		err := db.RegisterUser(registerReq.Username, registerReq.Email, registerReq.Pwd)
 		if err != nil {
-			fmt.Println("Error failed to read request body")
-			errorData.status = 400
-			errorData.error_msg = "Failed to read JSON"
-			c.AbortWithStatusJSON(400, errorData)
+			fmt.Println("Failed registration attempt due to an error during registration")
+			c.AbortWithStatusJSON(400, "Failed to register user")
 			return
 		}
-
-		// Parse the request body from JSON
-		// Unmarshal parses the JSON and stores it in a pointer (registerReq)
-		if err := json.Unmarshal(body, &registerReq); err != nil {
-			fmt.Println("Failed to parse request JSON")
-			errorData.status = 400
-			errorData.error_msg = "Failed to parse JSON"
-			c.AbortWithStatusJSON(400, errorData)
-			return
-		}
-
-		// Set the user data
-		username := registerReq.Username
-		email := registerReq.Email
-		password := registerReq.Pwd
-
-		// Get user ID
-		userID, err := db.GetUserIDByUsername(username)
-		if err != nil {
-			fmt.Println("Error getting username by id")
-			errorData.status = 400
-			errorData.error_msg = "Failed to get userID"
-			c.AbortWithStatusJSON(400, errorData)
-			return
-		}
-
-		// Check for errors
-		if username == "" {
-			errorData.status = 400
-			errorData.error_msg = "You have to enter a username"
-			c.AbortWithStatusJSON(400, errorData.error_msg)
-			return
-
-		} else if email == "" || !strings.Contains(email, "@") {
-			errorData.status = 400
-			errorData.error_msg = "You have to enter a valid email address"
-			c.AbortWithStatusJSON(400, errorData.error_msg)
-			return
-
-		} else if password == "" {
-			errorData.status = 400
-			errorData.error_msg = "You have to enter a password"
-			c.AbortWithStatusJSON(400, errorData.error_msg)
-			return
-
-		} else if fmt.Sprint(userID) != "-1" {
-			errorData.status = 400
-			errorData.error_msg = "The username is already taken"
-			c.AbortWithStatusJSON(400, errorData.error_msg)
-			return
-
-		} else {
-			err := db.RegisterUser(username, email, password)
-			if err != nil {
-				fmt.Println("Failed registration attempt due to an error during registration")
-				errorData.status = 400
-				errorData.error_msg = "Failed to register user"
-				c.AbortWithStatusJSON(400, errorData.error_msg)
-				return
-			}
-		}
-
-		if errorData.error_msg != "" {
-			c.AbortWithStatusJSON(400, errorData.error_msg)
-			return
-		} else {
-			c.JSON(204, "")
+		if config.DB.Error != nil {
+			fmt.Println("Registration error: ", config.DB.Error)
+			c.AbortWithStatusJSON(http.StatusBadRequest, "Registration error: ")
 		}
 	}
+
+	c.JSON(204, "")
 }
 
 /*
@@ -187,42 +117,24 @@ func ApiRegisterHandler(c *gin.Context) {
 func ApiMsgsHandler(c *gin.Context) {
 	UpdateLatestHandler(c)
 
-	errorData := ErrorData{
-		status:    0,
-		error_msg: "",
-	}
-
-	not_req_from_sim_statusCode, not_req_from_sim_errStr := Not_req_from_simulator(c)
+	not_req_from_sim_statusCode, not_req_from_sim_errStr := auth.Not_req_from_simulator(c)
 	if not_req_from_sim_statusCode == 403 && not_req_from_sim_errStr != "" {
 		fmt.Println("Request denied: not from simulator")
-		errorData.status = http.StatusForbidden
-		errorData.error_msg = not_req_from_sim_errStr
-		c.AbortWithStatusJSON(http.StatusForbidden, errorData.error_msg)
+		c.AbortWithStatusJSON(http.StatusForbidden, "Request denied: not from simulator")
 		return
 	}
 
-	numMsgs := c.Request.Header.Get("no")
-	numMsgsInt, err := strconv.Atoi(numMsgs)
-	// fallback on default value
-	if err != nil {
-		fmt.Println("Falling back to default number of messages due to parsing error")
-		numMsgsInt = 100
+	if c.Request.Method == http.MethodGet {
+		messages, err := db.GetPublicMessages(100)
+		if err != nil {
+			fmt.Println("Failed to fetch messages from DB")
+			c.AbortWithStatusJSON(http.StatusBadRequest, "Failed to fetch messages from DB")
+		}
+
+		jsonMessages, _ := json.Marshal(messages)
+		c.Header("Content-Type", "application/json")
+		c.String(http.StatusOK, string(jsonMessages))
 	}
-
-	messages, err := db.GetPublicMessages(numMsgsInt)
-	if err != nil {
-
-		fmt.Println("Failed to fetch messages from DB")
-
-		errorData.status = http.StatusBadRequest
-		errorData.error_msg = "Failed to fetch messages from DB"
-		c.AbortWithStatusJSON(http.StatusBadRequest, errorData)
-	}
-
-	filteredMessages := helpers.FilterMessages(messages)
-	jsonFilteredMessages, _ := json.Marshal(filteredMessages)
-	c.Header("Content-Type", "application/json")
-	c.String(http.StatusOK, string(jsonFilteredMessages))
 }
 
 /*
@@ -231,17 +143,10 @@ func ApiMsgsHandler(c *gin.Context) {
 func ApiMsgsPerUserHandler(c *gin.Context) {
 	UpdateLatestHandler(c)
 
-	errorData := ErrorData{
-		status:    0,
-		error_msg: "",
-	}
-
-	not_req_from_sim_statusCode, not_req_from_sim_errStr := Not_req_from_simulator(c)
+	not_req_from_sim_statusCode, not_req_from_sim_errStr := auth.Not_req_from_simulator(c)
 	if not_req_from_sim_statusCode == 403 && not_req_from_sim_errStr != "" {
 		fmt.Println("Request denied: not from simulator")
-		errorData.status = http.StatusForbidden
-		errorData.error_msg = not_req_from_sim_errStr
-		c.AbortWithStatusJSON(http.StatusForbidden, errorData.error_msg)
+		c.AbortWithStatusJSON(http.StatusForbidden, "Request denied: not from simulator")
 		return
 	}
 
@@ -251,7 +156,7 @@ func ApiMsgsPerUserHandler(c *gin.Context) {
 		c.AbortWithStatus(http.StatusNotFound)
 		return
 	}
-	if err != nil {
+	if err != nil || userId == -1 {
 		if errAbort := c.AbortWithError(http.StatusInternalServerError, err); errAbort != nil {
 			fmt.Printf("Failed to abort with error: %v", errAbort)
 		}
@@ -259,122 +164,109 @@ func ApiMsgsPerUserHandler(c *gin.Context) {
 	}
 
 	if c.Request.Method == http.MethodGet {
-		numMsgs := c.Request.Header.Get("no")
-		numMsgsInt, err := strconv.Atoi(numMsgs)
-		// fallback on default value
-		if err != nil {
-			numMsgsInt = 100
-			fmt.Println("Fallback to default number of messages due to parsing error")
-		}
-
-		messages, err := db.GetUserMessages(userId, numMsgsInt)
+		messages, err := db.GetUserMessages(userId, 100)
 		if err != nil {
 			fmt.Println("Failed to fetch messages from DB")
-			errorData.status = http.StatusBadRequest
-			errorData.error_msg = "Failed to fetch messages from DB"
-			c.AbortWithStatusJSON(http.StatusInternalServerError, errorData)
+			c.AbortWithStatusJSON(http.StatusInternalServerError, "Failed to fetch messages from DB")
 		}
 
 		// Log successful retrieval of messages
-		filteredMessages := helpers.FilterMessages(messages)
-		jsonFilteredMessages, _ := json.Marshal(filteredMessages)
+		jsonMessages, _ := json.Marshal(messages)
 		c.Header("Content-Type", "application/json")
-		c.String(http.StatusOK, string(jsonFilteredMessages))
+		c.String(http.StatusOK, string(jsonMessages))
 
 	} else if c.Request.Method == http.MethodPost {
-		// Read the request body
 		var messageReq MessageData
-		body, err := io.ReadAll(c.Request.Body)
+
+		err := json.NewDecoder(c.Request.Body).Decode(&messageReq)
 		if err != nil {
 			fmt.Println("Failed to read request body")
-			errorData.status = 400
-			errorData.error_msg = "Failed to read JSON"
-			c.AbortWithStatusJSON(http.StatusBadRequest, errorData)
+			c.AbortWithStatusJSON(http.StatusBadRequest, "Failed to read request body")
+			return
 		}
 
-		if err := json.Unmarshal(body, &messageReq); err != nil {
-			fmt.Println("Failed to parse JSON body")
-			errorData.status = 400
-			errorData.error_msg = "Failed to parse JSON"
-		}
-
-		text := messageReq.Content
-		authorId, err := db.GetUserIDByUsername(profileUserName)
+		err = db.AddMessage(messageReq.Content, userId)
 		if err != nil {
-			errorData.status = http.StatusBadRequest
-			errorData.error_msg = "Failed to get userID"
-			c.AbortWithStatusJSON(http.StatusBadRequest, errorData)
-		}
-
-		err = db.AddMessage(text, authorId)
-		if err != nil {
-			errorData.status = http.StatusInternalServerError
-			errorData.error_msg = "Failed to upload message"
-			c.AbortWithStatusJSON(http.StatusInternalServerError, errorData)
+			c.AbortWithStatusJSON(http.StatusInternalServerError, "Failed to upload message")
 		}
 
 		c.String(http.StatusNoContent, "")
 	}
 }
 
-/*
-GET and POST
-if GET:
-
-	return: all followers that :username follows
-
-else if POST:
-
-	if FOLLOW:
-		make userA follow userB
-		return: status code
-	if UNFOLLOW:
-		make userA unfollow userB
-		return: status code
-
-/api/fllws/<username>
-*/
 func ApiFllwsHandler(c *gin.Context) {
 	UpdateLatestHandler(c)
 
-	errorData := ErrorData{
-		status:    0,
-		error_msg: "",
-	}
-
-	not_req_from_sim_statusCode, not_req_from_sim_errStr := Not_req_from_simulator(c)
+	not_req_from_sim_statusCode, not_req_from_sim_errStr := auth.Not_req_from_simulator(c)
 	if not_req_from_sim_statusCode == 403 && not_req_from_sim_errStr != "" {
 		fmt.Println("Request denied: not from simulator")
-		errorData.status = http.StatusForbidden
-		errorData.error_msg = not_req_from_sim_errStr
-		c.AbortWithStatusJSON(http.StatusForbidden, errorData.error_msg)
 		return
 	}
 
-	if c.Request.Method == http.MethodGet {
-		profileUserName := c.Param("username")
-		numFollr := c.Request.Header.Get("no")
-		numFollrInt, err := strconv.Atoi(numFollr)
-		// fallback on default value
-		if err != nil {
-			fmt.Println("Fallback to default number of followers due to parsing error")
-			numFollrInt = 100
+	profileUserName := c.Param("username")
+	userId, err := db.GetUserIDByUsername(profileUserName)
+	if err != nil || userId == -1 {
+		fmt.Println("Failed to get user ID for follow/unfollow actions")
+		c.AbortWithStatus(http.StatusNotFound)
+		return
+	}
+	if c.Request.Method == http.MethodPost {
+		// POST request
+		var requestBody struct {
+			Follow   string `json:"follow"`
+			Unfollow string `json:"unfollow"`
 		}
 
-		userId, err := db.GetUserIDByUsername(profileUserName)
-		if err != nil || userId == -1 {
-			fmt.Println("Failed to get user ID for follow/unfollow actions")
-			c.AbortWithStatus(http.StatusNotFound)
+		if err := json.NewDecoder(c.Request.Body).Decode(&requestBody); err != nil {
+			c.AbortWithStatusJSON(http.StatusNotFound, "Failed decoding request")
 			return
 		}
 
-		// Fetch all followers for the user
-		followers, err := db.GetFollowing(userId, numFollrInt)
+		// Check if neither follow nor unfollow is provided
+		if requestBody.Follow == "" && requestBody.Unfollow == "" {
+			fmt.Println("Missing follow/unfollow field in request body")
+			c.AbortWithStatusJSON(http.StatusNotFound, "Missing follow/unfollow field in request body")
+			return
+		}
+
+		if requestBody.Follow != "" {
+			follow_user_id, err := db.GetUserIDByUsername(requestBody.Follow)
+			if err != nil || follow_user_id == -1 {
+				fmt.Println("Failed to get user ID for follow/unfollow actions")
+				c.AbortWithStatus(http.StatusNotFound)
+				return
+			}
+
+			// Follow the user
+			if err := db.FollowUser(userId, follow_user_id); err != nil {
+				c.AbortWithStatusJSON(http.StatusNotFound, "Failed to follow user")
+				return
+			}
+
+			c.JSON(http.StatusNoContent, "")
+			return
+
+		} else if requestBody.Unfollow != "" {
+			unfollow_user_id, err := db.GetUserIDByUsername(requestBody.Unfollow)
+			if err != nil || unfollow_user_id == -1 {
+				c.AbortWithStatus(http.StatusNotFound)
+				return
+			}
+
+			// Unfollow the user
+			if err := db.UnfollowUser(userId, unfollow_user_id); err != nil {
+				c.AbortWithStatusJSON(http.StatusNotFound, "Failed to unfollow user")
+				return
+			}
+
+			c.JSON(http.StatusNoContent, "")
+		}
+
+	} else if c.Request.Method == http.MethodGet {
+		followers, err := db.GetFollowing(userId, 100)
 		if err != nil {
 			fmt.Println("Failed to fetch followers from DB")
-			errorData.status = http.StatusInternalServerError
-			errorData.error_msg = "Failed to fetch followers from DB"
-			c.AbortWithStatusJSON(http.StatusInternalServerError, errorData)
+			c.AbortWithStatusJSON(http.StatusInternalServerError, "Failed to fetch followers from DB")
 		}
 
 		// empty slice for follower usernames
@@ -390,79 +282,6 @@ func ApiFllwsHandler(c *gin.Context) {
 			"follows": followerNames,
 		}
 
-		// Send JSON response of all followers
 		c.JSON(200, followersResponse)
-
-	} else if c.Request.Method == http.MethodPost {
-		// POST request
-		var requestBody struct {
-			Follow   string `json:"follow"`
-			Unfollow string `json:"unfollow"`
-		}
-
-		// Bind JSON data to requestBody
-		if err := c.BindJSON(&requestBody); err != nil {
-			fmt.Println("Failed to bind JSON for follow/unfollow action")
-			errorData.status = http.StatusNotFound
-			errorData.error_msg = "Failed to parse JSON"
-			c.AbortWithStatusJSON(http.StatusNotFound, errorData)
-			return
-		}
-
-		profileUserName := c.Param("username")
-
-		// Convert profileUserName to userID
-		userId, err := db.GetUserIDByUsername(profileUserName)
-		if err != nil || userId == -1 {
-			c.AbortWithStatus(http.StatusNotFound)
-			return
-		}
-
-		if requestBody.Follow != "" {
-			// Follow logic
-			// Convert requestBody.Follow to profileUserID
-			profileUserID, err := db.GetUserIDByUsername(requestBody.Follow)
-			if err != nil || profileUserID == -1 {
-				fmt.Println("Failed to get user ID for follow/unfollow actions")
-				c.AbortWithStatus(http.StatusNotFound)
-				return
-			}
-
-			// Follow the user
-			if err := db.FollowUser(userId, profileUserID); err != nil {
-				fmt.Println("Failed to follow user")
-				errorData.status = http.StatusNotFound
-				errorData.error_msg = "Failed to follow user"
-				c.AbortWithStatusJSON(http.StatusNotFound, errorData)
-				return
-			}
-
-			c.JSON(http.StatusNoContent, "")
-			return
-		} else if requestBody.Unfollow != "" {
-			// Unfollow logic
-			// Convert requestBody.Unfollow to profileUserID
-			profileUserID, err := db.GetUserIDByUsername(requestBody.Unfollow)
-			if err != nil || profileUserID == -1 {
-				c.AbortWithStatus(http.StatusNotFound)
-				return
-			}
-
-			// Unfollow the user
-			if err := db.UnfollowUser(userId, profileUserID); err != nil {
-				fmt.Println("Failed to unfollow user")
-				errorData.status = http.StatusNotFound
-				errorData.error_msg = "Failed to unfollow user"
-				c.AbortWithStatusJSON(http.StatusNotFound, errorData)
-				return
-			}
-
-			c.JSON(http.StatusNoContent, "")
-		} else {
-			errorData.status = http.StatusNotFound
-			errorData.error_msg = "No 'follow' or 'unfollow' provided in request"
-			c.AbortWithStatusJSON(http.StatusNotFound, errorData)
-			return
-		}
 	}
 }

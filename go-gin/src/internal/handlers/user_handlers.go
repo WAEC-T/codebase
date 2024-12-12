@@ -250,7 +250,6 @@ func RegisterHandler(c *gin.Context) {
 		password2 := c.Request.FormValue("password2")
 
 		userID, err := db.GetUserIDByUsername(userName)
-		fmt.Println("RegisterHandler userID: ", userID)
 		if err != nil {
 			if errAbort := c.AbortWithError(http.StatusInternalServerError, err); errAbort != nil {
 				fmt.Printf("Failed to abort with error: %v", errAbort)
@@ -305,7 +304,6 @@ func LoginHandler(c *gin.Context) {
 
 	userID := session.Get("userID")
 	if userID != nil {
-		fmt.Println("User already logged in, redirecting")
 		session.AddFlash("You were logged in")
 		if !helpers.SaveSessionOrRedirect(c, session.Save(), "/login") {
 			return
