@@ -14,7 +14,7 @@ COPY src/ ./src
 
 # Restore dependencies
 RUN dotnet nuget locals all --clear
-RUN dotnet restore "src/Minitwit.Web/Minitwit.Web.csproj" --no-cache --disable-parallel --max-retries 3 -v diag
+RUN dotnet restore "src/Minitwit.Web/Minitwit.Web.csproj" # -v diag
 
 # Build and publish the application in one step
 RUN dotnet publish "src/Minitwit.Web/Minitwit.Web.csproj" -c $BUILD_CONFIGURATION -o /app/publish --self-contained false --no-restore
@@ -28,10 +28,10 @@ COPY --from=builder /app/publish .
 
 # Set environment variables
 ENV ASPNETCORE_ENVIRONMENT=Development
-ENV ASPNETCORE_URLS=http://0.0.0.0:5000
+ENV ASPNETCORE_URLS=http://0.0.0.0:5001
 
 # Expose the port
-EXPOSE 5000
+EXPOSE 5001
 
 # Run the application
 ENTRYPOINT ["dotnet", "Minitwit.Web.dll"]
