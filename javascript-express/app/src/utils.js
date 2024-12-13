@@ -1,15 +1,34 @@
 const formatMessages = (messages) => {
-    const formattedMessages = messages.map((message) => {
-      return {
-        user_id: message.author_id,
-        username: message.username,
-        email: message.email,
-        message_id: message.message_id,
-        text: message.text,
-        pub_date: new Date(message.pub_date).toISOString().replace(/T/, ' @ ').slice(0, 16),
-        flagged: message.flagged,
-      };
-    });
+    return messages.map(message => {
+      const updatedMessage = { ...message };
   
-    return formattedMessages;
+      Object.entries(updatedMessage).forEach(([key, value]) => {
+        if (key.startsWith('User.')) {
+          const newKey = key.replace('User.', '');
+          updatedMessage[newKey] = value;
+          delete updatedMessage[key];
+        }
+      });
+  
+      return updatedMessage;
+    });
+  };
+
+const validateRegisterFields = async (username, email, password, password2) => {
+
+  let errorMessage = null;
+
+  if (!username) {
+      errorMessage = "You have to enter a username.";
+  } else if (!email || !email.includes('@')) {
+      errorMessage = "You have to enter a valid email address.";
+  } else if (!password) {
+      errorMessage = "You have to enter a password.";
+  } else if (password !== password2) {
+      errorMessage = "The two passwords do not match.";
   }
+  return errorMessage; 
+}
+  
+module.exports = { formatMessages, validateRegisterFields };
+  
