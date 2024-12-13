@@ -67,12 +67,12 @@ public class UserTimelineModel : PageModel
             currentPage = 1;
         }
         
-        TimelineAuthor = await _authorRepository.GetAuthorByNameAsync(author); // 1
+        TimelineAuthor = await _authorRepository.GetAuthorByNameAsync(author); 
         if (TimelineAuthor == null)
         {
             throw new KeyNotFoundException($"Author with username '{author}' was not found.");
         }
-        IsFollowing = await _followRepository.IsFollowingAsync(user.Id, TimelineAuthor.Id); // 2
+        IsFollowing = await _followRepository.IsFollowingAsync(user.Id, TimelineAuthor.Id); 
         await LoadMessages(user, TimelineAuthor, currentPage);
     }
 
