@@ -61,7 +61,7 @@ func FormatMessages(messages []models.MessageUser) []models.MessageUI {
 		msg.PubDate = Format_datetime(m.PubDate) // Assuming PubDate is already a time.Time type
 
 		// Create the profile link by encoding the username
-		msg.Profile_link = "/" + strings.ReplaceAll(msg.Username, " ", "%20")
+		msg.Profile_link = "/user/" + strings.ReplaceAll(msg.Username, " ", "%20")
 
 		// Generate the Gravatar URL
 		msg.Gravatar = GravatarURL(msg.Email, 48)
@@ -90,4 +90,8 @@ func SaveSessionOrRedirect(c *gin.Context, err error, redirectURL string) bool {
 
 func CheckPassword(userEnteredPwd string, dbpwd string) bool {
 	return userEnteredPwd == dbpwd
+}
+
+func IsNil(i interface{}) bool {
+	return i == nil || i == interface{}(nil)
 }
