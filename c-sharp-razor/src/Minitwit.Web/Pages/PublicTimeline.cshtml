@@ -19,7 +19,7 @@ Layout = "Shared/_Layout";
         <img src="@Gravatar.GetGravatarUrl(message.User.Email)" alt="User Avatar" />
         <p>
             <strong>
-                <a href="/@message.User.Username">@message.User.Username</a>
+                <a href="/user/@message.User.Username">@message.User.Username</a>
             </strong>
             @message.Message
             <small>&mdash; @message.Timestamp.ToString("yyyy-MM-dd @ HH:mm")</small>

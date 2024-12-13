@@ -48,17 +48,6 @@ public class UserTimelineModel : PageModel
     public async Task<ActionResult> OnGet(string author)
     {
         user = await _userManager.GetUserAsync(User);
-        if (user == null)
-        {
-            return Unauthorized();
-        }
-        await InitializeVariables(user!, author);
-
-        return Page();
-    }
-
-    public async Task InitializeVariables(Author user, string author)
-    {   
         if (Request.Query.ContainsKey("page"))
         {
             currentPage = int.Parse(Request.Query["page"]!);
@@ -67,17 +56,20 @@ public class UserTimelineModel : PageModel
         {
             currentPage = 1;
         }
-        
-        TimelineAuthor = await _authorRepository.GetAuthorByNameAsync(author); 
-        if (TimelineAuthor == null)
+        TimelineAuthor = await _authorRepository.GetAuthorByNameAsync(author);
+        if (user != null)
         {
-            throw new KeyNotFoundException($"Author with username '{author}' was not found.");
+            IsFollowing = await _followRepository.IsFollowingAsync(user.Id, TimelineAuthor.Id);
+            await LoadMessages(user, TimelineAuthor, currentPage);
         }
-        IsFollowing = await _followRepository.IsFollowingAsync(user.Id, TimelineAuthor.Id); 
-        await LoadMessages(user, TimelineAuthor, currentPage);
+        else
+        {
+            await LoadMessages(null, TimelineAuthor, currentPage);
+        }
+        return Page();
     }
-
-    private async Task LoadMessages(Author signedInAuthor, Author timelineAuthor, int page)
+    
+    private async Task LoadMessages(Author? signedInAuthor, Author timelineAuthor, int page)
     {
         try
         {
@@ -123,7 +115,7 @@ public class UserTimelineModel : PageModel
         await _authorRepository.AddFollowAsync(int.Parse(currentUserId), authorToFollow.Id); // 3
         TempData["FlashMessage"] = $"You are now following {authorToFollow.UserName}";
 
-        Response.Redirect($"/{authorToFollow.UserName}");
+        Response.Redirect($"/user/{authorToFollow.UserName}");
         return new EmptyResult();
     }
     
@@ -131,13 +123,13 @@ public class UserTimelineModel : PageModel
     {   
         Author? currentUser = await _userManager.GetUserAsync(User);
         Author? authorToUnfollow = await _authorRepository.GetAuthorByNameAsync(author);
-
+    
         if (currentUser == null)
             return NotFound();
         
         await _authorRepository.RemoveFollowAsync(currentUser.Id, authorToUnfollow.Id);
         TempData["FlashMessage"] = "You are no longer following " + authorToUnfollow.UserName;
-        Response.Redirect($"/{authorToUnfollow.UserName}");
+        Response.Redirect($"/user/{authorToUnfollow.UserName}");
         return new EmptyResult();
     }
 

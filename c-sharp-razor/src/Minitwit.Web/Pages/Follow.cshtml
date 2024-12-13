@@ -4,6 +4,6 @@
 @{
     Layout = null;
     await Model.OnGetFollow(Model.TimelineAuthor?.UserName ?? "");
-    Response.Redirect($"/{Model.TimelineAuthor?.UserName}");
+    Response.Redirect($"/user/{Model.TimelineAuthor?.UserName}");
 }
 

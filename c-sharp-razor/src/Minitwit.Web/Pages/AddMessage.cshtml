@@ -5,5 +5,5 @@
     Layout = null;
     var currentUser = HttpContext.Session.GetString("UserName") ?? User.Identity?.Name;
     await Model.OnPostCreateMessage();
-    Response.Redirect($"/{currentUser}");
+    Response.Redirect($"/");
 }

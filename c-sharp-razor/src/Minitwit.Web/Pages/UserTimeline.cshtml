@@ -1,4 +1,4 @@
-﻿@page "/{author}"
+﻿@page "/user/{author}"
 @using Minitwit.Core.Entities
 @using Minitwit.Core.Repository
 @using Minitwit.Web.Pages
@@ -19,12 +19,9 @@
     var timelineAuthor = Model.TimelineAuthor;
     var currentUser = HttpContext.Session.GetString("UserName") ?? User.Identity?.Name;
     var isCurrentUser = string.Equals(routeName, currentUser, StringComparison.OrdinalIgnoreCase);
-    var isLoggedIn = User.Identity?.IsAuthenticated ?? false;
     var isFollowing = Model.IsFollowing;
-    
-    ViewData["Title"] = isLoggedIn 
-        ? (isCurrentUser ? "My Timeline" : $"{routeName}'s Timeline") 
-        : "My Timeline";
+
+    ViewData["Title"] = isCurrentUser ? "My Timeline" : $"{routeName}'s Timeline";
 }
 
 <div>
@@ -32,13 +29,6 @@
 
     @if (SignInManager.IsSignedIn(User))
     {
-        @* @if (isCurrentUser) *@
-        @* { *@
-        @*     <div class="twitbox"> *@
-        @*         @await Html.PartialAsync("Shared/_MessageBox", new NewMessage { Text = "" }) *@
-        @*     </div> *@
-        @* } *@
-        @* else *@
         <div class="followstatus">
             @if (routeName != null && routeName == currentUser)
             {
