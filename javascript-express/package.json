@@ -6,16 +6,16 @@
         "start": "node --env-file='../.env.local' ./src/app.js",
         "start-api": "node --env-file='../.env' ./API/src/api.js",
         "lint": "npx eslint .",
-        "check-format": "npx prettier . --check",
-        "fix-format": "npx prettier . --write"
+        "format-check": "npx prettier . --check",
+        "format-fix": "npx prettier . --write"
     },
     "dependencies": {
         "cookie-parser": "~1.4.4",
         "crypto-js": "^4.2.0",
         "debug": "~2.6.9",
         "dotenv": "^16.4.5",
-        "ejs": "~2.6.1",
-        "express": "~4.16.1",
+        "ejs": "^3.1.10",
+        "express": "^4.21.2",
         "express-ejs-layouts": "^2.5.1",
         "express-flash": "^0.0.2",
         "express-session": "^1.18.0",
