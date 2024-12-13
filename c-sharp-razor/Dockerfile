@@ -1,6 +1,6 @@
 # Base image for the runtime
 FROM mcr.microsoft.com/dotnet/sdk:8.0-alpine AS builder
-WORKDIR /src
+WORKDIR /
 
 # Set build configuration to release
 ARG BUILD_CONFIGURATION=Release
