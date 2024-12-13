@@ -28,10 +28,10 @@ COPY --from=builder /app/publish .
 
 # Set environment variables
 ENV ASPNETCORE_ENVIRONMENT=Development
-ENV ASPNETCORE_URLS=http://0.0.0.0:5001
+ENV ASPNETCORE_URLS=http://0.0.0.0:5000
 
 # Expose the port
-EXPOSE 5001
+EXPOSE 5000
 
 # Run the application
 ENTRYPOINT ["dotnet", "Minitwit.Web.dll"]
