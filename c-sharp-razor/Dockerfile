@@ -1,5 +1,5 @@
 # Base image for the runtime
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS builder
+FROM mcr.microsoft.com/dotnet/sdk:8.0-alpine AS builder
 WORKDIR /
 
 # Set environment variables to suppress telemetry - faster ci/cd run
@@ -14,7 +14,7 @@ COPY src/ ./src
 
 # Restore dependencies
 RUN dotnet nuget locals all --clear
-RUN dotnet restore "src/Minitwit.Web/Minitwit.Web.csproj" -v diag
+RUN dotnet restore "src/Minitwit.Web/Minitwit.Web.csproj" --no-cache --disable-parallel --max-retries 3 -v diag
 
 # Build and publish the application in one step
 RUN dotnet publish "src/Minitwit.Web/Minitwit.Web.csproj" -c $BUILD_CONFIGURATION -o /app/publish --self-contained false --no-restore
