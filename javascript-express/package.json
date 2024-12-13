@@ -3,7 +3,8 @@
     "version": "0.0.1",
     "private": true,
     "scripts": {
-        "start": "node --env-file='../.env.local' ./src/app.js",
+        "start-bun": "bun --env-file='../.env.local' ./src/app.js",
+        "start-node": "node --env-file='../.env.local' ./src/app.js",
         "start-api": "node --env-file='../.env' ./API/src/api.js",
         "lint": "npx eslint .",
         "format-check": "npx prettier . --check",
