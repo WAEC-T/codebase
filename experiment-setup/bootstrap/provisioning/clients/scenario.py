@@ -63,9 +63,9 @@ def get_public_timeline(session=None):
 
 def get_private_timeline(username, session=None):
     if session:
-        return session.get(SERVER_URL + f"/{username}", allow_redirects=True)
+        return session.get(SERVER_URL + f"/user/{username}", allow_redirects=True)
     else:
-        return requests.get(SERVER_URL + f"/{username}", allow_redirects=True)
+        return requests.get(SERVER_URL + f"/user/{username}", allow_redirects=True)
 
 
 def follow(follows_username, username=None, password=None, session=None):

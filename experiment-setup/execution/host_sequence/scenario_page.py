@@ -83,7 +83,7 @@ def sequential_interval_scenario(service, start, iter):
     # 7. Access user timeline
     print_info_call("Page", service, "User Timeline", ITER_NUM)
     for _ in range(ITER_NUM):
-        response = request_endpoint(f"/{main_user}", user_session=main_user_session)
+        response = request_endpoint(f"/user/{main_user}", user_session=main_user_session)
         results.append(response)
     time.sleep(BASE_DELAY)
 
