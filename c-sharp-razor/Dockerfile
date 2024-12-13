@@ -2,6 +2,10 @@
 FROM mcr.microsoft.com/dotnet/sdk:8.0-alpine AS builder
 WORKDIR /
 
+# Set environment variables to suppress telemetry
+ENV DOTNET_CLI_TELEMETRY_OPTOUT=1
+ENV DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
+
 # Set build configuration to release
 ARG BUILD_CONFIGURATION=Release
 
