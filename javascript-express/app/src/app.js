@@ -19,6 +19,7 @@ const {
     isFollowing,
     getUserMessages,
     followUser,
+    unfollowUser,
 } = require('../../database/sequilize');
 const { formatMessages, validateRegisterFields } = require('./utils');
 
@@ -308,11 +309,11 @@ app.get('/:username/follow', async (req, res) => {
             return res.status(404).send('User not found');
         }
 
-        followUser(user.user_id, whomId);
-
-        req.flash('success', `You are now following "${whomUsername}"`);
+        if (await followUser(user.user_id, whomId))
+            req.flash('success', `You are now following "${whomUsername}"`);
 
         res.redirect(`/user/${whomUsername}`);
+
     } catch (error) {
         console.error('Error:', error);
 
@@ -322,43 +323,33 @@ app.get('/:username/follow', async (req, res) => {
 
 app.get('/:username/unfollow', async (req, res) => {
     try {
-        if (!req.session.user) {
+        const user = req.session.user;
+
+        if (!user) {
             return res.status(401).send('Unauthorized');
         }
 
-        // Get whom_id from the database
-        const username = req.params.username;
-        const whom_id = await getUserIdByName(username);
-        if (!whom_id) {
+        const whomUsername = req.params.username;
+
+        const whomId = await getUserIdByName(whomUsername);
+
+        if (!whomId) {
             return res.status(404).send('User not found');
         }
 
-        // Delete from follower table
-        //await execute('delete from follower where who_id=$1 and whom_id=$2', [req.session.user.user_id, whom_id]);
-        await Followers.destroy({
-            where: {
-                who_id: req.session.user.user_id,
-                whom_id: whom_id,
-            },
-        });
+        if (unfollowUser(user.user_id, whomId))
+            req.flash(
+                'success',
+                `You are no longer following "${whomUsername}"`
+            );
 
-        req.flash('success', `You are no longer following "${username}"`);
-        res.redirect(`/user/${username}`);
+        res.redirect(`/user/${whomUsername}`);
+
     } catch (error) {
         console.error('Error:', error);
+
         res.status(500).send('Internal Server Error');
     }
-});
-
-// catch 404 and forward to error handler
-app.use(function (req, res, next) {
-    next(createError(404));
-});
-
-app.use(function (err, req, res, next) {
-    res.locals.message = err.message || 'An error occurred';
-    res.locals.error = req.app.get('env') === 'development' ? err : {};
-    res.status(err.status || 500).render('error');
 });
 
 app.listen(5000, () => {

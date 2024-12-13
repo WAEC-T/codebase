@@ -214,6 +214,14 @@ const followUser = async (whoId, whomId) => {
     }));
 };
 
+const unfollowUser = async (whoId, whomId) =>
+    !!(await Followers.destroy({
+        where: {
+            who_id: whoId,
+            whom_id: whomId,
+        },
+    }));
+
 module.exports = {
     Users,
     Followers,
@@ -228,4 +236,5 @@ module.exports = {
     isFollowing,
     getUserByName,
     followUser,
+    unfollowUser,
 };
