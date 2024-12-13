@@ -2,18 +2,18 @@
 FROM mcr.microsoft.com/dotnet/sdk:8.0-alpine AS builder
 WORKDIR /
 
-# Set environment variables to suppress telemetry
+# Set environment variables to suppress telemetry - faster ci/cd run
 ENV DOTNET_CLI_TELEMETRY_OPTOUT=1
 ENV DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
 
 # Set build configuration to release
 ARG BUILD_CONFIGURATION=Release
-
+    
 # Copy src folder
 COPY src/ ./src
 
 # Restore dependencies
-RUN dotnet restore "src/Minitwit.Web/Minitwit.Web.csproj"
+RUN dotnet restore "src/Minitwit.Web/Minitwit.Web.csproj" -v diag
 
 # Build and publish the application in one step
 RUN dotnet publish "src/Minitwit.Web/Minitwit.Web.csproj" -c $BUILD_CONFIGURATION -o /app/publish --self-contained false --no-restore
