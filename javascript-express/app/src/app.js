@@ -7,30 +7,21 @@ const flash = require('express-flash');
 const session = require('express-session');
 const expressLayouts = require('express-ejs-layouts');
 const MD5 = require('crypto-js/md5');
+const { Users, Messages, Followers, get_user_id, getUserTimelineMessages, validateUser } = require('../../database/sequilize');
 
-// Import the sequlize functionality
-const { Users, Messages, Followers, get_user_id } = require('../../database/sequilize');
-
-// Configuration
 const PER_PAGE = 30;
 
 let app = express();
 
-// view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
-// Session
 app.use(session({
   secret: process.env.SECRET_KEY,
   resave: false,
   saveUninitialized: true,
-  cookie: {
-    expires: new Date(Date.now() + 2 * 60 * 60 * 1000) // 2 hours from now
-  }
 }));
 
-// Setup
 app.use(expressLayouts);
 app.set('layout', 'layout.ejs');
 app.use(logger('dev'));
@@ -40,10 +31,8 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.locals.user = null; // just forces layout.ejs to render. Should be refactored properly.
-
 const format_datetime = (timestamp) => {
-  return new Date(timestamp * 1000).toISOString().replace(/T/, ' ').replace(/\..+/, '');
+  return new Date(timestamp * 1000).toISOString().replace(/T/, ' @ ').replace(/\..+/, '');
 };
 
 const gravatarUrl = (email, size = 80) => {
@@ -54,55 +43,22 @@ const gravatarUrl = (email, size = 80) => {
 // Add datetimeformat function to locals object, so it can be called in .ejs views
 app.locals.format_datetime = format_datetime;
 app.locals.gravatarUrl = gravatarUrl;
+app.locals.user = null;
 
 // Routes
 app.get('/', async (req, res) => {
   try {
-    let user = null;
-    if (req.session?.user) {
-      user = await Users.findOne({ where: { user_id: req.session.user.user_id } });
-    }
-
-    if (!user) {
+    let user = req.session?.user;
+    
+    if (!user | !validateUser(user.user_id)) {
       return res.redirect('/public');
     }
 
-    const followers = await Followers.findAll({
-      where: {
-        who_id: req.session.user.user_id
-      },
-      raw: true
-    });
-    const followerList = followers.map(x => x.whom_id).concat(req.session.user.user_id);
+    const messages = await getUserTimelineMessages(user.user_id, PER_PAGE);
 
-    const messages = await Messages.findAll({
-      where: {
-        author_id: followerList
-      },
-      order: [['message_id', 'DESC']],
-      limit: PER_PAGE,
-      raw: true
-    });
+    console.log("query here ~~~~~~", messages);
 
-    // Add user_id, username, and email to each message
-    const users = await Users.findAll({
-      attributes: ['user_id', 'username', 'email'],
-      where: {
-        user_id: followerList
-      },
-      raw: true
-    });
-    const usersMap = users.reduce((user, Users) => {
-      user[Users.user_id] = Users;
-      return user;
-    }, {});
-   messages.forEach(msg => {
-      msg.user_id = usersMap[msg.author_id].user_id;
-      msg.username = usersMap[msg.author_id].username;
-      msg.email = usersMap[msg.author_id].email;
-    });
-
-    res.render('timeline.ejs', { user: req.session.user, messages, title: 'My Timeline', flashes: req.flash('success'), endpoint: 'user_timline' });
+    res.render('timeline.ejs', { user: req.session.user, messages, title: 'My Timeline', flashes: req.flash('success'), endpoint: 'my_timeline' });
   } catch (error) {
     console.error('Error: ', error);
     res.status(500).send('Internal Server Error');

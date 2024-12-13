@@ -114,6 +114,44 @@ const get_user_id = async (username) => {
   return user ? user.user_id : null;
 };
 
+const validateUser = async (userid) => {
+  const user = await Users.findOne({
+    where: {
+      user_id: userid,
+    },
+  });
+  user !== null
+};
+
+const getUserTimelineMessages = async (userid, paginationLimit) => {
+  const query = `
+  ((SELECT users.user_id, users.username, users.email, 
+          messages.message_id, messages.author_id, messages.text, messages.pub_date, messages.flagged 
+    FROM followers
+    INNER JOIN messages ON followers.whom_id = messages.author_id
+    INNER JOIN users ON messages.author_id = users.user_id
+    WHERE followers.who_id = :userId)
+  UNION
+  (SELECT users.user_id, users.username, users.email, 
+          messages.message_id, messages.author_id, messages.text, messages.pub_date, messages.flagged 
+    FROM messages
+    INNER JOIN users ON messages.author_id = users.user_id
+    WHERE users.user_id = :userId))
+  ORDER BY pub_date DESC
+  LIMIT :limit;
+  `;
+
+  const messages = await sequelize.query(query, {
+    replacements: {
+      userId: userid,
+      limit: paginationLimit,
+    },
+    type: sequelize.QueryTypes.SELECT,
+  });
+
+  return messages;
+}
+
 module.exports = {
   Users,
   Followers,
@@ -121,4 +159,6 @@ module.exports = {
   sequelize,
   Op,
   get_user_id,
+  validateUser,
+  getUserTimelineMessages
 };
