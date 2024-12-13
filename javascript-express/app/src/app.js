@@ -1,4 +1,3 @@
-const createError = require('http-errors');
 const express = require('express');
 let path = require('path');
 const cookieParser = require('cookie-parser');
@@ -7,10 +6,8 @@ const flash = require('express-flash');
 const session = require('express-session');
 const expressLayouts = require('express-ejs-layouts');
 const MD5 = require('crypto-js/md5');
+
 const {
-    Users,
-    Messages,
-    Followers,
     getUserIdByName,
     getUserTimelineMessages,
     getPublicMessages,
@@ -20,7 +17,10 @@ const {
     getUserMessages,
     followUser,
     unfollowUser,
-} = require('../../database/sequilize');
+    createNewUser,
+    createMessage
+} = require('../../database/repository');
+
 const { formatMessages, validateRegisterFields } = require('./utils');
 
 const PER_PAGE = 30;
@@ -66,7 +66,7 @@ app.get('/', async (req, res) => {
     try {
         let user = req.session?.user;
 
-        if (!user || !getUser(user.user_id)) {
+        if (!user) {
             return res.redirect('/public');
         }
 
@@ -144,11 +144,7 @@ app.post('/register', async (req, res) => {
             });
         }
 
-        await Users.create({
-            username: username,
-            email: email,
-            pw_hash: password,
-        });
+        createNewUser(username, email, password);
 
         req.flash(
             'success',
@@ -186,7 +182,7 @@ app.post('/login', async (req, res) => {
             });
         }
 
-        const user = await Users.findOne({ where: { username: username } });
+        const user = await getUserByName(username);
 
         if (!user) {
             return res.render('login.ejs', {
@@ -222,8 +218,11 @@ app.get('/logout', async (req, res) => {
 });
 
 app.post('/add_message', async (req, res) => {
-    if (!req.session.user) {
+    const user = req.session.user;
+
+    if (!user) {
         res.status(401).send('Unauthorized');
+
         return;
     }
 
@@ -238,12 +237,9 @@ app.post('/add_message', async (req, res) => {
     }
 
     try {
-        await Messages.create({
-            author_id: req.session.user.user_id,
-            text: text,
-            pub_date: new Date(),
-            flagged: 0,
-        });
+        createMessage(user.user_id,
+            text
+        );
 
         req.flash('success', 'Your message was recorded');
 
