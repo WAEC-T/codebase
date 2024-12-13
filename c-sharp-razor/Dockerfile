@@ -14,7 +14,7 @@ COPY src/ ./src
 
 # Restore dependencies
 RUN dotnet nuget locals all --clear
-RUN dotnet restore "src/Minitwit.Web/Minitwit.Web.csproj" # -v diag
+RUN dotnet restore "src/Minitwit.Web/Minitwit.Web.csproj" --disable-parallel -v diag
 
 # Build and publish the application in one step
 RUN dotnet publish "src/Minitwit.Web/Minitwit.Web.csproj" -c $BUILD_CONFIGURATION -o /app/publish --self-contained false --no-restore
