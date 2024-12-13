@@ -13,7 +13,7 @@ HEADERS = {'Connection': 'close',
            f'Authorization': f'Basic {ENCODED_CREDENTIALS}'}
 
 # Get the database URL from the environment variable
-DATABASE_URL = "postgresql://user:pass@localhost:5432/waect" # os.getenv("DATABASE_URL")
+DATABASE_URL = "postgresql://user:pass@localhost:5432/waect"
 
 print(DATABASE_URL)
 
@@ -22,7 +22,7 @@ def clean_database(truncate_all:bool = False):
         with conn.cursor() as cur:
             tables_to_truncate = [
                 'users', 'messages', 'followers', 'AspNetRoles', 'AspNetRoleClaims', 'AspNetUserClaims', 'AspNetUserLogins',
-                'AspNetUserRoles', 'AspNetUserTokens']
+                'AspNetUserRoles', 'AspNetUserTokens'] # AspNet tables for Identity
 
             for table in tables_to_truncate:
                 cur.execute("""
