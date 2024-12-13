@@ -19,7 +19,7 @@ const {
     unfollowUser,
     createNewUser,
     createMessage
-} = require('../../database/repository');
+} = require('./database/repository');
 
 const { formatMessages, validateRegisterFields } = require('./utils');
 
