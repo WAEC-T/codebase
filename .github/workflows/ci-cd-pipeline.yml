@@ -237,8 +237,11 @@ jobs:
             IMAGE_NAME="simonharwick97822/${{ matrix.service }}"
             COMMIT_SHA=$(git rev-parse --short HEAD)
             TIMESTAMP=$(date +%Y%m%d%H%M)
-
+    
             # Build the image without pushing in PRs
+            docker buildx create --name mybuilder --driver docker-container
+            docker buildx use mybuilder
+            docker buildx inspect mybuilder --bootstrap
             docker buildx build --platform linux/arm64 \
               -t ${IMAGE_NAME}:latest \
               -t ${IMAGE_NAME}:commit-sha-${COMMIT_SHA}-${TIMESTAMP} \
