@@ -29,7 +29,7 @@ func SetupRouting() template.FuncMap {
 			case "add_message":
 				return "/add_message"
 			case "timeline":
-				return "/" + username
+				return "/user/" + username
 			case "public_timeline":
 				return "/public"
 			case "logout":
@@ -67,7 +67,7 @@ func SetRouteHandlers(r *mux.Router) {
 	r.HandleFunc("/", handlers.MyTimeline)
 	r.HandleFunc("/add_message", handlers.Add_message).Methods("POST")
 	r.HandleFunc("/{username}/follow", handlers.Follow_user)
-	r.HandleFunc("/{username}", handlers.User_timeline)
+	r.HandleFunc("/user/{username}", handlers.User_timeline)
 	r.HandleFunc("/{username}/unfollow", handlers.Unfollow_user)
 
 	//API

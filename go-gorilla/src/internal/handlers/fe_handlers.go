@@ -312,7 +312,7 @@ func Follow_user(w http.ResponseWriter, r *http.Request) {
 	}
 	message := fmt.Sprintf("You are now following %s", username)
 	SetFlash(w, r, message)
-	http.Redirect(w, r, "/"+username, http.StatusSeeOther)
+	http.Redirect(w, r, "/user/"+username, http.StatusSeeOther)
 }
 
 // """Removes the current user as follower of the given user."""
@@ -341,7 +341,7 @@ func Unfollow_user(w http.ResponseWriter, r *http.Request) {
 	}
 	message := fmt.Sprintf("You are no longer following %s", username)
 	SetFlash(w, r, message)
-	http.Redirect(w, r, "/"+username, http.StatusFound)
+	http.Redirect(w, r, "/user/"+username, http.StatusFound)
 }
 
 // """Display's a users tweets."""
