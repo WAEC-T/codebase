@@ -13,6 +13,7 @@ ARG BUILD_CONFIGURATION=Release
 COPY src/ ./src
 
 # Restore dependencies
+RUN dotnet nuget locals all --clear
 RUN dotnet restore "src/Minitwit.Web/Minitwit.Web.csproj" -v diag
 
 # Build and publish the application in one step
