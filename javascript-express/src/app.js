@@ -18,7 +18,7 @@ const {
     followUser,
     unfollowUser,
     createNewUser,
-    createMessage
+    createMessage,
 } = require('./database/repository');
 
 const { formatMessages, validateRegisterFields } = require('./utils');
@@ -237,9 +237,7 @@ app.post('/add_message', async (req, res) => {
     }
 
     try {
-        createMessage(user.user_id,
-            text
-        );
+        createMessage(user.user_id, text);
 
         req.flash('success', 'Your message was recorded');
 
@@ -309,7 +307,6 @@ app.get('/:username/follow', async (req, res) => {
             req.flash('success', `You are now following "${whomUsername}"`);
 
         res.redirect(`/user/${whomUsername}`);
-
     } catch (error) {
         console.error('Error:', error);
 
@@ -340,7 +337,6 @@ app.get('/:username/unfollow', async (req, res) => {
             );
 
         res.redirect(`/user/${whomUsername}`);
-
     } catch (error) {
         console.error('Error:', error);
 

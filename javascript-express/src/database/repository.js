@@ -1,7 +1,4 @@
-const {Users,
-Followers,
-Messages,
-sequelize} = require('./model');
+const { Users, Followers, Messages, sequelize } = require('./model');
 
 const getUserIdByName = async (username) => {
     const user = await Users.findOne({
@@ -122,21 +119,21 @@ const unfollowUser = async (whoId, whomId) =>
     }));
 
 const createNewUser = async (username, email, password) => {
-    return !!await Users.create({
+    return !!(await Users.create({
         username: username,
         email: email,
         pw_hash: password,
-    });
-}
+    }));
+};
 
 const createMessage = async (userId, text) => {
-    return !! await Messages.create({
+    return !!(await Messages.create({
         author_id: userId,
         text: text,
         pub_date: new Date(),
         flagged: 0,
-    });
-}
+    }));
+};
 
 module.exports = {
     getUserIdByName,
@@ -149,5 +146,5 @@ module.exports = {
     followUser,
     unfollowUser,
     createNewUser,
-    createMessage
+    createMessage,
 };
