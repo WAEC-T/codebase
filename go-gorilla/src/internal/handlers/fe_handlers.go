@@ -348,7 +348,6 @@ func Unfollow_user(w http.ResponseWriter, r *http.Request) {
 func User_timeline(w http.ResponseWriter, r *http.Request) {
 	user, user_id, err := GetUser(r)
 	if err != nil || helpers.IsNil(user) {
-		SetFlash(w, r, "You need to login before you can see the user's timeline")
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
 		return
 	}

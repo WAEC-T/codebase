@@ -32,7 +32,7 @@ func UserFollowActionHandler(c *gin.Context) {
 		err := db.FollowUser(userID.(int), profileUserID)
 		if err != nil {
 			fmt.Println("follow user failed with:", err)
-			c.Redirect(http.StatusFound, "/"+profileUserName)
+			c.Redirect(http.StatusFound, "/user/"+profileUserName)
 			return
 		}
 		session.AddFlash("You are now following " + profileUserName)
@@ -41,16 +41,16 @@ func UserFollowActionHandler(c *gin.Context) {
 		err := db.UnfollowUser(userID.(int), profileUserID)
 		if err != nil {
 			fmt.Println("unfollow user failed with:", err)
-			c.Redirect(http.StatusFound, "/"+profileUserName)
+			c.Redirect(http.StatusFound, "/user/"+profileUserName)
 			return
 		}
 		session.AddFlash("You are no longer following " + profileUserName)
 	}
 
-	if !helpers.SaveSessionOrRedirect(c, session.Save(), "/"+profileUserName) {
+	if !helpers.SaveSessionOrRedirect(c, session.Save(), "/user/"+profileUserName) {
 		return
 	}
-	c.Redirect(http.StatusFound, "/"+profileUserName)
+	c.Redirect(http.StatusFound, "/user/"+profileUserName)
 }
 
 func PublicTimelineHandler(c *gin.Context) {
@@ -83,6 +83,10 @@ func PublicTimelineHandler(c *gin.Context) {
 func UserTimelineHandler(c *gin.Context) {
 	session := sessions.Default(c)
 	userID := session.Get("userID")
+	if userID == nil {
+		c.Redirect(http.StatusFound, "/login") // Redirect to login page if session is invalid
+		return
+	}
 	flashMessages := session.Flashes()
 
 	if !helpers.SaveSessionOrRedirect(c, session.Save(), "/") {

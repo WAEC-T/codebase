@@ -24,7 +24,7 @@ func SetRouteHandlers(r *gin.Engine) {
 	// user routes
 	r.GET("/", handlers.MyTimelineHandler)
 	r.GET("/public", handlers.PublicTimelineHandler)
-	r.GET("/:username", handlers.UserTimelineHandler)
+	r.GET("/user/:username", handlers.UserTimelineHandler)
 	r.GET("/register", handlers.RegisterHandler)
 	r.GET("/login", handlers.LoginHandler)
 	r.GET("/logout", handlers.LogoutHandler)
