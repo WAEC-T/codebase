@@ -1,11 +1,10 @@
 # Base image for the runtime
-FROM mcr.microsoft.com/dotnet/sdk:8.0-alpine AS builder
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS builder
 WORKDIR /
 
 # Set environment variables to suppress telemetry - faster ci/cd run
 ENV DOTNET_CLI_TELEMETRY_OPTOUT=1
 ENV DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
-RUN apk add --no-cache icu-libs zlib-dev
 
 # Set build configuration to release
 ARG BUILD_CONFIGURATION=Release
