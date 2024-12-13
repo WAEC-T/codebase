@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -107,8 +108,8 @@ public class UserTimelineModel : PageModel
     
     public async Task<IActionResult> OnGetFollow(string author)
     {
-        var currentUser = await _userManager.GetUserAsync(User); // 1
-        if (currentUser == null)
+        var currentUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (currentUserId == null)
         {
             return Unauthorized();
         }
@@ -118,8 +119,8 @@ public class UserTimelineModel : PageModel
         {
             return NotFound();
         }
-
-        await _authorRepository.AddFollowAsync(currentUser.Id, authorToFollow.Id); // 3
+        
+        await _authorRepository.AddFollowAsync(int.Parse(currentUserId), authorToFollow.Id); // 3
         TempData["FlashMessage"] = $"You are now following {authorToFollow.UserName}";
 
         Response.Redirect($"/{authorToFollow.UserName}");
