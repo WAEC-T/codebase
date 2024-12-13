@@ -6,6 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>ITU-minitwit</RootNamespace>
     <AssemblyName>Minitwit.Web</AssemblyName>
+    <RuntimeIdentifiers>linux-musl-x64;linux-musl-arm64</RuntimeIdentifiers>
   </PropertyGroup>
 
   <ItemGroup>
