@@ -16,7 +16,17 @@ public class AuthorRepository : BaseRepository, IAuthorRepository
 
     public async Task<ICollection<Author>> GetAuthorsByIdAsync(IEnumerable<int> authors)
     {
-        return await db.Users.Where(a => authors.Contains(a.Id)).AsNoTracking().ToListAsync();
+        return await db.Users
+            .Where(a => authors.Contains(a.Id))
+            .Select(a => new Author
+            {
+                Id = a.Id,
+                UserName = a.UserName,
+                Email = a.Email,
+                NormalizedEmail = a.NormalizedEmail ?? string.Empty
+            })
+            .AsNoTracking()
+            .ToListAsync();
     }
 
     public async Task<Author?> GetAuthorByIdAsync(int authorId)
@@ -24,14 +34,22 @@ public class AuthorRepository : BaseRepository, IAuthorRepository
         Author? author = await db.Users.FirstOrDefaultAsync(a => a.Id == authorId);
         return author!;
     }
-
+    
     public async Task<Author> GetAuthorByNameAsync(string name)
     {
-        Author? author = await db.Users.FirstOrDefaultAsync(a => a.UserName == name)!;
-        return author!;
+        var author = await db.Users
+            .Where(a => a.UserName == name)
+            .Select(a => new Author
+            {
+                Id = a.Id,
+                UserName = a.UserName,
+                Email = a.Email,
+                NormalizedEmail = a.NormalizedEmail ?? string.Empty,
+            })
+            .FirstOrDefaultAsync();
+        return author;
     }
 
-    // ----- Get Messages By Author and Page Methods ----- //
     public async Task<ICollection<Message>> GetMessagesByAuthorAsync(int id)
     {
         return await db.Messages.Where(e => e.AuthorId == id).ToListAsync();
@@ -41,7 +59,6 @@ public class AuthorRepository : BaseRepository, IAuthorRepository
     {
         var messages = await GetMessagesByAuthorAsync(authorId);
 
-        //Check that author has Messages
         if (messages == null || messages.Count == 0)
             throw new InvalidOperationException("The specified author has no messages.");
         
