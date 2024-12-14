@@ -15,15 +15,18 @@ from host_sequence.scenario_page import run_page_seq_scenario
 # Check the static addresses when preparing the setup!
 SERVER_URL = "http://10.7.7.144:5000"
 CLIENT_1_URL = "http://10.7.7.199:5001/trigger"
-CLIENT_2_URL = "http://10.7.7.178:5001/trigger"
-CLIENT_3_URL = "http://10.7.7.145:5001/trigger"
+CLIENT_2_URL = "http://10.7.7.179:5001/trigger"
+CLIENT_3_URL = "http://10.7.7.146:5001/trigger"
 
 BASE_COMPOSE_FILES_LOCATION = '/media/mmcblk0p2/setup/compose_files/'
 COOLDOWN = 30
 
-SERVICES = {"rust-actix": BASE_COMPOSE_FILES_LOCATION + 'rust-actix-compose-prod.yml',
-            "python-flask": BASE_COMPOSE_FILES_LOCATION + 'python-flask-compose-prod.yml',
-            "go-gorilla": BASE_COMPOSE_FILES_LOCATION + 'go-gorilla-compose-prod.yml'
+SERVICES = {
+            # "rust-actix": BASE_COMPOSE_FILES_LOCATION + 'rust-actix-compose-prod.yml',
+            # "c-sharp-razor": BASE_COMPOSE_FILES_LOCATION + 'c-sharp-razor-compose-prod.yml',
+            # "python-flask": BASE_COMPOSE_FILES_LOCATION + 'python-flask-compose-prod.yml',
+            # "go-gorilla": BASE_COMPOSE_FILES_LOCATION + 'go-gorilla-compose-prod.yml'
+            "ruby-sinatra": BASE_COMPOSE_FILES_LOCATION + 'ruby-sinatra-compose-prod.yml'
             }
 
 
@@ -107,4 +110,4 @@ async def main(run_mode, out_path, iterations):
 if __name__ == "__main__":
     run_mode = str(Path(sys.argv[1])) if len(sys.argv) > 1 else "berries"
     out_path = Path(sys.argv[2]) if len(sys.argv) > 2 else Path("data/out")
-    asyncio.run(main(run_mode, out_path, 10))
+    asyncio.run(main(run_mode, out_path, 30))
