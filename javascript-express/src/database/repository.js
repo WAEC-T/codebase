@@ -143,19 +143,19 @@ const updateLatest = async (latest) => {
     return !!(await Latest.update({ value: latest }, { where: { id: 1 } }));
 };
 
-const getUserFollowers = async (userId) => {
-    const followers = await Users.findAll({
+const getUserFollows = async (userId) => {
+    const followUsers = await Users.findAll({
         include: {
             model: Followers,
             where: {
-                whom_id: userId,
+                who_id: userId,
             },
         },
         attributes: ['user_id', 'username', 'email'],
         raw: true,
     });
 
-    return followers;
+    return followUsers.map(follow => follow['username']);
 };
 
 module.exports = {
@@ -172,5 +172,5 @@ module.exports = {
     createMessage,
     updateLatest,
     getLatest,
-    getUserFollowers,
+    getUserFollows,
 };

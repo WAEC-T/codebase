@@ -9,7 +9,7 @@ const {
     getUserMessages,
     getUserByName,
     createMessage,
-    getUserFollowers,
+    getUserFollows,
     followUser,
     unfollowUser,
 } = require('../database/repository');
@@ -157,7 +157,7 @@ router.get('/fllws/:username', async (req, res) => {
         return res.status(404).send('User not found');
     }
 
-    const followers = await getUserFollowers(userId);
+    const followers = await getUserFollows(userId);
 
     res.json({ follows: followers });
 });
