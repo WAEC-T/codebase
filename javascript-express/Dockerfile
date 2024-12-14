@@ -1,4 +1,6 @@
-FROM node:slim
+FROM alpine:edge
+
+RUN apk add --no-cache nodejs npm
 
 WORKDIR /express-docker
 
