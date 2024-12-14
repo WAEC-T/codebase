@@ -254,7 +254,7 @@ router.get('/:username/follow', async (req, res) => {
         }
 
         if (await followUser(user.user_id, whomId))
-            req.flash('success', `You are now following "${whomUsername}"`);
+            req.flash('success', `You are now following ${whomUsername}`);
 
         res.redirect(`/user/${whomUsername}`);
     } catch (error) {
@@ -281,10 +281,7 @@ router.get('/:username/unfollow', async (req, res) => {
         }
 
         if (unfollowUser(user.user_id, whomId))
-            req.flash(
-                'success',
-                `You are no longer following "${whomUsername}"`
-            );
+            req.flash('success', `You are no longer following ${whomUsername}`);
 
         res.redirect(`/user/${whomUsername}`);
     } catch (error) {

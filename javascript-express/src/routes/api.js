@@ -20,7 +20,7 @@ const API_DEFAULT_MESSAGES_AMOUNT = 100;
 const router = express.Router();
 
 const checkSimulatorToken = (authToken) => {
-    return authToken !== 'Basic c2ltdWxhdG9yOnN1cGVyX3NhZmUh'
+    return authToken !== 'Basic c2ltdWxhdG9yLnN1cGVyX3NhZmUh'
         ? 'You are not authorized to use this resource!'
         : null;
 };
@@ -30,16 +30,18 @@ const validateRequest = async (req) => {
 
     if (latestValue) await updateLatest(latestValue);
 
-    return checkSimulatorToken(req.headers.authorization);
+    const auth = checkSimulatorToken(req.headers.authorization);
+
+    return auth;
 };
 
 router.get('/latest', async (req, res) => {
-    const latest = getLatest() ?? -1;
-    res.json({ latest: parseInt(latest) });
+    const latest = (await getLatest()) ?? -1;
+    res.json({ latest: latest.value });
 });
 
 router.post('/register', async (req, res) => {
-    const unauthorized = validateRequest(req);
+    const unauthorized = await validateRequest(req);
 
     if (unauthorized) {
         return res.status(401).send(unauthorized);
@@ -59,7 +61,8 @@ router.post('/register', async (req, res) => {
 });
 
 router.get('/msgs', async (req, res) => {
-    const unauthorized = validateRequest(req);
+    const unauthorized = await validateRequest(req);
+    console.log(unauthorized);
 
     if (unauthorized) {
         return res.status(401).send(unauthorized);
@@ -77,7 +80,7 @@ router.get('/msgs', async (req, res) => {
 });
 
 router.get('/msgs/:username', async (req, res) => {
-    const unauthorized = validateRequest(req);
+    const unauthorized = await validateRequest(req);
 
     if (unauthorized) {
         return res.status(401).send(unauthorized);
@@ -85,11 +88,15 @@ router.get('/msgs/:username', async (req, res) => {
 
     const username = req.params.username;
 
+    console.log(username);
+
     if (!username) {
-        return req.status(400).send('Username not provided!');
+        return res.status(400).send('Username not provided!');
     }
 
-    if (getUserByName(username)) {
+    const user = await getUserByName(username);
+
+    if (!user) {
         return res.status(404).send('User not found');
     }
 
@@ -97,7 +104,7 @@ router.get('/msgs/:username', async (req, res) => {
         parseInt(req.query.no) || API_DEFAULT_MESSAGES_AMOUNT;
 
     const messages = formatMessages(
-        getUserMessages(username, messagesAmount),
+        await getUserMessages(user.user_id, messagesAmount),
         true
     );
 
@@ -105,7 +112,7 @@ router.get('/msgs/:username', async (req, res) => {
 });
 
 router.post('/msgs/:username', async (req, res) => {
-    const unauthorized = validateRequest(req);
+    const unauthorized = await validateRequest(req);
 
     if (unauthorized) {
         return res.status(401).send(unauthorized);
@@ -116,26 +123,26 @@ router.post('/msgs/:username', async (req, res) => {
     const { content } = req.body;
 
     if (!username || !content) {
-        req.status(400).send('Username or content not provided');
+        return res.status(400).send('Username or content not provided');
     }
 
-    const userId = getUserIdByName(username);
+    const userId = await getUserIdByName(username);
 
     if (!userId) {
-        req.status(404).send('User not found');
+        return res.status(404).send('User not found');
     }
 
     const success = await createMessage(userId, content);
 
     if (success) {
-        res.sendStatus(204);
+        return res.sendStatus(204);
     } else {
-        res.status(500).send('Internal Server Error');
+        return res.status(500).send('Internal Server Error');
     }
 });
 
 router.get('/fllws/:username', async (req, res) => {
-    const unauthorized = validateRequest(req);
+    const unauthorized = await validateRequest(req);
 
     if (unauthorized) {
         return res.status(401).send(unauthorized);
@@ -144,22 +151,22 @@ router.get('/fllws/:username', async (req, res) => {
     const username = req.params.username;
 
     if (!username) {
-        req.status(400).send('Username not provided');
+        return res.status(400).send('Username not provided');
     }
 
-    const userId = getUserIdByName(username);
+    const userId = await getUserIdByName(username);
 
     if (!userId) {
-        req.status(404).send('User not found');
+        return res.status(404).send('User not found');
     }
 
-    const followers = getUserFollowers(userId);
+    const followers = await getUserFollowers(userId);
 
     res.json({ follows: followers });
 });
 
 router.post('/fllws/:username', async (req, res) => {
-    const unauthorized = validateRequest(req);
+    const unauthorized = await validateRequest(req);
 
     if (unauthorized) {
         return res.status(401).send(unauthorized);
@@ -168,23 +175,23 @@ router.post('/fllws/:username', async (req, res) => {
     const username = req.params.username;
 
     if (!username) {
-        req.status(400).send('Username not provided');
+        return res.status(400).send('Username not provided');
     }
 
-    const followerId = getUserIdByName(username);
+    const followerId = await getUserIdByName(username);
 
     if (!followerId) {
-        req.status(404).send('User not found');
+        return res.status(404).send('User not found');
     }
 
     const { follow, unfollow } = req.body;
 
     if (follow && unfollow) {
-        req.status(400).send('You should pass only one operation');
+        return res.status(400).send('You should pass only one operation');
     }
 
     if (follow) {
-        const followedId = getUserIdByName(follow);
+        const followedId = await getUserIdByName(follow);
         if (!followedId) {
             return res.status(404).send('User to follow not found');
         }
@@ -200,7 +207,7 @@ router.post('/fllws/:username', async (req, res) => {
             return res.status(500).send('Internal Server Error');
         }
     } else if (unfollow) {
-        const unfollowedId = getUserIdByName(unfollow);
+        const unfollowedId = await getUserIdByName(unfollow);
 
         if (!unfollowedId) {
             return res.status(404).send('User to follow not found');
@@ -209,12 +216,12 @@ router.post('/fllws/:username', async (req, res) => {
         const success = await unfollowUser(followerId, unfollowedId);
 
         if (success) {
-            return res.sendStatus(204);
+            res.sendStatus(204);
         } else {
-            return res.status(500).send('Internal Server Error');
+            res.status(500).send('Internal Server Error');
         }
     } else {
-        req.status(400).send(
+        res.status(400).send(
             'Follow or unfollow should be provided in the request body'
         );
     }
