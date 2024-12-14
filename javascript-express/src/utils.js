@@ -1,4 +1,4 @@
-const formatMessages = (messages, isApi=false) => {
+const formatMessages = (messages, isApi = false) => {
     return messages.map((message) => {
         const updatedMessage = { ...message };
 
@@ -8,7 +8,7 @@ const formatMessages = (messages, isApi=false) => {
                 updatedMessage[newKey] = value;
                 delete updatedMessage[key];
             }
-            if (isApi && key ==='text') {
+            if (isApi && key === 'text') {
                 updatedMessage['content'] = value;
                 delete updatedMessage[key];
             }
@@ -18,7 +18,13 @@ const formatMessages = (messages, isApi=false) => {
     });
 };
 
-const validateRegisterFields = async (username, email, password, password2, isApi=false) => {
+const validateRegisterFields = async (
+    username,
+    email,
+    password,
+    password2,
+    isApi = false
+) => {
     let errorMessage = null;
 
     if (!username) {

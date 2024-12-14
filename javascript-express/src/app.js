@@ -82,7 +82,7 @@ app.get('/', async (req, res) => {
             messages,
             title: 'My Timeline',
             flashes: req.flash('success'),
-            endpoint: 'my_timeline',
+            endpoint: 'myTimeline',
         });
     } catch (error) {
         console.error('Error: ', error);
@@ -104,7 +104,7 @@ app.get('/public', async (req, res) => {
             messages: messages,
             title: 'Public Timeline',
             flashes: req.flash('success'),
-            endpoint: 'public_timeline',
+            endpoint: 'publicTimeline',
         });
     } catch (error) {
         console.error('Error:', error);
@@ -221,9 +221,7 @@ app.post('/add_message', async (req, res) => {
     const user = req.session.user;
 
     if (!user) {
-        res.status(401).send('Unauthorized');
-
-        return;
+        return res.status(401).send('Unauthorized');
     }
 
     const text = req.body.text;
@@ -231,9 +229,7 @@ app.post('/add_message', async (req, res) => {
     if (!text) {
         req.flash('success', 'Message cannot be empty!'); // minimal effort maximum result ¯\_(ツ)_/¯
 
-        res.redirect('/');
-
-        return;
+        return res.redirect('/');
     }
 
     try {
@@ -258,9 +254,7 @@ app.get('/user/:username', async (req, res) => {
         let profileUser = await getUserByName(req.params.username);
 
         if (!profileUser) {
-            res.status(404).send('User not found');
-
-            return;
+            return res.status(404).send('User not found');
         }
 
         const followed = userRefresh

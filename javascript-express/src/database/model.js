@@ -82,20 +82,24 @@ const Messages = sequelize.define(
     }
 );
 
-const Latest = sequelize.define('Latest', {
-    id: {
-      type: DataTypes.INTEGER,
-      primaryKey: true,
-      autoIncrement: true,
+const Latest = sequelize.define(
+    'Latest',
+    {
+        id: {
+            type: DataTypes.INTEGER,
+            primaryKey: true,
+            autoIncrement: true,
+        },
+        value: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+        },
     },
-    value: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-    },
-  }, {
-    tableName: 'latest',
-    timestamps: false,
-  });
+    {
+        tableName: 'latest',
+        timestamps: false,
+    }
+);
 
 Messages.belongsTo(Users, { foreignKey: 'author_id' });
 

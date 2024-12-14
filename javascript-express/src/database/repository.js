@@ -140,7 +140,7 @@ const getLatest = async () => {
 };
 
 const updateLatest = async (latest) => {
-   return !!await Latest.update({ value: latest }, { where: { id: 1 } });
+    return !!(await Latest.update({ value: latest }, { where: { id: 1 } }));
 };
 
 module.exports = {

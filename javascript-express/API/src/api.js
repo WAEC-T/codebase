@@ -1,7 +1,15 @@
 const express = require('express');
 
 const { Users, Messages, Followers } = require('../../src/database/model');
-const { updateLatest, getLatest, createNewUser, getUserIdByName, getPublicMessages, getUserMessages} = require('../../src/database/repository');
+const {
+    updateLatest,
+    getLatest,
+    createNewUser,
+    getUserIdByName,
+    getPublicMessages,
+    getUserMessages,
+    getUserByName,
+} = require('../../src/database/repository');
 const { validateRegisterFields, formatMessages } = require('../../src/utils');
 
 const API_DEFAULT_MESSAGES_AMOUNT = 100;
@@ -9,27 +17,25 @@ const API_DEFAULT_MESSAGES_AMOUNT = 100;
 const router = express.Router();
 
 const checkSimulatorToken = (authToken) => {
-    return authToken !== 'Basic c2ltdWxhdG9yOnN1cGVyX3NhZmUh'? 'You are not authorized to use this resource!' : null;
-}
+    return authToken !== 'Basic c2ltdWxhdG9yOnN1cGVyX3NhZmUh'
+        ? 'You are not authorized to use this resource!'
+        : null;
+};
 
 const validateRequest = async (req) => {
-
     const latestValue = req.query.latest;
 
-    if(latestValue) await updateLatest(latestValue);
+    if (latestValue) await updateLatest(latestValue);
 
-    return checkSimulatorToken(req.headers.authorization);    
-}
-
+    return checkSimulatorToken(req.headers.authorization);
+};
 
 router.get('/latest', async (req, res) => {
     const latest = getLatest() ?? -1;
     res.json({ latest: parseInt(latest) });
 });
 
-
 router.post('/register', async (req, res) => {
-
     const unauthorized = validateRequest(req);
 
     if (unauthorized) {
@@ -38,17 +44,16 @@ router.post('/register', async (req, res) => {
         return res.status(400).send('The username is already taken');
     }
 
-    const {username, email, pwd} = req.body;
+    const { username, email, pwd } = req.body;
 
     let error = validateRegisterFields(username, email, pwd, true);
 
-    if (!error && await createNewUser(username, email, pwd)) {
+    if (!error && (await createNewUser(username, email, pwd))) {
         res.sendStatus(204);
     } else {
         res.status(400).json({ status: 400, error_msg: error });
     }
 });
-
 
 router.get('/msgs', async (req, res) => {
     const unauthorized = validateRequest(req);
@@ -57,16 +62,18 @@ router.get('/msgs', async (req, res) => {
         return res.status(401).send(unauthorized);
     }
 
-    const messagesAmount = parseInt(req.query.no, 10) || API_DEFAULT_MESSAGES_AMOUNT;
+    const messagesAmount =
+        parseInt(req.query.no, 10) || API_DEFAULT_MESSAGES_AMOUNT;
 
-    const messages = formatMessages(await getPublicMessages(messagesAmount), true);
+    const messages = formatMessages(
+        await getPublicMessages(messagesAmount),
+        true
+    );
 
     return res.json(messages);
 });
 
-
 router.get('/msgs/:username', async (req, res) => {
-    
     const unauthorized = validateRequest(req);
 
     if (unauthorized) {
@@ -75,18 +82,31 @@ router.get('/msgs/:username', async (req, res) => {
 
     const username = req.params.username;
 
-    if (!username) req.status(400).send('username not provided!');
+    if (!username) {
+        req.status(400).send('username not provided!');
 
-    const messagesAmount = parseInt(req.query.no) || API_DEFAULT_MESSAGES_AMOUNT;
+        return;
+    }
 
-    const messages = formatMessages(getUserMessages(username, messagesAmount), true);
+    if (getUserByName(username)) {
+        res.status(404).send('User not found');
+
+        return;
+    }
+
+    const messagesAmount =
+        parseInt(req.query.no) || API_DEFAULT_MESSAGES_AMOUNT;
+
+    const messages = formatMessages(
+        getUserMessages(username, messagesAmount),
+        true
+    );
 
     res.json(messages);
 });
 
 // ------------ Route to post a Messages by a given user --------------
 router.post('/msgs/:username', async (req, res) => {
-    
     const unauthorized = validateRequest(req);
 
     if (unauthorized) {
@@ -94,7 +114,14 @@ router.post('/msgs/:username', async (req, res) => {
     }
 
     const username = req.params.username;
+
     const { content } = req.body;
+
+    if (!username) {
+        req.status(400).send('username or content not provided!');
+    }
+
+    const userId = getUserIdByName(username);
 
     const user = await Users.findOne({
         attributes: ['user_id'],
