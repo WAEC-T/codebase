@@ -77,7 +77,7 @@ def public_timeline():
     return render_template("timeline.html", messages=messages_with_users)
 
 
-@main_bp.route("/<username>")
+@main_bp.route("/user/<username>")
 def user_timeline(username):
     """Displays a user's timeline."""
     is_user_logged()
