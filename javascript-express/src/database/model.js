@@ -102,6 +102,7 @@ const Latest = sequelize.define(
 );
 
 Messages.belongsTo(Users, { foreignKey: 'author_id' });
+Followers.belongsTo(Users, { foreignKey: 'who_id' });
 
 module.exports = {
     Users,
