@@ -51,9 +51,15 @@ router.post('/register', async (req, res) => {
         return res.status(400).send('The username is already taken');
     }
 
-    let error = await validateRegisterFields(username, email, pwd, 'whatever', true);
+    let error = await validateRegisterFields(
+        username,
+        email,
+        pwd,
+        'whatever',
+        true
+    );
 
-    if (!error && await createNewUser(username, email, pwd)) {
+    if (!error && (await createNewUser(username, email, pwd))) {
         res.sendStatus(204);
     } else {
         res.status(400).json({ status: 400, error_msg: error });

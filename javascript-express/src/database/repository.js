@@ -155,7 +155,7 @@ const getUserFollows = async (userId) => {
         raw: true,
     });
 
-    return followUsers.map(follow => follow['username']);
+    return followUsers.map((follow) => follow['username']);
 };
 
 module.exports = {

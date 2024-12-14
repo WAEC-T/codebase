@@ -19,7 +19,8 @@ const formatMessages = (messages, isApi = false) => {
             }
 
             if (updatedMessage.pub_date) {
-                updatedMessage.pub_date = new Date(updatedMessage.pub_date).getTime() / 1000;
+                updatedMessage.pub_date =
+                    new Date(updatedMessage.pub_date).getTime() / 1000;
             }
 
             if (updatedMessage.text) {
@@ -27,7 +28,7 @@ const formatMessages = (messages, isApi = false) => {
                 delete updatedMessage.text;
             }
         }
-        
+
         return updatedMessage;
     });
 };
