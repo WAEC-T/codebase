@@ -1,4 +1,4 @@
-const formatMessages = (messages) => {
+const formatMessages = (messages, isApi=false) => {
     return messages.map((message) => {
         const updatedMessage = { ...message };
 
@@ -8,13 +8,17 @@ const formatMessages = (messages) => {
                 updatedMessage[newKey] = value;
                 delete updatedMessage[key];
             }
+            if (isApi && key ==='text') {
+                updatedMessage['content'] = value;
+                delete updatedMessage[key];
+            }
         });
 
         return updatedMessage;
     });
 };
 
-const validateRegisterFields = async (username, email, password, password2) => {
+const validateRegisterFields = async (username, email, password, password2, isApi=false) => {
     let errorMessage = null;
 
     if (!username) {
@@ -23,7 +27,7 @@ const validateRegisterFields = async (username, email, password, password2) => {
         errorMessage = 'You have to enter a valid email address.';
     } else if (!password) {
         errorMessage = 'You have to enter a password.';
-    } else if (password !== password2) {
+    } else if (password !== password2 && !isApi) {
         errorMessage = 'The two passwords do not match.';
     }
     return errorMessage;

@@ -1,4 +1,4 @@
-const { Users, Followers, Messages, sequelize } = require('./model');
+const { Users, Followers, Messages, Latest, sequelize } = require('./model');
 
 const getUserIdByName = async (username) => {
     const user = await Users.findOne({
@@ -135,6 +135,14 @@ const createMessage = async (userId, text) => {
     }));
 };
 
+const getLatest = async () => {
+    return await Latest.findOne({ where: { id: 1 } });
+};
+
+const updateLatest = async (latest) => {
+   return !!await Latest.update({ value: latest }, { where: { id: 1 } });
+};
+
 module.exports = {
     getUserIdByName,
     getUser,
@@ -147,4 +155,6 @@ module.exports = {
     unfollowUser,
     createNewUser,
     createMessage,
+    updateLatest,
+    getLatest,
 };

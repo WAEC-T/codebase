@@ -1,154 +1,96 @@
-const createError = require('http-errors');
 const express = require('express');
-const fs = require('fs');
-const bcrypt = require('bcrypt');
 
-// Configuration
-const DEBUG = true;
+const { Users, Messages, Followers } = require('../../src/database/model');
+const { updateLatest, getLatest, createNewUser, getUserIdByName, getPublicMessages, getUserMessages} = require('../../src/database/repository');
+const { validateRegisterFields, formatMessages } = require('../../src/utils');
 
-// Import the sequlize functionality
-const {
-    Users,
-    Messages,
-    Followers,
-    get_user_id,
-} = require('../../utils/sequilize');
-const { Sequelize } = require('sequelize');
+const API_DEFAULT_MESSAGES_AMOUNT = 100;
 
-fs.unlink('./latest_processed_sim_action_id.txt', (err) => {
-    if (err && err.code !== 'ENOENT') {
-        console.error('Error deleting latest processed file:', err);
-    }
-});
+const router = express.Router();
 
-// Create our little application :)
-const app = express();
-
-// Setup
-app.use(express.json()); // allows json in http request
-app.use(express.urlencoded({ extended: false })); // same
-
-function not_req_from_simulator(req) {
-    const fromSimulator = req.headers.authorization;
-    if (fromSimulator !== 'Basic c2ltdWxhdG9yOnN1cGVyX3NhZmUh') {
-        const error = 'You are not authorized to use this resource!';
-        return error;
-    }
-    return null;
+const checkSimulatorToken = (authToken) => {
+    return authToken !== 'Basic c2ltdWxhdG9yOnN1cGVyX3NhZmUh'? 'You are not authorized to use this resource!' : null;
 }
 
-async function update_latest(request) {
-    const parsed_command_id = request.query.latest;
-    if (parsed_command_id !== -1) {
-        fs.writeFile(
-            './latest_processed_sim_action_id.txt',
-            parsed_command_id.toString(),
-            (err) => {
-                if (err) {
-                    console.error('Error writing file:', err);
-                }
-            }
-        );
-    }
+const validateRequest = async (req) => {
+
+    const latestValue = req.query.latest;
+
+    if(latestValue) await updateLatest(latestValue);
+
+    return checkSimulatorToken(req.headers.authorization);    
 }
 
-// --------------- Routes ------------------
 
-// Get the latest value
-app.get('/latest', async (req, res) => {
-    fs.readFile(
-        './latest_processed_sim_action_id.txt',
-        'utf8',
-        (err, content) => {
-            if (err) {
-                res.json({ latest: -1 });
-            } else {
-                res.json({ latest: parseInt(content) });
-            }
-        }
-    );
+router.get('/latest', async (req, res) => {
+    const latest = getLatest() ?? -1;
+    res.json({ latest: parseInt(latest) });
 });
 
-// ------- Route to register a user ----------
-app.post('/register', async (req, res) => {
-    await update_latest(req);
-    const request_data = req.body;
 
-    let error = null;
-    if (!request_data.username) {
-        error = 'You have to enter a username';
-    } else if (!request_data.email || !request_data.email.includes('@')) {
-        error = 'You have to enter a valid email address';
-    } else if (!request_data.pwd) {
-        error = 'You have to enter a password';
-    } else {
-        const hash_password = bcrypt.hashSync(request_data.pwd, 10);
-        await Users.create({
-            username: request_data.username,
-            email: request_data.email,
-            pw_hash: hash_password,
-        });
+router.post('/register', async (req, res) => {
+
+    const unauthorized = validateRequest(req);
+
+    if (unauthorized) {
+        return res.status(401).send(unauthorized);
+    } else if (await getUserIdByName(username)) {
+        return res.status(400).send('The username is already taken');
     }
-    if (error) {
-        res.status(400).json({ status: 400, error_msg: error });
-    } else {
+
+    const {username, email, pwd} = req.body;
+
+    let error = validateRegisterFields(username, email, pwd, true);
+
+    if (!error && await createNewUser(username, email, pwd)) {
         res.sendStatus(204);
+    } else {
+        res.status(400).json({ status: 400, error_msg: error });
     }
 });
 
-// ---------- route to get messages by user -------------
-app.get('/msgs/:username', async (req, res) => {
-    await update_latest(req);
 
-    const not_from_sim_response = not_req_from_simulator(req);
-    if (not_from_sim_response) {
-        return res.send(not_from_sim_response);
+router.get('/msgs', async (req, res) => {
+    const unauthorized = validateRequest(req);
+
+    if (unauthorized) {
+        return res.status(401).send(unauthorized);
+    }
+
+    const messagesAmount = parseInt(req.query.no, 10) || API_DEFAULT_MESSAGES_AMOUNT;
+
+    const messages = formatMessages(await getPublicMessages(messagesAmount), true);
+
+    return res.json(messages);
+});
+
+
+router.get('/msgs/:username', async (req, res) => {
+    
+    const unauthorized = validateRequest(req);
+
+    if (unauthorized) {
+        return res.status(401).send(unauthorized);
     }
 
     const username = req.params.username;
-    const no_msgs = parseInt(req.query.no) || 100; // Default to 100 if 'no' parameter is not provided
 
-    const user = await Users.findOne({
-        attributes: ['user_id'],
-        where: {
-            username: username,
-        },
-    });
+    if (!username) req.status(400).send('username not provided!');
 
-    // Refactored using Sequelize
-    const messages = await Messages.findAll({
-        attributes: ['message_id', 'author_id', 'text', 'pub_date'],
-        include: [
-            {
-                model: Users,
-                as: 'User',
-                attributes: ['user_id', 'username', 'email'],
-            },
-        ],
-        where: {
-            author_id: user.user_id,
-        },
-        order: [['message_id', 'DESC']],
-        limit: no_msgs,
-        raw: true,
-    });
+    const messagesAmount = parseInt(req.query.no) || API_DEFAULT_MESSAGES_AMOUNT;
 
-    /*     const filtered_msgs = messages.map(msg => ({
-        content: msg.text,
-        pub_date: msg.pub_date,
-        user: msg['User.username']
-    })); */
+    const messages = formatMessages(getUserMessages(username, messagesAmount), true);
 
     res.json(messages);
 });
 
 // ------------ Route to post a Messages by a given user --------------
-app.post('/msgs/:username', async (req, res) => {
-    await update_latest(req);
+router.post('/msgs/:username', async (req, res) => {
+    
+    const unauthorized = validateRequest(req);
 
-    const not_from_sim_response = not_req_from_simulator(req);
-    if (not_from_sim_response) {
-        return res.send(not_from_sim_response);
+    if (unauthorized) {
+        return res.status(401).send(unauthorized);
     }
 
     const username = req.params.username;
@@ -172,52 +114,8 @@ app.post('/msgs/:username', async (req, res) => {
     res.sendStatus(204);
 });
 
-// ------------ Route to get all messages in Database ----------------
-app.get('/msgs', async (req, res) => {
-    await update_latest(req);
-
-    const not_from_sim_response = not_req_from_simulator(req);
-    if (not_from_sim_response) {
-        return res.status(403).json({ error: not_from_sim_response });
-    }
-
-    const no_msgs = parseInt(req.query.no, 10) || 100;
-
-    // Query the database to get messages
-    const messages = await Messages.findAll({
-        attributes: [
-            'message_id',
-            'author_id',
-            'text',
-            'pub_date',
-            [Sequelize.literal('"User"."user_id"'), 'user_id'],
-            [Sequelize.literal('"User"."username"'), 'username'],
-            [Sequelize.literal('"User"."email"'), 'email'],
-        ],
-        include: [
-            {
-                model: Users,
-                as: 'User', // Ensure this matches the alias used in your join
-                attributes: [], // Don't fetch any additional attributes from the Users model
-            },
-        ],
-        where: { flagged: 0 },
-        order: [['message_id', 'DESC']],
-        limit: no_msgs,
-        raw: true,
-    });
-
-    const filtered_msgs = messages.map((msg) => ({
-        content: msg.text,
-        pub_date: msg.pub_date,
-        user: msg.username,
-    }));
-
-    return res.json(filtered_msgs);
-});
-
 // -------------- Route to get the followers of a given user ------------------
-app.get('/fllws/:username', async (req, res) => {
+router.get('/fllws/:username', async (req, res) => {
     await update_latest(req);
 
     const not_from_sim_response = not_req_from_simulator(req);
@@ -260,7 +158,7 @@ app.get('/fllws/:username', async (req, res) => {
 });
 
 // ------------ Route to add/delete a follower --------------
-app.post('/fllws/:username', async (req, res) => {
+router.post('/fllws/:username', async (req, res) => {
     await update_latest(req);
 
     const not_from_sim_response = not_req_from_simulator(req);
@@ -329,6 +227,4 @@ app.post('/fllws/:username', async (req, res) => {
     }
 });
 
-app.listen(5001, () => {
-    console.log('Listening on port 5001');
-});
+module.exports = router;
