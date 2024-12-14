@@ -20,7 +20,7 @@ const API_DEFAULT_MESSAGES_AMOUNT = 100;
 const router = express.Router();
 
 const checkSimulatorToken = (authToken) => {
-    return authToken !== 'Basic c2ltdWxhdG9yLnN1cGVyX3NhZmUh'
+    return authToken !== 'Basic c2ltdWxhdG9yOnN1cGVyX3NhZmUh'
         ? 'You are not authorized to use this resource!'
         : null;
 };
@@ -30,9 +30,7 @@ const validateRequest = async (req) => {
 
     if (latestValue) await updateLatest(latestValue);
 
-    const auth = checkSimulatorToken(req.headers.authorization);
-
-    return auth;
+    return checkSimulatorToken(req.headers.authorization);
 };
 
 router.get('/latest', async (req, res) => {
@@ -45,15 +43,17 @@ router.post('/register', async (req, res) => {
 
     if (unauthorized) {
         return res.status(401).send(unauthorized);
-    } else if (await getUserIdByName(username)) {
-        return res.status(400).send('The username is already taken');
     }
 
     const { username, email, pwd } = req.body;
 
-    let error = validateRegisterFields(username, email, pwd, true);
+    if (await getUserIdByName(username)) {
+        return res.status(400).send('The username is already taken');
+    }
 
-    if (!error && (await createNewUser(username, email, pwd))) {
+    let error = await validateRegisterFields(username, email, pwd, 'whatever', true);
+
+    if (!error && await createNewUser(username, email, pwd)) {
         res.sendStatus(204);
     } else {
         res.status(400).json({ status: 400, error_msg: error });
@@ -62,7 +62,6 @@ router.post('/register', async (req, res) => {
 
 router.get('/msgs', async (req, res) => {
     const unauthorized = await validateRequest(req);
-    console.log(unauthorized);
 
     if (unauthorized) {
         return res.status(401).send(unauthorized);
@@ -87,8 +86,6 @@ router.get('/msgs/:username', async (req, res) => {
     }
 
     const username = req.params.username;
-
-    console.log(username);
 
     if (!username) {
         return res.status(400).send('Username not provided!');
@@ -195,9 +192,6 @@ router.post('/fllws/:username', async (req, res) => {
         if (!followedId) {
             return res.status(404).send('User to follow not found');
         }
-
-        console.log('follow: ', followerId);
-        console.log('follow: ', followedId);
 
         const success = await followUser(followerId, followedId);
 

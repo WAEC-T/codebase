@@ -8,12 +8,26 @@ const formatMessages = (messages, isApi = false) => {
                 updatedMessage[newKey] = value;
                 delete updatedMessage[key];
             }
-            if (isApi && key === 'text') {
-                updatedMessage['content'] = value;
-                delete updatedMessage[key];
-            }
         });
 
+        if (isApi) {
+            delete updatedMessage.user_id;
+
+            if (updatedMessage.username) {
+                updatedMessage.user = updatedMessage.username;
+                delete updatedMessage.username;
+            }
+
+            if (updatedMessage.pub_date) {
+                updatedMessage.pub_date = new Date(updatedMessage.pub_date).getTime() / 1000;
+            }
+
+            if (updatedMessage.text) {
+                updatedMessage.content = updatedMessage.text;
+                delete updatedMessage.text;
+            }
+        }
+        
         return updatedMessage;
     });
 };

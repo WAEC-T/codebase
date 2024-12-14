@@ -101,6 +101,7 @@ const Latest = sequelize.define(
     }
 );
 
+Users.hasMany(Followers, { foreignKey: 'whom_id' });
 Messages.belongsTo(Users, { foreignKey: 'author_id' });
 Followers.belongsTo(Users, { foreignKey: 'who_id' });
 
