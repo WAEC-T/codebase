@@ -6,7 +6,15 @@ if (!databaseUrl) {
     throw new Error('DATABASE_URL environment variable is not defined');
 }
 
-let sequelize = new Sequelize(databaseUrl);
+const sequelize = new Sequelize(databaseUrl, {
+    dialect: 'postgres',
+    dialectOptions: {
+        ssl: {
+            require: true,
+            rejectUnauthorized: false, 
+        },
+    },
+});
 
 const Users = sequelize.define(
     'Users',
