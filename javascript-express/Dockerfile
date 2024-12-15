@@ -1,8 +1,6 @@
 FROM alpine:edge
 
-RUN apk add --no-cache curl bash gcc libstdc++ libgcc && curl -fsSL https://bun.sh/install | bash
-
-ENV PATH="/root/.bun/bin:${PATH}"
+RUN apk add --no-cache nodejs npm
 
 WORKDIR /waect-javascript-express
 
@@ -10,10 +8,10 @@ ENV RUN_TYPE=dev
 
 COPY package.json ./
 
-RUN bun install
+RUN npm install
 
 COPY ./src .
 
 EXPOSE 5000
 
-CMD ["bun", "app.js"]
+CMD ["node", "app.js"]
