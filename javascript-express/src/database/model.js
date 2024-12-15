@@ -1,19 +1,26 @@
 const { Sequelize, DataTypes } = require('sequelize');
 
-const databaseUrl = process.env.DATABASE_URL;
+const databaseUrl = String(process.env.DATABASE_URL);
 
 if (!databaseUrl) {
     throw new Error('DATABASE_URL environment variable is not defined');
 }
 
+const connectionOptions =
+    databaseUrl.includes('database') || databaseUrl.includes('localhost')
+        ? {}
+        : {
+              dialectOptions: {
+                  ssl: {
+                      require: true,
+                      rejectUnauthorized: false,
+                  },
+              },
+          };
+
 const sequelize = new Sequelize(databaseUrl, {
     dialect: 'postgres',
-    dialectOptions: {
-        ssl: {
-            require: true,
-            rejectUnauthorized: false, 
-        },
-    },
+    ...connectionOptions,
 });
 
 const Users = sequelize.define(
