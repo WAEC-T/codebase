@@ -1,7 +1,6 @@
 const express = require('express');
 let path = require('path');
 const cookieParser = require('cookie-parser');
-const logger = require('morgan');
 const flash = require('express-flash');
 const session = require('express-session');
 const expressLayouts = require('express-ejs-layouts');
@@ -24,7 +23,6 @@ app.use(
 
 app.use(expressLayouts);
 app.set('layout', 'layout.ejs');
-app.use(logger('dev'));
 app.use(flash());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
