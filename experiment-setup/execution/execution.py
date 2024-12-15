@@ -28,7 +28,8 @@ SERVICES = {
             #"python-flask": BASE_COMPOSE_FILES_LOCATION + 'python-flask-compose-prod.yml',
             # "go-gorilla": BASE_COMPOSE_FILES_LOCATION + 'go-gorilla-compose-prod.yml',
             # "go-gin": BASE_COMPOSE_FILES_LOCATION + 'go-gin-compose-prod.yml'
-            "ruby-sinatra": BASE_COMPOSE_FILES_LOCATION + 'ruby-sinatra-compose-prod.yml'
+            #"ruby-sinatra": BASE_COMPOSE_FILES_LOCATION + 'ruby-sinatra-compose-prod.yml'
+             "javascript-express": BASE_COMPOSE_FILES_LOCATION + 'javascript-express-compose-prod.yml'
             }
 
 
