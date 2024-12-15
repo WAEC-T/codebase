@@ -45,7 +45,7 @@ static class ProgramOptions
     
     public static void AddDatabase(WebApplicationBuilder builder)
     {
-        string? databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL"); // "postgresql://user:pass@10.26.42.13:5432/waect";
+        string? databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
         
         if (string.IsNullOrEmpty(databaseUrl))
         {
@@ -69,7 +69,7 @@ static class ProgramOptions
             Console.WriteLine($"Connection failed: {ex.Message}");
         }
     }
-
+    
     private static string ConvertDatabaseUrlToConnectionString(string databaseUrl)
     {
         var uri = new Uri(databaseUrl);

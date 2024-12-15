@@ -13,7 +13,7 @@ public class AuthorRepository : BaseRepository, IAuthorRepository
     {
         _followRepository = followRepository;
     }
-
+    
     public async Task<ICollection<Author>> GetAuthorsByIdAsync(IEnumerable<int> authors)
     {
         return await db.Users
@@ -28,7 +28,7 @@ public class AuthorRepository : BaseRepository, IAuthorRepository
             .AsNoTracking()
             .ToListAsync();
     }
-
+    
     public async Task<Author?> GetAuthorByIdAsync(int authorId)
     {
         Author? author = await db.Users.FirstOrDefaultAsync(a => a.Id == authorId);

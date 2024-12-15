@@ -1,4 +1,5 @@
 using FluentValidation;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Minitwit.Core.Entities;
@@ -29,6 +30,10 @@ static class Program
         
         ProgramOptions.AddProgramOptions(builder);
         ProgramOptions.AddIdendity(builder);
+        builder.Services.Configure<IdentityOptions>(options =>
+        {
+            options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
+        });
         ProgramOptions.AddDatabase(builder);
 
         //API Controllers
@@ -43,23 +48,25 @@ static class Program
         
         builder.Services.ConfigureApplicationCookie(options =>
         {
-            options.Cookie.SecurePolicy = CookieSecurePolicy.None; // Allow cookies over HTTP
             options.Cookie.HttpOnly = true;
-            options.Cookie.SameSite = SameSiteMode.Lax; // Use Lax or None depending on requirements
-            options.ExpireTimeSpan = TimeSpan.FromMinutes(60); // Extend expiration for testing
-            options.SlidingExpiration = true; // Enable sliding expiration
+            options.Cookie.SecurePolicy = CookieSecurePolicy.None;
+            options.Cookie.SameSite = SameSiteMode.Lax;
+            options.ExpireTimeSpan = TimeSpan.FromMinutes(60);
+            options.SlidingExpiration = true;
+            options.LoginPath = "/login";
+            options.LogoutPath = "/logout";
         });
-
+        
         builder.Services.AddSession(options =>
         {
             options.Cookie.Name = ".Minitwit.Web.Session";
-            options.IdleTimeout = TimeSpan.FromMinutes(30);
-            options.Cookie.HttpOnly = true;
+            options.IdleTimeout = TimeSpan.FromMinutes(30); 
+            options.Cookie.HttpOnly = true; 
             options.Cookie.IsEssential = true;
-            options.Cookie.SecurePolicy = CookieSecurePolicy.None; // Allow cookies over HTTP
-            options.Cookie.SameSite = SameSiteMode.None;
+            options.Cookie.SecurePolicy = CookieSecurePolicy.None; 
+            options.Cookie.SameSite = SameSiteMode.Lax; 
         });
-
+        
         // Dependency Injection
         builder.Services.AddScoped<IAuthorRepository, AuthorRepository>();
         builder.Services.AddScoped<IValidator<CreateMessage>, MessageCreateValidator>();
@@ -71,14 +78,6 @@ static class Program
         builder.Logging.ClearProviders();
         builder.Logging.AddConsole();
         builder.Logging.AddDebug();
-
-        builder.Services.AddSession(options =>
-        {
-            options.Cookie.Name = ".Minitwit.Web.Session";
-            options.IdleTimeout = TimeSpan.FromMinutes(10);
-            options.Cookie.HttpOnly = false;
-            options.Cookie.IsEssential = true;
-        });
 
         var app = builder.Build();
 
@@ -97,23 +96,22 @@ static class Program
                 Console.WriteLine($"Error applying migrations: {e.Message}");
             }
         }
-
+        
         if (!app.Environment.IsDevelopment())
         {
             app.UseExceptionHandler("/Error");
             app.UseHsts();
         }
         app.UseStaticFiles();
-        
-        app.UseRouting();
 
+        app.UseRouting();
         app.UseAuthentication();
         app.UseAuthorization();
-        
-        app.UseSession(); 
+        app.UseSession();           
+
         app.MapControllers();
-        app.MapRazorPages();
-        
+        app.MapRazorPages(); 
+
         app.Run();
     }
 }

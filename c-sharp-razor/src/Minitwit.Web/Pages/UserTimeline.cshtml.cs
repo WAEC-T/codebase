@@ -105,14 +105,13 @@ public class UserTimelineModel : PageModel
         {
             return Unauthorized();
         }
-        Console.WriteLine("In Follow Page");
-        var authorToFollow = await _authorRepository.GetAuthorByNameAsync(author); // 2
+        var authorToFollow = await _authorRepository.GetAuthorByNameAsync(author); 
         if (authorToFollow == null)
         {
             return NotFound();
         }
         
-        await _authorRepository.AddFollowAsync(int.Parse(currentUserId), authorToFollow.Id); // 3
+        await _authorRepository.AddFollowAsync(int.Parse(currentUserId), authorToFollow.Id); 
         TempData["FlashMessage"] = $"You are now following {authorToFollow.UserName}";
 
         Response.Redirect($"/user/{authorToFollow.UserName}");

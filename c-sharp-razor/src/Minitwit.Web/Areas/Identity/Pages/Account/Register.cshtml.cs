@@ -93,7 +93,6 @@ namespace Minitwit.Web.Areas.Identity.Pages.Account
                 Email = Email,
                 NormalizedEmail = Email.ToUpperInvariant(),
             };
-            Console.WriteLine(newUser);
             var result = await _userManager.CreateAsync(newUser, Password);
             
             if (result.Succeeded)

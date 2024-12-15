@@ -54,7 +54,7 @@ public class MyTimelineModel : PageModel
         {
             return Page();
         }
-        var author = await _userManager.GetUserAsync(User); 
+        var author = await _userManager.GetUserAsync(User);
         if (author == null)
         {   
             return RedirectToPage("/Login");
@@ -64,8 +64,7 @@ public class MyTimelineModel : PageModel
         var Message = new CreateMessage(author.Id, Text);
         await CreateMessage(Message);
         TempData["FlashMessage"] = "Your message was recorded";
-        Response.Redirect("/");
-        return new EmptyResult();
+        return RedirectToPage("/MyTimeline");
     }
 
     public async Task CreateMessage(CreateMessage newMessage)
