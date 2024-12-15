@@ -3,6 +3,7 @@ import asyncio
 import sys
 from datetime import datetime
 from pathlib import Path
+import time
 
 import pandas
 
@@ -22,10 +23,11 @@ BASE_COMPOSE_FILES_LOCATION = '/media/mmcblk0p2/setup/compose_files/'
 COOLDOWN = 30
 
 SERVICES = {
-            # "rust-actix": BASE_COMPOSE_FILES_LOCATION + 'rust-actix-compose-prod.yml',
-            # "c-sharp-razor": BASE_COMPOSE_FILES_LOCATION + 'c-sharp-razor-compose-prod.yml',
-            # "python-flask": BASE_COMPOSE_FILES_LOCATION + 'python-flask-compose-prod.yml',
-            # "go-gorilla": BASE_COMPOSE_FILES_LOCATION + 'go-gorilla-compose-prod.yml'
+            #"rust-actix": BASE_COMPOSE_FILES_LOCATION + 'rust-actix-compose-prod.yml',
+            #"c-sharp-razor": BASE_COMPOSE_FILES_LOCATION + 'c-sharp-razor-compose-prod.yml',
+            #"python-flask": BASE_COMPOSE_FILES_LOCATION + 'python-flask-compose-prod.yml',
+            # "go-gorilla": BASE_COMPOSE_FILES_LOCATION + 'go-gorilla-compose-prod.yml',
+            # "go-gin": BASE_COMPOSE_FILES_LOCATION + 'go-gin-compose-prod.yml'
             "ruby-sinatra": BASE_COMPOSE_FILES_LOCATION + 'ruby-sinatra-compose-prod.yml'
             }
 
@@ -103,6 +105,7 @@ async def main(run_mode, out_path, iterations):
             filepath
         )
         if service_started:
+            time.sleep(5)
             await execute_experiment(otii_project, device, out_path, service, run_mode, iterations)
     await manage_server_docker_service(ssh_target, "", True)
 

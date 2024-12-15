@@ -7,7 +7,7 @@ from host_sequence.const_data import api_register_data_dummie, api_follow_data_d
 BASE_URL = "http://10.7.7.144:5000/api"
 AUTH_HEADER = {"Authorization": "Basic c2ltdWxhdG9yOnN1cGVyX3NhZmUh"}
 BASE_DELAY = 1.8
-ITER_NUM = 20 # iteration number for each endpoint call has to be <= 400
+ITER_NUM = 200 # iteration number for each endpoint call has to be <= 400
 
 user_sessions = {}
 api_latest_query = {"latest": 1}
