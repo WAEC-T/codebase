@@ -16,6 +16,7 @@ const connectionOptions =
                       rejectUnauthorized: false,
                   },
               },
+              logging: false,
           };
 
 const sequelize = new Sequelize(databaseUrl, {
