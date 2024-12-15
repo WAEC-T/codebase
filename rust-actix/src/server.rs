@@ -31,7 +31,7 @@ pub async fn start(port: u16) -> std::io::Result<()> {
             )
             .service(fs::Files::new("/static", "./src/frontend/static/").index_file("index.html"))
             .service(page_services())
-    })
+    }).workers(9)
     .bind(("0.0.0.0", port))?
     .run()
     .await
