@@ -23,6 +23,5 @@ public class Author : IdentityUser<int>
     public override required string Email { get; set; }
     
     [StringLength(50)]
-    [Required]
     public override string? NormalizedEmail { get; set; } 
 }
