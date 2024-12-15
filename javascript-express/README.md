@@ -31,13 +31,13 @@ postgresql
 
 - **Follow/Unfollow**: localhost:5001/fllw/{username}?latest={provide a number}
 
-  -- body: {"follow": "username to follow"}
+    -- body: {"follow": "username to follow"}
 
-  -- body: {"unfollow": {"username to unfollow"}}
+    -- body: {"unfollow": {"username to unfollow"}}
 
 - **Register a user**: localhost:5001/register?latest={provide a number}
-    -- body: {
-        "username": "...",
-        "email": "...",
-        "pwd": "..."
+  -- body: {
+  "username": "...",
+  "email": "...",
+  "pwd": "..."
   }

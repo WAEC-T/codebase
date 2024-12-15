@@ -16,4 +16,4 @@ COPY . /app
 EXPOSE 5000
 ENV FLASK_APP=wsgi.py
 
-CMD ["venv/bin/gunicorn", "--bind", "0.0.0.0:5000", "wsgi:app"]
+CMD ["sh", "-c", "venv/bin/gunicorn --workers $((2 * $(nproc) + 1)) --bind 0.0.0.0:5000 wsgi:app"]
