@@ -1,0 +1,418 @@
+[    0.000000] Booting Linux on physical CPU 0x0000000000 [0x414fd0b1]
+[    0.000000] Linux version 6.6.49-0-rpi (buildozer@build-3-20-aarch64) (gcc (Alpine 13.2.1_git20240309) 13.2.1 20240309, GNU ld (GNU Binutils) 2.42) #1-Alpine SMP PREEMPT Thu Sep  5 10:58:11 UTC 2024
+[    0.000000] KASLR enabled
+[    0.000000] random: crng init done
+[    0.000000] Machine model: Raspberry Pi 5 Model B Rev 1.0
+[    0.000000] efi: UEFI not found.
+[    0.000000] Reserved memory: created CMA memory pool at 0x0000000001c00000, size 64 MiB
+[    0.000000] OF: reserved mem: initialized node linux,cma, compatible id shared-dma-pool
+[    0.000000] OF: reserved mem: 0x0000000001c00000..0x0000000005bfffff (65536 KiB) map reusable linux,cma
+[    0.000000] OF: reserved mem: 0x0000000000000000..0x000000000007ffff (512 KiB) nomap non-reusable atf@0
+[    0.000000] OF: reserved mem: 0x000000003fd16200..0x000000003fd16237 (0 KiB) nomap non-reusable nvram@0
+[    0.000000] Zone ranges:
+[    0.000000]   DMA      [mem 0x0000000000000000-0x00000000ffffffff]
+[    0.000000]   DMA32    empty
+[    0.000000]   Normal   [mem 0x0000000100000000-0x00000001ffffffff]
+[    0.000000] Movable zone start for each node
+[    0.000000] Early memory node ranges
+[    0.000000]   node   0: [mem 0x0000000000000000-0x000000000007ffff]
+[    0.000000]   node   0: [mem 0x0000000000080000-0x000000003f7fffff]
+[    0.000000]   node   0: [mem 0x0000000040000000-0x00000001ffffffff]
+[    0.000000] Initmem setup node 0 [mem 0x0000000000000000-0x00000001ffffffff]
+[    0.000000] On node 0, zone DMA: 2048 pages in unavailable ranges
+[    0.000000] psci: probing for conduit method from DT.
+[    0.000000] psci: PSCIv1.1 detected in firmware.
+[    0.000000] psci: Using standard PSCI v0.2 function IDs
+[    0.000000] psci: MIGRATE_INFO_TYPE not supported.
+[    0.000000] psci: SMC Calling Convention v1.2
+[    0.000000] percpu: Embedded 30 pages/cpu s85224 r8192 d29464 u122880
+[    0.000000] pcpu-alloc: s85224 r8192 d29464 u122880 alloc=30*4096
+[    0.000000] pcpu-alloc: [0] 0 [0] 1 [0] 2 [0] 3 
+[    0.000000] Detected PIPT I-cache on CPU0
+[    0.000000] CPU features: detected: Virtualization Host Extensions
+[    0.000000] CPU features: detected: Hardware dirty bit management
+[    0.000000] CPU features: detected: Spectre-v4
+[    0.000000] CPU features: detected: Spectre-BHB
+[    0.000000] CPU features: kernel page table isolation forced ON by KASLR
+[    0.000000] CPU features: detected: Kernel page table isolation (KPTI)
+[    0.000000] CPU features: detected: SSBS not fully self-synchronizing
+[    0.000000] alternatives: applying boot alternatives
+[    0.000000] Kernel command line: reboot=w coherent_pool=1M 8250.nr_uarts=1 pci=pcie_bus_safe bcm2708_fb.fbwidth=1920 bcm2708_fb.fbheight=1080 bcm2708_fb.fbdepth=16 bcm2708_fb.fbswap=1 smsc95xx.macaddr=2C:CF:67:8A:43:1D vc_mem.mem_base=0x3fc00000 vc_mem.mem_size=0x40000000  modules=loop,squashfs,sd-mod,usb-storage quiet console=tty1
+[    0.000000] Unknown kernel command line parameters "modules=loop,squashfs,sd-mod,usb-storage", will be passed to user space.
+[    0.000000] Dentry cache hash table entries: 1048576 (order: 11, 8388608 bytes, linear)
+[    0.000000] Inode-cache hash table entries: 524288 (order: 10, 4194304 bytes, linear)
+[    0.000000] Built 1 zonelists, mobility grouping on.  Total pages: 2062336
+[    0.000000] mem auto-init: stack:all(zero), heap alloc:off, heap free:off
+[    0.000000] software IO TLB: area num 4.
+[    0.000000] software IO TLB: mapped [mem 0x00000000fbfff000-0x00000000fffff000] (64MB)
+[    0.000000] Memory: 8057156K/8380416K available (12608K kernel code, 2208K rwdata, 4252K rodata, 3456K init, 1073K bss, 257724K reserved, 65536K cma-reserved)
+[    0.000000] SLUB: HWalign=64, Order=0-3, MinObjects=0, CPUs=4, Nodes=1
+[    0.000000] trace event string verifier disabled
+[    0.000000] rcu: Preemptible hierarchical RCU implementation.
+[    0.000000] rcu: 	RCU event tracing is enabled.
+[    0.000000] rcu: 	RCU restricting CPUs from NR_CPUS=256 to nr_cpu_ids=4.
+[    0.000000] 	Trampoline variant of Tasks RCU enabled.
+[    0.000000] 	Tracing variant of Tasks RCU enabled.
+[    0.000000] rcu: RCU calculated value of scheduler-enlistment delay is 25 jiffies.
+[    0.000000] rcu: Adjusting geometry for rcu_fanout_leaf=16, nr_cpu_ids=4
+[    0.000000] NR_IRQS: 64, nr_irqs: 64, preallocated irqs: 0
+[    0.000000] Root IRQ handler: gic_handle_irq
+[    0.000000] GIC: Using split EOI/Deactivate mode
+[    0.000000] rcu: srcu_init: Setting srcu_struct sizes based on contention.
+[    0.000000] arch_timer: cp15 timer(s) running at 54.00MHz (phys).
+[    0.000000] clocksource: arch_sys_counter: mask: 0xffffffffffffff max_cycles: 0xc743ce346, max_idle_ns: 440795203123 ns
+[    0.000000] sched_clock: 56 bits at 54MHz, resolution 18ns, wraps every 4398046511102ns
+[    0.000224] Console: colour dummy device 80x25
+[    0.000229] printk: console [tty1] enabled
+[    0.000269] Calibrating delay loop (skipped), value calculated using timer frequency.. 108.00 BogoMIPS (lpj=216000)
+[    0.000276] pid_max: default: 32768 minimum: 301
+[    0.000367] LSM: initializing lsm=capability,integrity
+[    0.000469] Mount-cache hash table entries: 16384 (order: 5, 131072 bytes, linear)
+[    0.000501] Mountpoint-cache hash table entries: 16384 (order: 5, 131072 bytes, linear)
+[    0.000961] cgroup: Disabling memory control group subsystem
+[    0.001566] RCU Tasks: Setting shift to 2 and lim to 1 rcu_task_cb_adjust=1.
+[    0.001616] RCU Tasks Trace: Setting shift to 2 and lim to 1 rcu_task_cb_adjust=1.
+[    0.001707] rcu: Hierarchical SRCU implementation.
+[    0.001709] rcu: 	Max phase no-delay instances is 1000.
+[    0.002575] EFI services will not be available.
+[    0.002705] smp: Bringing up secondary CPUs ...
+[    0.002950] Detected PIPT I-cache on CPU1
+[    0.003005] CPU1: Booted secondary processor 0x0000000100 [0x414fd0b1]
+[    0.003274] Detected PIPT I-cache on CPU2
+[    0.003321] CPU2: Booted secondary processor 0x0000000200 [0x414fd0b1]
+[    0.003591] Detected PIPT I-cache on CPU3
+[    0.003633] CPU3: Booted secondary processor 0x0000000300 [0x414fd0b1]
+[    0.003673] smp: Brought up 1 node, 4 CPUs
+[    0.003679] SMP: Total of 4 processors activated.
+[    0.003683] CPU features: detected: 32-bit EL0 Support
+[    0.003686] CPU features: detected: Data cache clean to the PoU not required for I/D coherence
+[    0.003689] CPU features: detected: Common not Private translations
+[    0.003691] CPU features: detected: CRC32 instructions
+[    0.003695] CPU features: detected: RCpc load-acquire (LDAPR)
+[    0.003697] CPU features: detected: LSE atomic instructions
+[    0.003699] CPU features: detected: Privileged Access Never
+[    0.003701] CPU features: detected: RAS Extension Support
+[    0.003705] CPU features: detected: Speculative Store Bypassing Safe (SSBS)
+[    0.003751] CPU: All CPU(s) started at EL2
+[    0.003753] alternatives: applying system-wide alternatives
+[    0.005981] devtmpfs: initialized
+[    0.010590] Enabled cp15_barrier support
+[    0.010599] Enabled setend support
+[    0.010663] clocksource: jiffies: mask: 0xffffffff max_cycles: 0xffffffff, max_idle_ns: 7645041785100000 ns
+[    0.010671] futex hash table entries: 1024 (order: 4, 65536 bytes, linear)
+[    0.011471] pinctrl core: initialized pinctrl subsystem
+[    0.011639] DMI not present or invalid.
+[    0.011842] NET: Registered PF_NETLINK/PF_ROUTE protocol family
+[    0.012435] DMA: preallocated 1024 KiB GFP_KERNEL pool for atomic allocations
+[    0.012522] DMA: preallocated 1024 KiB GFP_KERNEL|GFP_DMA pool for atomic allocations
+[    0.012650] DMA: preallocated 1024 KiB GFP_KERNEL|GFP_DMA32 pool for atomic allocations
+[    0.012691] audit: initializing netlink subsys (disabled)
+[    0.012757] audit: type=2000 audit(0.008:1): state=initialized audit_enabled=0 res=1
+[    0.012945] thermal_sys: Registered thermal governor 'step_wise'
+[    0.012961] cpuidle: using governor menu
+[    0.013024] hw-breakpoint: found 6 breakpoint and 4 watchpoint registers.
+[    0.013063] ASID allocator initialised with 32768 entries
+[    0.013506] Serial: AMBA PL011 UART driver
+[    0.014675] bcm2835-mbox 107c013880.mailbox: mailbox enabled
+[    0.014963] 107d001000.serial: ttyAMA10 at MMIO 0x107d001000 (irq = 15, base_baud = 0) is a PL011 rev2
+[    0.021494] raspberrypi-firmware soc:firmware: Attached to firmware from 2024-06-05T15:41:49, variant start_cd
+[    0.025499] raspberrypi-firmware soc:firmware: Firmware hash is 6fe0b09100000000000000000000000000000000
+[    0.032882] Modules: 2G module region forced by RANDOMIZE_MODULE_REGION_FULL
+[    0.032885] Modules: 0 pages in range for non-PLT usage
+[    0.032887] Modules: 518336 pages in range for PLT usage
+[    0.035616] bcm2835-dma 1000010000.dma: DMA legacy API manager, dmachans=0x1
+[    0.036143] iommu: Default domain type: Translated
+[    0.036146] iommu: DMA domain TLB invalidation policy: strict mode
+[    0.036277] SCSI subsystem initialized
+[    0.036335] usbcore: registered new interface driver usbfs
+[    0.036346] usbcore: registered new interface driver hub
+[    0.036361] usbcore: registered new device driver usb
+[    0.036474] pps_core: LinuxPPS API ver. 1 registered
+[    0.036477] pps_core: Software ver. 5.3.6 - Copyright 2005-2007 Rodolfo Giometti <giometti@linux.it>
+[    0.036483] PTP clock support registered
+[    0.036887] vgaarb: loaded
+[    0.037333] clocksource: Switched to clocksource arch_sys_counter
+[    0.037499] VFS: Disk quotas dquot_6.6.0
+[    0.037518] VFS: Dquot-cache hash table entries: 512 (order 0, 4096 bytes)
+[    0.037560] FS-Cache: Loaded
+[    0.041344] CacheFiles: Loaded
+[    0.043582] NET: Registered PF_INET protocol family
+[    0.043819] IP idents hash table entries: 131072 (order: 8, 1048576 bytes, linear)
+[    0.047349] tcp_listen_portaddr_hash hash table entries: 4096 (order: 4, 65536 bytes, linear)
+[    0.047403] Table-perturb hash table entries: 65536 (order: 6, 262144 bytes, linear)
+[    0.047412] TCP established hash table entries: 65536 (order: 7, 524288 bytes, linear)
+[    0.047825] TCP bind hash table entries: 65536 (order: 9, 2097152 bytes, linear)
+[    0.049578] TCP: Hash tables configured (established 65536 bind 65536)
+[    0.049754] MPTCP token hash table entries: 8192 (order: 5, 196608 bytes, linear)
+[    0.049868] UDP hash table entries: 4096 (order: 5, 131072 bytes, linear)
+[    0.050017] UDP-Lite hash table entries: 4096 (order: 5, 131072 bytes, linear)
+[    0.050226] NET: Registered PF_UNIX/PF_LOCAL protocol family
+[    0.050451] RPC: Registered named UNIX socket transport module.
+[    0.050454] RPC: Registered udp transport module.
+[    0.050456] RPC: Registered tcp transport module.
+[    0.050458] RPC: Registered tcp-with-tls transport module.
+[    0.050460] RPC: Registered tcp NFSv4.1 backchannel transport module.
+[    0.050467] PCI: CLS 0 bytes, default 64
+[    0.050635] Trying to unpack rootfs image as initramfs...
+[    0.057408] kvm [1]: IPA Size Limit: 40 bits
+[    0.057454] kvm [1]: vgic interrupt IRQ9
+[    0.057476] kvm [1]: VHE mode initialized successfully
+[    0.237217] Freeing initrd memory: 6392K
+[    0.471934] Initialise system trusted keyrings
+[    0.472004] workingset: timestamp_bits=46 max_order=21 bucket_order=0
+[    0.472032] zbud: loaded
+[    0.472445] NFS: Registering the id_resolver key type
+[    0.472453] Key type id_resolver registered
+[    0.472455] Key type id_legacy registered
+[    0.472465] nfs4filelayout_init: NFSv4 File Layout Driver Registering...
+[    0.472469] nfs4flexfilelayout_init: NFSv4 Flexfile Layout Driver Registering...
+[    0.472749] Key type asymmetric registered
+[    0.472752] Asymmetric key parser 'x509' registered
+[    0.472800] Block layer SCSI generic (bsg) driver version 0.4 loaded (major 247)
+[    0.472857] io scheduler mq-deadline registered
+[    0.472861] io scheduler kyber registered
+[    0.472880] io scheduler bfq registered
+[    0.473267] irq_brcmstb_l2: registered L2 intc (/soc/intc@7d503000, parent irq: 26)
+[    0.473403] irq_brcmstb_l2: registered L2 intc (/soc/intc@7d508380, parent irq: 27)
+[    0.473514] irq_brcmstb_l2: registered L2 intc (/soc/intc@7d508400, parent irq: 28)
+[    0.473625] irq_brcmstb_l2: registered L2 intc (/soc/intc@7d517b00, parent irq: 29)
+[    0.477574] bcm2708_fb soc:fb: FB found 1 display(s)
+[    0.484732] Console: switching to colour frame buffer device 240x67
+[    0.488862] bcm2708_fb soc:fb: Registered framebuffer for display 0, size 1920x1080
+[    0.520968] Serial: 8250/16550 driver, 1 ports, IRQ sharing enabled
+[    0.522252] 107d50c000.serial: ttyS0 at MMIO 0x107d50c000 (irq = 32, base_baud = 6000000) is a Broadcom BCM7271 UART
+[    0.522417] serial serial0: tty port ttyS0 registered
+[    0.523126] iproc-rng200 107d208000.rng: hwrng registered
+[    0.523319] vc-mem: phys_addr:0x00000000 mem_base=0x3fc00000 mem_size:0x40000000(1024 MiB)
+[    0.523841] bcm2712-iommu-cache 1000005b00.iommuc: bcm2712_iommu_cache_probe
+[    0.528148] brd: module loaded
+[    0.530900] loop: module loaded
+[    0.531109] bcm2835-power bcm2835-power: Broadcom BCM2835 power domains driver
+[    0.531665] Loading iSCSI transport class v2.0-870.
+[    0.534906] usbcore: registered new device driver r8152-cfgselector
+[    0.534926] usbcore: registered new interface driver r8152
+[    0.534944] usbcore: registered new interface driver lan78xx
+[    0.534957] usbcore: registered new interface driver smsc95xx
+[    0.535063] dwc_otg: version 3.00a 10-AUG-2012 (platform bus)
+[    0.535102] dwc_otg: FIQ enabled
+[    0.535104] dwc_otg: NAK holdoff enabled
+[    0.535106] dwc_otg: FIQ split-transaction FSM enabled
+[    0.535110] Module dwc_common_port init
+[    0.535703] usbcore: registered new interface driver uas
+[    0.535718] usbcore: registered new interface driver usb-storage
+[    0.535975] mousedev: PS/2 mouse device common for all mice
+[    0.543975] rpi-rtc soc:rpi_rtc: registered as rtc0
+[    0.545412] rpi-rtc soc:rpi_rtc: setting system clock to 1970-01-01T00:00:08 UTC (8)
+[    0.546285] bcm2835-wdt bcm2835-wdt: Poweroff handler already present!
+[    0.546291] bcm2835-wdt bcm2835-wdt: Broadcom BCM2835 watchdog timer
+[    0.549082] sdhci: Secure Digital Host Controller Interface driver
+[    0.549085] sdhci: Copyright(c) Pierre Ossman
+[    0.549143] sdhci-pltfm: SDHCI platform and OF driver helper
+[    0.549615] ledtrig-cpu: registered to indicate activity on CPUs
+[    0.549698] SMCCC: SOC_ID: ARCH_SOC_ID not implemented, skipping ....
+[    0.549721] hid: raw HID events driver (C) Jiri Kosina
+[    0.549753] usbcore: registered new interface driver usbhid
+[    0.549756] usbhid: USB HID core driver
+[    0.550307] hw perfevents: enabled with armv8_cortex_a76 PMU driver, 7 counters available
+[    0.550883] Key type dns_resolver registered
+[    0.567773] registered taskstats version 1
+[    0.567905] Loading compiled-in X.509 certificates
+[    0.571933] Key type .fscrypt registered
+[    0.571937] Key type fscrypt-provisioning registered
+[    0.572913] brcm-pcie 1000120000.pcie: host bridge /axi/pcie@120000 ranges:
+[    0.572926] brcm-pcie 1000120000.pcie:   No bus range found for /axi/pcie@120000, using [bus 00-ff]
+[    0.572942] brcm-pcie 1000120000.pcie:      MEM 0x1f00000000..0x1ffffffffb -> 0x0000000000
+[    0.572951] brcm-pcie 1000120000.pcie:      MEM 0x1c00000000..0x1effffffff -> 0x0400000000
+[    0.572964] brcm-pcie 1000120000.pcie:   IB MEM 0x1f00000000..0x1f003fffff -> 0x0000000000
+[    0.572971] brcm-pcie 1000120000.pcie:   IB MEM 0x0000000000..0x0fffffffff -> 0x1000000000
+[    0.574795] brcm-pcie 1000120000.pcie: Forcing gen 2
+[    0.575056] brcm-pcie 1000120000.pcie: PCI host bridge to bus 0000:00
+[    0.575061] pci_bus 0000:00: root bus resource [bus 00-ff]
+[    0.575067] pci_bus 0000:00: root bus resource [mem 0x1f00000000-0x1ffffffffb] (bus address [0x00000000-0xfffffffb])
+[    0.575072] pci_bus 0000:00: root bus resource [mem 0x1c00000000-0x1effffffff pref] (bus address [0x400000000-0x6ffffffff])
+[    0.575090] pci 0000:00:00.0: [14e4:2712] type 01 class 0x060400
+[    0.575124] pci 0000:00:00.0: PME# supported from D0 D3hot
+[    0.576411] pci 0000:00:00.0: bridge configuration invalid ([bus 00-00]), reconfiguring
+[    0.681342] brcm-pcie 1000120000.pcie: link up, 5.0 GT/s PCIe x4 (!SSC)
+[    0.681373] pci 0000:01:00.0: [1de4:0001] type 00 class 0x020000
+[    0.681390] pci 0000:01:00.0: reg 0x10: [mem 0xffffc000-0xffffffff]
+[    0.681401] pci 0000:01:00.0: reg 0x14: [mem 0xffc00000-0xffffffff]
+[    0.681410] pci 0000:01:00.0: reg 0x18: [mem 0xffff0000-0xffffffff]
+[    0.681490] pci 0000:01:00.0: supports D1
+[    0.681493] pci 0000:01:00.0: PME# supported from D0 D1 D3hot D3cold
+[    0.693351] pci_bus 0000:01: busn_res: [bus 01-ff] end is updated to 01
+[    0.693365] pci 0000:00:00.0: BAR 8: assigned [mem 0x1f00000000-0x1f005fffff]
+[    0.693372] pci 0000:01:00.0: BAR 1: assigned [mem 0x1f00000000-0x1f003fffff]
+[    0.693378] pci 0000:01:00.0: BAR 2: assigned [mem 0x1f00400000-0x1f0040ffff]
+[    0.693385] pci 0000:01:00.0: BAR 0: assigned [mem 0x1f00410000-0x1f00413fff]
+[    0.693391] pci 0000:00:00.0: PCI bridge to [bus 01]
+[    0.693395] pci 0000:00:00.0:   bridge window [mem 0x1f00000000-0x1f005fffff]
+[    0.693402] pci 0000:00:00.0: Max Payload Size set to  256/ 512 (was  128), Max Read Rq  512
+[    0.693412] pci 0000:01:00.0: Max Payload Size set to  256/ 256 (was  128), Max Read Rq  512
+[    0.693534] pcieport 0000:00:00.0: enabling device (0000 -> 0002)
+[    0.693591] pcieport 0000:00:00.0: PME: Signaling with IRQ 37
+[    0.693796] pcieport 0000:00:00.0: AER: enabled with IRQ 37
+[    0.693935] rp1 0000:01:00.0: bar0 len 0x4000, start 0x1f00410000, end 0x1f00413fff, flags, 0x40200
+[    0.693941] rp1 0000:01:00.0: bar1 len 0x400000, start 0x1f00000000, end 0x1f003fffff, flags, 0x40200
+[    0.693953] rp1 0000:01:00.0: enabling device (0000 -> 0002)
+[    0.695263] rp1 0000:01:00.0: chip_id 0x20001927
+[    0.701290] genirq: irq_chip rp1_irq_chip did not update eff. affinity mask of irq 99
+[    0.722120] macb 1f00100000.ethernet eth0: Cadence GEM rev 0x00070109 at 0x1f00100000 irq 105 (2c:cf:67:8a:43:1d)
+[    0.722822] dw_axi_dmac_platform 1f00188000.dma: DesignWare AXI DMA Controller, 8 channels
+[    0.723212] xhci-hcd xhci-hcd.0: xHCI Host Controller
+[    0.723221] xhci-hcd xhci-hcd.0: new USB bus registered, assigned bus number 1
+[    0.723698] xhci-hcd xhci-hcd.0: hcc params 0x0240fe6d hci version 0x110 quirks 0x0000008000000810
+[    0.723716] xhci-hcd xhci-hcd.0: irq 130, io mem 0x1f00200000
+[    0.723805] xhci-hcd xhci-hcd.0: xHCI Host Controller
+[    0.723810] xhci-hcd xhci-hcd.0: new USB bus registered, assigned bus number 2
+[    0.723815] xhci-hcd xhci-hcd.0: Host supports USB 3.0 SuperSpeed
+[    0.724299] usb usb1: New USB device found, idVendor=1d6b, idProduct=0002, bcdDevice= 6.06
+[    0.724306] usb usb1: New USB device strings: Mfr=3, Product=2, SerialNumber=1
+[    0.724310] usb usb1: Product: xHCI Host Controller
+[    0.724313] usb usb1: Manufacturer: Linux 6.6.49-0-rpi xhci-hcd
+[    0.724317] usb usb1: SerialNumber: xhci-hcd.0
+[    0.724566] hub 1-0:1.0: USB hub found
+[    0.724584] hub 1-0:1.0: 2 ports detected
+[    0.724842] usb usb2: New USB device found, idVendor=1d6b, idProduct=0003, bcdDevice= 6.06
+[    0.724848] usb usb2: New USB device strings: Mfr=3, Product=2, SerialNumber=1
+[    0.724851] usb usb2: Product: xHCI Host Controller
+[    0.724854] usb usb2: Manufacturer: Linux 6.6.49-0-rpi xhci-hcd
+[    0.724857] usb usb2: SerialNumber: xhci-hcd.0
+[    0.725060] hub 2-0:1.0: USB hub found
+[    0.725074] hub 2-0:1.0: 1 port detected
+[    0.725788] xhci-hcd xhci-hcd.1: xHCI Host Controller
+[    0.725797] xhci-hcd xhci-hcd.1: new USB bus registered, assigned bus number 3
+[    0.726265] xhci-hcd xhci-hcd.1: hcc params 0x0240fe6d hci version 0x110 quirks 0x0000008000000810
+[    0.726287] xhci-hcd xhci-hcd.1: irq 135, io mem 0x1f00300000
+[    0.726377] xhci-hcd xhci-hcd.1: xHCI Host Controller
+[    0.726381] xhci-hcd xhci-hcd.1: new USB bus registered, assigned bus number 4
+[    0.726386] xhci-hcd xhci-hcd.1: Host supports USB 3.0 SuperSpeed
+[    0.726456] usb usb3: New USB device found, idVendor=1d6b, idProduct=0002, bcdDevice= 6.06
+[    0.726460] usb usb3: New USB device strings: Mfr=3, Product=2, SerialNumber=1
+[    0.726464] usb usb3: Product: xHCI Host Controller
+[    0.726467] usb usb3: Manufacturer: Linux 6.6.49-0-rpi xhci-hcd
+[    0.726470] usb usb3: SerialNumber: xhci-hcd.1
+[    0.726702] hub 3-0:1.0: USB hub found
+[    0.726719] hub 3-0:1.0: 2 ports detected
+[    0.726971] usb usb4: New USB device found, idVendor=1d6b, idProduct=0003, bcdDevice= 6.06
+[    0.726976] usb usb4: New USB device strings: Mfr=3, Product=2, SerialNumber=1
+[    0.726980] usb usb4: Product: xHCI Host Controller
+[    0.726982] usb usb4: Manufacturer: Linux 6.6.49-0-rpi xhci-hcd
+[    0.726985] usb usb4: SerialNumber: xhci-hcd.1
+[    0.727181] hub 4-0:1.0: USB hub found
+[    0.727196] hub 4-0:1.0: 1 port detected
+[    0.728420] bcm2712-iommu 1000005100.iommu: bcm2712_iommu_init: DEBUG_INFO = 0x20804774
+[    0.728859] platform 1000800000.codec: bcm2712_iommu_probe_device: MMU 1000005100.iommu
+[    0.728867] platform 1000800000.codec: bcm2712_iommu_device_group: MMU 1000005100.iommu
+[    0.728874] platform 1000800000.codec: Adding to iommu group 0
+[    0.728888] platform 1000880000.pisp_be: bcm2712_iommu_probe_device: MMU 1000005100.iommu
+[    0.728894] platform 1000880000.pisp_be: bcm2712_iommu_device_group: MMU 1000005100.iommu
+[    0.728900] platform 1000880000.pisp_be: Adding to iommu group 0
+[    0.728930] platform 1000800000.codec: bcm2712_iommu_attach_dev: MMU 1000005100.iommu
+[    0.728933] platform 1000880000.pisp_be: bcm2712_iommu_attach_dev: MMU 1000005100.iommu
+[    0.728941] bcm2712-iommu 1000005100.iommu: bcm2712_iommu_probe: Success
+[    0.729566] bcm2712-iommu 1000005200.iommu: bcm2712_iommu_init: DEBUG_INFO = 0x20804774
+[    0.730015] bcm2712-iommu 1000005200.iommu: bcm2712_iommu_probe: Success
+[    0.730652] bcm2712-iommu 1000005280.iommu: bcm2712_iommu_init: DEBUG_INFO = 0x20804774
+[    0.731096] bcm2712-iommu 1000005280.iommu: bcm2712_iommu_probe: Success
+[    0.731819] sdhci-brcmstb 1000fff000.mmc: Got CD GPIO
+[    0.731984] mmc0: CQHCI version 5.10
+[    0.732623] mmc1: CQHCI version 5.10
+[    0.733498] of_cfs_init
+[    0.733538] of_cfs_init: OK
+[    0.733668] clk: Disabling unused clocks
+[    0.768846] mmc0: SDHCI controller on 1000fff000.mmc [1000fff000.mmc] using ADMA 64-bit
+[    0.862449] mmc0: new ultra high speed SDR104 SDHC card at address 59b4
+[    0.862763] mmcblk0: mmc0:59b4 LX32G 29.5 GiB
+[    0.864041]  mmcblk0: p1 p2
+[    0.864197] mmcblk0: mmc0:59b4 LX32G 29.5 GiB
+[    0.917870] mmc1: SDHCI controller on 1001100000.mmc [1001100000.mmc] using ADMA 64-bit
+[    0.919987] Freeing unused kernel memory: 3456K
+[    0.920068] Run /init as init process
+[    0.920070]   with arguments:
+[    0.920072]     /init
+[    0.920074]   with environment:
+[    0.920075]     HOME=/
+[    0.920077]     TERM=linux
+[    0.920079]     modules=loop,squashfs,sd-mod,usb-storage
+[    0.936143] Alpine Init 3.10.1-r0
+[    0.937235] Loading boot drivers...
+[    0.941861] squashfs: version 4.0 (2009/01/31) Phillip Lougher
+[    0.942425] Loading boot drivers: ok.
+[    0.944532] Mounting boot media...
+[    0.956247] mmc1: new ultra high speed DDR50 SDIO card at address 0001
+[    0.982068] usb 3-1: new low-speed USB device number 2 using xhci-hcd
+[    1.172715] usb 3-1: New USB device found, idVendor=046d, idProduct=c313, bcdDevice= 1.01
+[    1.172727] usb 3-1: New USB device strings: Mfr=1, Product=2, SerialNumber=0
+[    1.172732] usb 3-1: Product: USB Multimedia Keyboard
+[    1.172736] usb 3-1: Manufacturer: LITEON Technology
+[    1.254607] input: LITEON Technology USB Multimedia Keyboard as /devices/platform/axi/1000120000.pcie/1f00300000.usb/xhci-hcd.1/usb3/3-1/3-1:1.0/0003:046D:C313.0001/input/input0
+[    1.313523] hid-generic 0003:046D:C313.0001: input,hidraw0: USB HID v1.10 Keyboard [LITEON Technology USB Multimedia Keyboard] on usb-xhci-hcd.1-1/input0
+[    1.318492] EXT4-fs (mmcblk0p2): orphan cleanup on readonly fs
+[    1.319717] EXT4-fs (mmcblk0p2): mounted filesystem e279b314-51dd-4303-99f6-e6dd3d0fa0ee ro with ordered data mode. Quota mode: none.
+[    1.337475] input: LITEON Technology USB Multimedia Keyboard as /devices/platform/axi/1000120000.pcie/1f00300000.usb/xhci-hcd.1/usb3/3-1/3-1:1.1/0003:046D:C313.0002/input/input1
+[    1.358348] Mounting boot media: ok.
+[    1.360513] Loading user settings from /media/mmcblk0p1/localhost.apkovl.tar.gz...
+[    1.375753] Loading user settings from /media/mmcblk0p1/localhost.apkovl.tar.gz: ok.
+[    1.401595] hid-generic 0003:046D:C313.0002: input,hidraw1: USB HID v1.10 Device [LITEON Technology USB Multimedia Keyboard] on usb-xhci-hcd.1-1/input1
+[    1.737937] Installing packages to root filesystem...
+[    6.940787] Installing packages to root filesystem: ok.
+[    7.737377] loop0: detected capacity change from 0 to 61016
+[    7.739654] F2FS-fs (loop0): Magic Mismatch, valid(0xf2f52010) - read(0x8eeb746f)
+[    7.739663] F2FS-fs (loop0): Can't find valid F2FS filesystem in 1th superblock
+[    7.739687] F2FS-fs (loop0): Magic Mismatch, valid(0xf2f52010) - read(0xfde4274)
+[    7.739691] F2FS-fs (loop0): Can't find valid F2FS filesystem in 2th superblock
+[    8.718581] Bluetooth: Core ver 2.22
+[    8.718623] NET: Registered PF_BLUETOOTH protocol family
+[    8.718626] Bluetooth: HCI device and connection manager initialized
+[    8.718635] Bluetooth: HCI socket layer initialized
+[    8.718639] Bluetooth: L2CAP socket layer initialized
+[    8.718646] Bluetooth: SCO socket layer initialized
+[    8.732107] Bluetooth: HCI UART driver ver 2.3
+[    8.732116] Bluetooth: HCI UART protocol H4 registered
+[    8.732152] Bluetooth: HCI UART protocol Three-wire (H5) registered
+[    8.732242] Bluetooth: HCI UART protocol Broadcom registered
+[    8.732379] hci_uart_bcm serial0-0: supply vbat not found, using dummy regulator
+[    8.732444] hci_uart_bcm serial0-0: supply vddio not found, using dummy regulator
+[    8.980868] mc: Linux media interface: v0.10
+[    9.013628] videodev: Linux video capture interface: v2.00
+[    9.033787] rpivid_hevc: module is from the staging directory, the quality is unknown, you have been warned.
+[    9.034524] rpivid 1000800000.codec: bcm2712_iommu_of_xlate: MMU 1000005100.iommu
+[    9.035825] rpivid 1000800000.codec: Device registered as /dev/video19
+[    9.045506] rpi-gpiomem 107d508500.gpiomem: window base 0x107d508500 size 0x00000040
+[    9.045696] rpi-gpiomem 107d508500.gpiomem: initialised 1 regions as /dev/gpiomem1
+[    9.045854] rpi-gpiomem 107d517c00.gpiomem: window base 0x107d517c00 size 0x00000040
+[    9.050284] rpi-gpiomem 107d517c00.gpiomem: initialised 1 regions as /dev/gpiomem2
+[    9.050362] rpi-gpiomem 107d504100.gpiomem: window base 0x107d504100 size 0x00000020
+[    9.051125] rpi-gpiomem 107d504100.gpiomem: initialised 1 regions as /dev/gpiomem3
+[    9.051191] rpi-gpiomem 107d510700.gpiomem: window base 0x107d510700 size 0x00000020
+[    9.054018] rpi-gpiomem 107d510700.gpiomem: initialised 1 regions as /dev/gpiomem4
+[    9.054172] rpi-gpiomem 1f000d0000.gpiomem: window base 0x1f000d0000 size 0x00030000
+[    9.057367] rpi-gpiomem 1f000d0000.gpiomem: initialised 1 regions as /dev/gpiomem0
+[    9.078855] pispbe 1000880000.pisp_be: bcm2712_iommu_of_xlate: MMU 1000005100.iommu
+[    9.082071] pispbe 1000880000.pisp_be: Runtime PM usage count underflow!
+[    9.093746] input: pwr_button as /devices/platform/pwr_button/input/input2
+[    9.097224] Bluetooth: hci0: BCM: chip id 107
+[    9.097910] Bluetooth: hci0: BCM: features 0x2f
+[    9.099046] Bluetooth: hci0: BCM4345C0
+[    9.099053] Bluetooth: hci0: BCM4345C0 (003.001.025) build 0000
+[    9.130865] Bluetooth: hci0: BCM4345C0 'brcm/BCM4345C0.raspberrypi,5-model-b.hcd' Patch
+[    9.225813] cfg80211: Loading compiled-in X.509 certificates for regulatory database
+[    9.257089] Loaded X.509 cert 'benh@debian.org: 577e021cb980e0e820821ba7b54b4961b8b4fadf'
+[    9.257666] Loaded X.509 cert 'romain.perier@gmail.com: 3abbc6ec146e09d1b6016ab9d6cf71dd233f0328'
+[    9.258175] Loaded X.509 cert 'sforshee: 00b28ddf47aef9cea7'
+[    9.258626] Loaded X.509 cert 'wens: 61c038651aabdcf94bd0ac7ff06c7248db18c600'
+[    9.333794] brcmfmac: F1 signature read @0x18000000=0x15264345
+[    9.335762] brcmfmac: brcmf_fw_alloc_request: using brcm/brcmfmac43455-sdio for chip BCM4345/6
+[    9.335949] usbcore: registered new interface driver brcmfmac
+[    9.575071] brcmfmac: brcmf_c_process_txcap_blob: no txcap_blob available (err=-2)
+[    9.575345] brcmfmac: brcmf_c_preinit_dcmds: Firmware: BCM4345/6 wl0: Apr 15 2021 03:03:20 version 7.45.234 (4ca95bb CY) FWID 01-996384e2
+[    9.878005] Bluetooth: hci0: BCM: features 0x2f
+[    9.879391] Bluetooth: hci0: BCM43455 37.4MHz Raspberry Pi 3+-0190
+[    9.879395] Bluetooth: hci0: BCM4345C0 (003.001.025) build 0382
+[    9.879738] Bluetooth: hci0: BCM: Using default device address (43:45:c0:00:1f:ac)
+[    9.914421] NET: Registered PF_PACKET protocol family
+[    9.981472] NET: Registered PF_INET6 protocol family
+[    9.982025] Segment Routing with IPv6
+[    9.982037] In-situ OAM (IOAM) with IPv6
+[   10.118507] EXT4-fs (mmcblk0p2): re-mounted e279b314-51dd-4303-99f6-e6dd3d0fa0ee r/w. Quota mode: none.
