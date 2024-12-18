@@ -1,0 +1,126 @@
+Mem: 1506520K used, 6626020K free, 1197960K shrd, 4572K buff, 1347332K cached
+CPU:   0% usr   0% sys   0% nic 100% idle   0% io   0% irq   0% sirq
+Load average: 0.00 0.00 0.00 1/148 4442
+  PID  PPID USER     STAT   VSZ %VSZ CPU %CPU COMMAND
+ 3030  3029 root     S    1267m  15%   3   0% /usr/bin/dockerd
+ 3048  3030 root     S    1253m  15%   3   0% containerd --config /var/run/docker/containerd/containerd.toml
+ 2727  2726 root     S     9392   0%   3   0% /sbin/wpa_supplicant -i wlan0 -c/etc/wpa_supplicant/wpa_supplicant.conf
+ 2884     1 chrony   S     8608   0%   2   0% /usr/sbin/chronyd -f /etc/chrony/chrony.conf
+ 4430  4428 root     S     6736   0%   3   0% sshd-session: root@pts/0
+ 4428  2946 root     S     6424   0%   3   0% sshd-session: root [priv]
+ 2946     1 root     S     5884   0%   2   0% sshd: /usr/sbin/sshd [listener] 0 of 10-100 startups
+ 3033  3030 root     S     3560   0%   0   0% log_proxy -m /var/log/docker.log
+ 3032  3030 root     S     3560   0%   2   0% log_proxy -m /var/log/docker.log
+ 2975  2953 root     S     1824   0%   0   0% -sh
+ 4431  4430 root     S     1792   0%   0   0% -sh
+ 4442  4431 root     R     1724   0%   1   0% top -b -n 1
+ 2698     1 root     S     1724   0%   1   0% /sbin/syslogd -t -n
+ 2910     1 root     S     1712   0%   1   0% /usr/sbin/crond -c /etc/crontabs -f
+    1     0 root     S     1708   0%   3   0% /sbin/init
+ 2953     1 root     S     1708   0%   3   0% /bin/login -- root
+ 2970     1 root     S     1708   0%   2   0% /sbin/getty 38400 tty6
+ 2966     1 root     S     1708   0%   0   0% /sbin/getty 38400 tty5
+ 2973     1 root     S     1708   0%   2   0% /sbin/getty -L 0 ttyAMA10 vt100
+ 2954     1 root     S     1708   0%   3   0% /sbin/getty 38400 tty2
+ 2961     1 root     S     1708   0%   3   0% /sbin/getty 38400 tty4
+ 2958     1 root     S     1708   0%   3   0% /sbin/getty 38400 tty3
+ 2855     1 root     S     1704   0%   2   0% /sbin/acpid -f
+ 3029     1 root     S     1268   0%   2   0% supervise-daemon docker --start --retry TERM/60/KILL/10 --stdout-logger log_proxy -m /var/log/docker.log --stderr-logger log_proxy -m /var/log/docker.log --respawn-delay 2 --respawn-max 5 --respawn-period 1800 /usr/bin/dockerd --
+ 2726     1 root     S     1268   0%   3   0% supervise-daemon wpa_supplicant --start --respawn-delay 2 --respawn-max 5 --respawn-period 1800 /sbin/wpa_supplicant -- -i wlan0 -c/etc/wpa_supplicant/wpa_supplicant.conf
+   16     2 root     IW       0   0%   2   0% [rcu_preempt]
+ 4422     2 root     IW       0   0%   0   0% [kworker/0:0-eve]
+ 3573     2 root     IW       0   0%   2   0% [kworker/2:3-eve]
+   40     2 root     IW       0   0%   2   0% [kworker/u9:1-ev]
+ 4423     2 root     IW       0   0%   0   0% [kworker/0:2-eve]
+   46     2 root     SW       0   0%   0   0% [kcompactd0]
+ 4416     2 root     IW       0   0%   3   0% [kworker/3:2-mm_]
+  408     2 root     DW       0   0%   3   0% [sugov:0]
+ 4418     2 root     IW       0   0%   3   0% [kworker/3:1-eve]
+   15     2 root     SW       0   0%   0   0% [ksoftirqd/0]
+ 3806     2 root     IW       0   0%   1   0% [kworker/1:2-cgr]
+   26     2 root     SW       0   0%   2   0% [ksoftirqd/2]
+   21     2 root     SW       0   0%   1   0% [ksoftirqd/1]
+   31     2 root     SW       0   0%   3   0% [ksoftirqd/3]
+  828     2 root     IW<      0   0%   3   0% [kworker/u13:0-h]
+  112     2 root     IW       0   0%   2   0% [kworker/u11:1-e]
+  959     2 root     IW<      0   0%   0   0% [kworker/0:1H-kb]
+ 3911     2 root     IW       0   0%   2   0% [kworker/u10:2-e]
+ 3257     2 root     IW       0   0%   3   0% [kworker/u10:0-e]
+ 4364     2 root     IW       0   0%   1   0% [kworker/1:1-eve]
+  199     2 root     SW       0   0%   1   0% [hwrng]
+  281     2 root     IW<      0   0%   3   0% [kworker/R-nvme-]
+  283     2 root     IW<      0   0%   2   0% [kworker/R-nvme-]
+  284     2 root     IW<      0   0%   3   0% [kworker/R-nvme-]
+   81     2 root     IW<      0   0%   2   0% [kworker/R-kthro]
+   78     2 root     IW<      0   0%   2   0% [kworker/R-nfsio]
+  271     2 root     IW<      0   0%   0   0% [kworker/R-iscsi]
+  378     2 root     IW<      0   0%   0   0% [kworker/R-uas]
+  440     2 root     IW<      0   0%   2   0% [kworker/2:1H-kb]
+  829     2 root     IW<      0   0%   2   0% [kworker/u14:0]
+  288     2 root     IW<      0   0%   3   0% [kworker/R-DWC N]
+  831     2 root     IW<      0   0%   2   0% [kworker/u16:0]
+  832     2 root     IW<      0   0%   0   0% [kworker/u17:0]
+  845     2 root     SW       0   0%   0   0% [irq/37-aerdrv]
+  881     2 root     IW       0   0%   3   0% [kworker/u12:5-e]
+  931     2 root     IW<      0   0%   1   0% [kworker/R-sdhci]
+  939     2 root     IW<      0   0%   1   0% [kworker/R-sdhci]
+  940     2 root     SW       0   0%   0   0% [irq/160-mmc0]
+  941     2 root     SW       0   0%   0   0% [irq/161-mmc1]
+  956     2 root     IW<      0   0%   1   0% [kworker/R-mmc_c]
+  830     2 root     IW<      0   0%   0   0% [kworker/u15:0]
+   54     2 root     IW<      0   0%   1   0% [kworker/1:1H-kb]
+   49     2 root     IW<      0   0%   2   0% [kworker/R-blkcg]
+   48     2 root     IW<      0   0%   3   0% [kworker/R-kbloc]
+   51     2 root     SW       0   0%   1   0% [watchdogd]
+   55     2 root     IW<      0   0%   3   0% [kworker/R-rpcio]
+   45     2 root     IW<      0   0%   3   0% [kworker/R-write]
+   44     2 root     SW       0   0%   3   0% [oom_reaper]
+   41     2 root     SW       0   0%   1   0% [kauditd]
+   39     2 root     IW<      0   0%   3   0% [kworker/R-inet_]
+   38     2 root     SW       0   0%   2   0% [kdevtmpfs]
+   43     2 root     SW       0   0%   2   0% [khungtaskd]
+   47     2 root     IW<      0   0%   2   0% [kworker/R-kinte]
+   56     2 root     IW<      0   0%   3   0% [kworker/R-xprti]
+   25     2 root     SW       0   0%   2   0% [migration/2]
+   29     2 root     SW       0   0%   3   0% [cpuhp/3]
+   23     2 root     IW<      0   0%   1   0% [kworker/1:0H-ev]
+   20     2 root     SW       0   0%   1   0% [migration/1]
+   19     2 root     SW       0   0%   1   0% [cpuhp/1]
+   24     2 root     SW       0   0%   2   0% [cpuhp/2]
+   30     2 root     SW       0   0%   3   0% [migration/3]
+   14     2 root     IW       0   0%   0   0% [rcu_tasks_trace]
+   13     2 root     IW       0   0%   0   0% [rcu_tasks_kthre]
+   17     2 root     SW       0   0%   0   0% [migration/0]
+    7     2 root     IW<      0   0%   0   0% [kworker/R-netns]
+    6     2 root     IW<      0   0%   0   0% [kworker/R-slub_]
+ 2409     2 root     IW<      0   0%   2   0% [kworker/R-ipv6_]
+ 2358     2 root     SW       0   0%   3   0% [brcmf_wdog/mmc1]
+ 2357     2 root     IW<      0   0%   1   0% [kworker/R-brcmf]
+ 2408     2 root     IW<      0   0%   3   0% [kworker/R-mld]
+ 2256     2 root     SW       0   0%   0   0% [irq/162-1000800]
+ 2246     2 root     IW<      0   0%   0   0% [kworker/u13:2-h]
+ 2330     2 root     SW       0   0%   2   0% [spi10]
+ 1691     2 root     IW<      0   0%   3   0% [kworker/3:2H]
+ 1640     2 root     SW       0   0%   0   0% [jbd2/mmcblk0p2-]
+ 1564     2 root     IW<      0   0%   2   0% [kworker/2:2H]
+ 1641     2 root     IW<      0   0%   2   0% [kworker/R-ext4-]
+ 1709     2 root     IW<      0   0%   0   0% [kworker/0:2H]
+ 2351     2 root     IW<      0   0%   1   0% [kworker/R-cfg80]
+ 3635     2 root     IW       0   0%   0   0% [kworker/u9:0-ev]
+ 3393     2 root     IW       0   0%   1   0% [kworker/u10:1-e]
+ 3585     2 root     IW       0   0%   1   0% [kworker/u8:1-ex]
+ 3975     2 root     IW       0   0%   1   0% [kworker/u11:0]
+   11     2 root     IW       0   0%   1   0% [kworker/u8:0]
+    4     2 root     IW<      0   0%   0   0% [kworker/R-rcu_g]
+    2     0 root     SW       0   0%   1   0% [kthreadd]
+    3     2 root     SW       0   0%   0   0% [pool_workqueue_]
+    5     2 root     IW<      0   0%   0   0% [kworker/R-rcu_p]
+   12     2 root     IW<      0   0%   0   0% [kworker/R-mm_pe]
+   18     2 root     SW       0   0%   0   0% [cpuhp/0]
+   71     2 root     SW       0   0%   0   0% [kswapd0]
+ 1075     2 root     IW<      0   0%   3   0% [kworker/3:1H-kb]
+ 4126     2 root     IW       0   0%   2   0% [kworker/u9:2-ev]
+ 4358     2 root     IW       0   0%   3   0% [kworker/u12:0-e]
+ 4327     2 root     IW       0   0%   2   0% [kworker/2:1-eve]
+ 4436     2 root     IW       0   0%   0   0% [kworker/0:1-eve]
+

@@ -16,20 +16,20 @@ from host_sequence.scenario_page import run_page_seq_scenario
 # Check the static addresses when preparing the setup!
 SERVER_URL = "http://10.7.7.144:5000"
 CLIENT_1_URL = "http://10.7.7.199:5001/trigger"
-CLIENT_2_URL = "http://10.7.7.179:5001/trigger"
-CLIENT_3_URL = "http://10.7.7.146:5001/trigger"
+CLIENT_2_URL = "http://10.7.7.178:5001/trigger"
+CLIENT_3_URL = "http://10.7.7.145:5001/trigger"
 
 BASE_COMPOSE_FILES_LOCATION = '/media/mmcblk0p2/setup/compose_files/'
 COOLDOWN = 30
 
 SERVICES = {
-            #"rust-actix": BASE_COMPOSE_FILES_LOCATION + 'rust-actix-compose-prod.yml',
+            "rust-actix": BASE_COMPOSE_FILES_LOCATION + 'rust-actix-compose-prod.yml',
             #"c-sharp-razor": BASE_COMPOSE_FILES_LOCATION + 'c-sharp-razor-compose-prod.yml',
             #"python-flask": BASE_COMPOSE_FILES_LOCATION + 'python-flask-compose-prod.yml',
             # "go-gorilla": BASE_COMPOSE_FILES_LOCATION + 'go-gorilla-compose-prod.yml',
             # "go-gin": BASE_COMPOSE_FILES_LOCATION + 'go-gin-compose-prod.yml'
             #"ruby-sinatra": BASE_COMPOSE_FILES_LOCATION + 'ruby-sinatra-compose-prod.yml'
-             "javascript-express": BASE_COMPOSE_FILES_LOCATION + 'javascript-express-compose-prod.yml'
+            #"javascript-express": BASE_COMPOSE_FILES_LOCATION + 'javascript-express-compose-prod.yml'
             }
 
 
