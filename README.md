@@ -5,30 +5,9 @@ This repository serves as the codebase for a study that examines the energy cons
 
 This project provides tooling to conduct automated performance and energy consumption experiments across multiple web-application implementations. It includes capabilities for both sequential and "berries" (multi-client) testing scenarios.
 
-### Folder structure
-
-CODEBASE/
-├── .github/
-├── .pytest_cache/
-├── aws-cdk/
-├── c-sharp-razor/
-├── database/
-├── experiment-setup/
-│   ├── bootstrap/
-│   ├── execution/
-│   └── loadtest_cloud_db/
-├── requirements.txt
-├── go-gin/
-├── go-gorilla/
-├── javascript-express/
-├── python-flask/
-├── ruby-sinatra/
-├── rust-actix/
-├── tests/
-
 ## Features
 
-- Web-applications implementation support:
+- Web-applications:
   - Rust-Actix
   - Python-Flask
   - Go-Gorilla
@@ -63,12 +42,7 @@ CODEBASE/
 ## Configuration
 
 ### Network Setup
-Configure the following addresses in the `execution.py`:
-- Server URL (default: `http://10.7.7.144:5000`)
-- Client URLs (default):
-  - Client 1: `http://10.7.7.199:5001/trigger`
-  - Client 2: `http://10.7.7.178:5001/trigger`
-  - Client 3: `http://10.7.7.145:5001/trigger`
+Configure you own addresses with your own IP in the `execution.py`:
 
 ### Docker Compose Files
 Place your Docker Compose files in the specified base location:
