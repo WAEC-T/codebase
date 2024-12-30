@@ -4,7 +4,7 @@ import pandas as pd
 from host_sequence.const_data import register_data_dummie, login_data_dummie, message_data
 from utils import print_info_call
 
-BASE_URL = "http://10.7.7.144:5000"
+BASE_URL = "YOUR_IP_HERE:PORT/5000"
 BASE_DELAY = 1.8
 ITER_NUM = 20  # iteration number for each endpoint call has to be <= 400
 
