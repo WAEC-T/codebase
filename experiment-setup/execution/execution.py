@@ -13,10 +13,10 @@ from host_sequence.scenario_api import run_api_seq_scenario
 from host_sequence.scenario_page import run_page_seq_scenario
 
 # Check the static addresses when preparing the setup!
-SERVER_URL = "http://10.7.7.144:5000"
-CLIENT_1_URL = "http://10.7.7.199:5001/trigger"
-CLIENT_2_URL = "http://10.7.7.178:5001/trigger"
-CLIENT_3_URL = "http://10.7.7.145:5001/trigger"
+SERVER_URL = "YOUR_IP_HERE:PORT/trigger"
+CLIENT_1_URL = "YOUR_IP_HERE:PORT/trigger"
+CLIENT_2_URL = "YOUR_IP_HERE:PORT/trigger"
+CLIENT_3_URL = "YOUR_IP_HERE:PORT/trigger"
 
 BASE_COMPOSE_FILES_LOCATION = '/media/mmcblk0p2/setup/compose_files/'
 COOLDOWN = 30
