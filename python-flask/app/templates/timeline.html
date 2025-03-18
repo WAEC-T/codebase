@@ -25,7 +25,7 @@
           }}">Follow user</a>.
       {% endif %}
       </div>
-    {% elif request.endpoint == 'main.timeline' %}
+      {% elif request.endpoint == 'main.timeline' or request.endpoint == 'main.public_timeline' %}
       <div class=twitbox>
         <h3>What's on your mind {{ g.user.username }}?</h3>
         <form action="{{ url_for('posts.add_message') }}" method=post>
