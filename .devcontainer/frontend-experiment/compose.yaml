@@ -1,0 +1,35 @@
+version: "3"
+
+services:
+  minitwit-implementations:
+    image: minitwit-implementations
+    build: .
+    container_name: minitwit-implementations
+    volumes:
+      - ../..:/workspaces:cached
+    ports:
+      - 5000:5000
+    environment:
+      - DATABASE_URL=postgresql://user:password@postgres-implementations:5432/minitwit
+      - DATABASE_URL_JAVA=jdbc:postgresql://postgres-implementations:5432/minitwit?user=user&password=password
+      - BASE_URL=http://localhost:5000
+      - SECRET_KEY=waectsk
+
+  postgres-implementations:
+    image: ghcr.io/3-1-research-project/postgres:17
+    container_name: postgres-implementations
+    hostname: postgres-implementations
+    environment:
+      - POSTGRES_PASSWORD=1234 
+      - POSTGRES_HOST_AUTH_METHOD=trust
+    ports:
+      - 5432:5432
+
+  frontend-client:
+    image: ghcr.io/3-1-research-project/client:3
+    container_name: client
+    hostname: client
+    environment:
+      - PORT=8000
+    ports:
+      - 8000:8000

@@ -1,0 +1,82 @@
+﻿@page "/user/{author}"
+@using Minitwit.Core.Entities
+@using Minitwit.Core.Repository
+@using Minitwit.Web.Pages
+@using Minitwit.Web.Helpers
+
+@using FluentValidation
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+@model Minitwit.Razor.Pages.UserTimelineModel
+@inject SignInManager<Author> SignInManager
+@inject UserManager<Author> UserManager
+@inject IValidator<CreateMessage> Validator
+@inject IAuthorRepository AuthorRepository
+@inject IMessageRepository MessageRepository
+
+
+@{
+    var routeName = HttpContext.GetRouteValue("author")?.ToString();
+    var timelineAuthor = Model.TimelineAuthor;
+    var currentUser = HttpContext.Session.GetString("UserName") ?? User.Identity?.Name;
+    var isCurrentUser = string.Equals(routeName, currentUser, StringComparison.OrdinalIgnoreCase);
+    var isFollowing = Model.IsFollowing;
+
+    ViewData["Title"] = isCurrentUser ? "My Timeline" : $"{routeName}'s Timeline";
+}
+
+<div>
+    <h2>@ViewData["Title"]</h2>
+
+    @if (SignInManager.IsSignedIn(User))
+    {
+        <div class="followstatus">
+            @if (routeName != null && routeName == currentUser)
+            {
+                <p>This is you!</p>
+            }
+            else if (isFollowing)
+            {
+                <p>You are currently following this user.</p>
+                <form method="post" asp-page-handler="Unfollow">
+                    <input type="hidden" name="Author2Unfollow" value="@timelineAuthor.UserName" />
+                    <a class="unfollow" href="@Url.Page("/UserTimeline", new { handler = "Unfollow", author = timelineAuthor.UserName })">Unfollow user</a>
+                </form>
+            }
+            else
+            {
+                <p>You are not yet following this user.</p>
+                <form method="post" asp-page-handler="Follow">
+                    <input type="hidden" name="Author2Follow" value="@timelineAuthor.UserName" />
+                    <a class="follow" href="@Url.Page("/UserTimeline", new { handler = "Follow", author = timelineAuthor.UserName })">Follow user</a>
+                </form>
+            }
+        </div>
+    }
+
+    <ul class="messages">
+        @if (!Model.Messages?.Any() ?? true)
+        {
+        <li><em>There's no message so far.</em></li>
+        }
+        else
+        {
+        @foreach (var message in Model.Messages)
+        {
+        <li>
+            <img src="@Gravatar.GetGravatarUrl(message.User.Email)" alt="User Avatar" />
+            <p>
+                <strong>
+                    <a href="/user/@message.User.Username">@message.User.Username</a>
+                </strong>
+                @message.Message
+                <small>&mdash; @message.Timestamp.ToString("yyyy-MM-dd @ HH:mm")</small>
+            </p>
+        </li>
+        }
+        }
+    </ul>
+</div>
+
+@section Scripts {
+    <partial name="/Areas/Identity/Pages/_ValidationScriptsPartial.cshtml" />
+}

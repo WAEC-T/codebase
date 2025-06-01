@@ -1,0 +1,69 @@
+FROM mcr.microsoft.com/devcontainers/base:jammy
+
+WORKDIR /app
+
+# Update package lists and install dependencies in a single RUN command
+RUN apt-get update \
+    && apt install \
+        python3 \
+        python3-pip \
+        libpq-dev \
+        ruby \
+        ruby-dev \
+        -y \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Go 1.22.2 manually
+RUN wget https://go.dev/dl/go1.22.2.linux-amd64.tar.gz \
+    && tar -C /usr/local -xzf go1.22.2.linux-amd64.tar.gz \
+    && rm go1.22.2.linux-amd64.tar.gz
+
+# Install nvm, Node.js, and npm
+RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.38.0/install.sh | bash \
+    && export NVM_DIR="/root/.nvm" \
+    && [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh" \
+    && nvm install node \
+    && nvm use node \
+    && nvm alias default node \
+    && ln -s "$NVM_DIR/versions/node/$(nvm version)/bin/node" /usr/local/bin/node \
+    && ln -s "$NVM_DIR/versions/node/$(nvm version)/bin/npm" /usr/local/bin/npm \
+    && ln -s "$NVM_DIR/versions/node/$(nvm version)/bin/npx" /usr/local/bin/npx
+    
+# Setup ruby
+RUN gem install bundler
+
+# Install node
+RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.2/install.sh | bash \
+    && \. "$HOME/.nvm/nvm.sh" \
+    && nvm install 22
+
+# Install .NET SDK
+RUN wget https://packages.microsoft.com/config/ubuntu/20.04/packages-microsoft-prod.deb -O packages-microsoft-prod.deb \
+    && sudo dpkg -i packages-microsoft-prod.deb \
+    && rm packages-microsoft-prod.deb
+
+RUN apt-get update \ 
+    && apt-get install -y dotnet-sdk-8.0
+    
+# Install Rust via rustup
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y \
+    && echo 'export PATH="$HOME/.cargo/bin:$PATH"' >> /root/.bashrc \
+    && /root/.cargo/bin/rustc --version
+
+# Set the correct PATH for interactive sessions
+ENV PATH="/root/.cargo/bin:${PATH}"
+ENV PATH="/usr/local/go/bin:$PATH"
+
+EXPOSE 5000:5000
+
+# Install Java and Maven packages
+RUN apt-get update && apt-get install -y openjdk-17-jdk
+RUN apt-get update && apt-get install -y maven
+ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+ENV PATH="$JAVA_HOME/bin:$PATH"
+WORKDIR /app/java_spring/MiniTwit
+# RUN mvn clean install -U
+
+WORKDIR /app
+# Keep container running (for debugging)
+CMD sleep infinity

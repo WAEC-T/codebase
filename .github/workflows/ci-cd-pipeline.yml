@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - 'python-flask/**'
+      - 'python-django/**'
       - 'c-sharp-razor/**'
       - 'rust-actix/**'
       - 'ruby-sinatra/**'
@@ -19,12 +20,24 @@ on:
       - main
     paths:
       - 'python-flask/**'
+      - 'python-django/**'
       - 'c-sharp-razor/**'
       - 'rust-actix/**'
       - 'ruby-sinatra/**'
       - 'javascript-express/**'
       - 'go-gin/**'
       - 'go-gorilla/**'
+      
+  workflow_dispatch:
+
+defaults:
+  run:
+    shell: bash
+    working-directory: minitwit-implementations/
+
+env:
+  BASE_URL: http://localhost:5000
+  DATABASE_URL: postgresql://user:pass@localhost:5432/waect
 
 jobs:
   check-root-changes:
@@ -52,11 +65,11 @@ jobs:
 
           # Check if any of the changed files are outside the known service directories
           for file in $changed_files; do
-            if [[ ! "$file" =~ ^(python-flask/|c-sharp-razor/|rust-actix/|ruby-sinatra/|javascript-express/|go-gin/|go-gorilla/|\.github/) ]]; then
+            if [[ ! "$file" =~ ^(python-flask/|python-django/|c-sharp-razor/|rust-actix/|ruby-sinatra/|javascript-express/|go-gin/|go-gorilla/|\.github/) ]]; then
               root_changed="true"
               echo "Root-level file changed: $file"
             fi
-            if [[ "$file" =~ ^(python-flask/|c-sharp-razor/|rust-actix/|ruby-sinatra/|javascript-express/|go-gin/|go-gorilla/) ]]; then
+            if [[ "$file" =~ ^(python-flask/|python-django/|c-sharp-razor/|rust-actix/|ruby-sinatra/|javascript-express/|go-gin/|go-gorilla/) ]]; then
               any_service_changed="true"
               echo "Service-level file changed: $file"
             fi
@@ -70,7 +83,7 @@ jobs:
     name: CI – Run All Tests
     runs-on: ubuntu-latest
     needs: check-root-changes
-    if: ${{ needs.check-root-changes.outputs.root_changed == 'true' }}
+    # if: ${{ needs.check-root-changes.outputs.root_changed == 'true' }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -107,6 +120,7 @@ jobs:
       matrix:
         service:
           - python-flask
+          - python-django
           - c-sharp-razor
           - rust-actix
           - ruby-sinatra
@@ -161,6 +175,7 @@ jobs:
       matrix:
         service:
           - python-flask
+          - python-django
           - c-sharp-razor
           - rust-actix
           - ruby-sinatra
@@ -187,6 +202,7 @@ jobs:
         with:
           files: |
             python-flask/**
+            python-django/**
             c-sharp-razor/**
             rust-actix/**
             ruby-sinatra/**

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <!--  <title th:text="${#strings.defaultString(title, 'Welcome')} | MiniTwit">Welcome | MiniTwit</title>-->
+    <title>Welcome | MiniTwit</title>
+    <link th:href="@{/styles/style.css}" rel="stylesheet" type="text/css" href="/styles/style.css" media="all"/>
+    <link th:href="@{/static/favicon.ico}" rel="icon" type="image/x-icon" href="/static/favicon.ico" />
+</head>
+<body>
+<div class="page" th:fragment="header">
+    <h1>MiniTwit</h1>
+    <div class="navigation">
+        <!--    <div th:if="${g.user != null}">-->
+        <!--      <a th:href="@{/timeline}">my timeline</a> |-->
+        <!--      <a th:href="@{/public_timeline}">public timeline</a> |-->
+        <!--      <a th:href="@{/logout}">sign out [<span th:text="${g.user.username}">Username</span>]</a>-->
+        <!--    </div>-->
+        <!--    <div th:if="${g.user == null}">-->
+        <!--      <a th:href="@{/public_timeline}">public timeline</a> |-->
+        <!--      <a th:href="@{/register}">sign up</a> |-->
+        <!--      <a th:href="@{/login}">sign in</a>-->
+        <!--    </div>-->
+            <div>
+              <a th:href="@{/public}">public timeline</a> |
+              <a th:href="@{/register}">sign up</a> |
+              <a th:href="@{/login}">sign in</a>
+            </div>
+    </div>
+    <!--  <div th:with="flashes=${get_flashed_messages()}">-->
+    <!--    <ul class="flashes" th:if="${not #lists.isEmpty(flashes)}">-->
+    <!--      <li th:each="message : ${flashes}" th:text="${message}">Flash message</li>-->
+    <!--    </ul>-->
+    <!--  </div>-->
+    <div class="body">
+        <div th:block="body">
+        </div>
+    </div>
+    <!--  <div class="footer">-->
+    <!--    MiniTwit &mdash; A Flask Application-->
+    <!--  </div>-->
+</div>
+</body>
+</html>

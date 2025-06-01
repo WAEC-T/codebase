@@ -1,0 +1,15 @@
+services:
+  rust-actix:
+    image: waect/rust-actix
+    build: .
+    container_name: rust-actix
+    ports:
+      - "5000:5000"
+    env_file:
+      - ../.env.local
+    networks:
+      - waect-network
+
+networks:
+  waect-network:
+    external: true

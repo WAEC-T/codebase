@@ -1,9 +1,0 @@
-services:
-  c-sharp-razor:
-    image: simonharwick97822/c-sharp-razor:latest
-    build: .
-    container_name: c-sharp-razor
-    ports:
-      - "5000:5000"
-    env_file:
-      - ../.env.prod

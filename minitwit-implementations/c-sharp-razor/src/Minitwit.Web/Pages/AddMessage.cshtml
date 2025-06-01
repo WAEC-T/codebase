@@ -1,0 +1,8 @@
+@page "/add_message"
+@model Minitwit.Web.Pages.MyTimelineModel
+
+@{  
+    Layout = null;
+    await Model.OnPostCreateMessage();
+    Response.Redirect($"/");
+}

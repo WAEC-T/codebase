@@ -1,0 +1,39 @@
+<% contentFor('body') %>
+<h2><%= title %></h2>
+    <% if (user) { %>
+        <% if (endpoint === 'userTimeline') { %>
+            <div class="followstatus">
+                <% if (user.user_id === profileUser.user_id) { %>
+                  This is you!
+                <% } else if (followed) { %>
+                  You are currently following this user.
+                  <a class="unfollow" href="<%="/" + profileUser.username + "/unfollow"%>">Unfollow user</a>.
+                <% } else { %>
+                  You are not yet following this user.
+                  <a class="follow" href="<%="/" + profileUser.username + "/follow"%>">Follow user</a>.
+                <% } %>
+                </div>         
+        <% } %>
+        <% if (endpoint === 'myTimeline' || endpoint === 'publicTimeline') { %>
+            <div class="twitbox">
+                <h3>What's on your mind ?</h3>
+                <form action="/add_message" method="post">
+                    <p><input type="text" name="text" size="60"><input type="submit" value="Share"></p>
+                </form>
+            </div>
+        <% } %>
+    <% } %>
+    <ul class="messages">
+        <% messages.forEach(function(message) { %>
+            <li><img src="<%= gravatarUrl(message.email, 48)   //message.email|gravatar(size=48) %>">
+                <p>
+                    <strong><a href="<%="/user/" + message.username %>">
+                            <%= message.username %>
+                        </a></strong>
+                    <%= message.text %>
+                        <small>&mdash; <%= formatDatetime(message.pub_date) %></small>
+                        <% }) %>
+                            <% if (messages.length===0) { %>
+            <li><em>There's no message so far.</em></li>
+            <% } %>
+    </ul>

@@ -1,0 +1,9 @@
+services:
+  java-spring:
+    image: minitwit_java:latest
+    build: .
+    container_name: java-spring
+    ports:
+      - "5000:5000"
+    env_file:
+      - ../.env.prod

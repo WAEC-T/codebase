@@ -1,0 +1,34 @@
+﻿@page
+@model LoginModel
+
+@{
+ViewData["Title"] = "Sign In";
+}
+
+<h2>Sign In</h2>
+
+@if (!string.IsNullOrEmpty(Model.ErrorMessage))
+{
+<div class="error">
+    <strong>Error:</strong> @Model.ErrorMessage
+</div>
+}
+
+<form method="post">
+    <dl>
+        <dt>Username:</dt>
+        <dd>
+            <input asp-for="Username" type="text" class="form-control" size="30" />
+            <span asp-validation-for="Username" class="text-danger"></span>
+        </dd>
+
+        <dt>Password:</dt>
+        <dd>
+            <input asp-for="Password" type="password" class="form-control" size="30" />
+            <span asp-validation-for="Password" class="text-danger"></span>
+        </dd>
+    </dl>
+    <div class="actions">
+        <input type="submit" class="btn btn-primary" value="Sign In" />
+    </div>
+</form>

@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link th:href="@{/styles/style.css}" rel="stylesheet" type="text/css" href="/styles/style.css" media="all"/>
+    <link th:href="@{/static/favicon.ico}" rel="icon" type="image/x-icon" href="/static/favicon.ico" />
+</head>
+<body>
+
+
+
+<!--</div>-->
+<div class="page" th:fragment="header">
+    <h1>MiniTwit</h1>
+    <div class="navigation">
+            <div th:if="${user != 'false'}">
+              <a th:href="@{/}">my timeline</a> |
+              <a th:href="@{/public}">public timeline</a> |
+              <a th:href="@{/logout}">sign out [<span th:text="${user}">Username</span>]</a>
+            </div>
+            <div th:if="${user == 'false'}">
+              <a th:href="@{/public}">public timeline</a> |
+              <a th:href="@{/register}">sign up</a> |
+              <a th:href="@{/login}">sign in</a>
+            </div>
+<!--        <div>-->
+<!--            <a th:href="@{/public}">public timeline</a> |-->
+<!--            <a th:href="@{/register}">sign up</a> |-->
+<!--            <a th:href="@{/login}">sign in</a>-->
+<!--        </div>-->
+    </div>
+    <!--  <div th:with="flashes=${get_flashed_messages()}">-->
+    <!--    <ul class="flashes" th:if="${not #lists.isEmpty(flashes)}">-->
+    <!--      <li th:each="message : ${flashes}" th:text="${message}">Flash message</li>-->
+    <!--    </ul>-->
+    <!--  </div>-->
+    <div class="body">
+        <ul class="flashes" th:if="${flashMessage}">
+            <li th:text="${flashMessage}"></li>
+        </ul>
+        <div th:if="${error}" class="error">
+            <strong>Error:</strong>
+            <span th:text="${error}"></span>
+        </div>
+        <div th:if="${public == 'true'}" class="public">
+            <h2>Public Timeline</h2>
+        </div>
+        <div th:if="${my == 'true'}" class="my">
+            <h2>My Timeline</h2>
+        </div>
+        <div th:if="${(public == 'true' || my == 'true') && user != 'false'}" class="twitbox">
+            <h3>What's on your mind <span th:text="${username}"></span>?</h3>
+            <form th:action="@{/add_message}" method="post">
+                <p>
+                    <input type="text" name="text" size="60" />
+                    <input type="submit" value="Share" />
+                </p>
+            </form>
+        </div>
+        <div th:if="${public == 'false' && user != 'false'}" class="followstatus">
+            <span th:if="${self == 'true'}">This is you!</span>
+                <span th:if="${followed == 'true' && self != 'true'}">You are currently following this user.
+                    <a class="unfollow" th:href="@{/{username}/unfollow(username=${username})}">
+                        Unfollow user
+                    </a>
+                </span>
+                    <span th:if="${followed == 'false' && self != 'true'}">
+                You are not yet following this user.
+                <a class="follow" th:href="@{/{username}/follow(username=${username})}">
+                    Follow user
+                </a>
+            </span>
+        </div>
+            <ul class="messages">
+                <li th:each="message : ${messages}" th:if="${messagesSize > 0}">
+                    <img th:src="${message.gravatar_url}" width="40" height="40"/>
+                    <p>
+                        <strong>
+                            <a th:href="@{/user/{username}(username=${message.username})}"
+                               th:text="${message.username}">
+                            </a>
+                        </strong>
+                        <span th:text="${message.text}"></span>
+                        <small>&mdash; <span th:text="${message.date_time}"></span></small><br>
+                    </p>
+                </li>
+                <li th:if="${messagesSize == 0}">
+                    <em>There's no message so far.</em>
+                </li>
+            </ul>
+
+    </div>
+    <!--  <div class="footer">-->
+    <!--    MiniTwit &mdash; A Flask Application-->
+    <!--  </div>-->
+</div>
+
+</body>
+</html>

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+    <!-- <meta http-equiv="Content-Security-Policy" content="form-action 'self'; default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; connect-src 'self'; img-src 'self'; frame-src 'none'; frame-ancestors 'none'; media-src 'none'; object-src 'none'; manifest-src 'none'; worker-src 'none'; prefetch-src 'none'; form-action 'none' always;">  -->
+<head>
+    <title th:block="title">Sign In</title>
+    <link th:href="@{/styles/style.css}" rel="stylesheet" type="text/css" href="/styles/style.css" media="all"/>
+    <link th:href="@{/static/favicon.ico}" rel="icon" type="image/x-icon" href="/static/favicon.ico" />
+</head>
+
+<body>
+<div class="page" th:fragment="header">
+    <h1>MiniTwit</h1>
+    <div class="navigation">
+        <!--    <div th:if="${g.user != null}">-->
+        <!--      <a th:href="@{/timeline}">my timeline</a> |-->
+        <!--      <a th:href="@{/public_timeline}">public timeline</a> |-->
+        <!--      <a th:href="@{/logout}">sign out [<span th:text="${g.user.username}">Username</span>]</a>-->
+        <!--    </div>-->
+        <!--    <div th:if="${g.user == null}">-->
+        <!--      <a th:href="@{/public_timeline}">public timeline</a> |-->
+        <!--      <a th:href="@{/register}">sign up</a> |-->
+        <!--      <a th:href="@{/login}">sign in</a>-->
+        <!--    </div>-->
+        <div>
+            <a th:href="@{/public}">public timeline</a> |
+            <a th:href="@{/register}">sign up</a> |
+            <a th:href="@{/login}">sign in</a>
+        </div>
+    </div>
+    <!--  <div th:with="flashes=${get_flashed_messages()}">-->
+    <!--    <ul class="flashes" th:if="${not #lists.isEmpty(flashes)}">-->
+    <!--      <li th:each="message : ${flashes}" th:text="${message}">Flash message</li>-->
+    <!--    </ul>-->
+    <!--  </div>-->
+    <div class="body">
+        <ul class="flashes"th:if="${flashMessage}">
+            <li th:text="${flashMessage}"></li>
+        </ul>
+        <h2>Sign In</h2>
+        <div th:if="${error}" class="error">
+            <strong>Error:</strong>
+            <span th:text="${error}"></span>
+        </div>
+        <form action="#" th:action="@{/login}" th:object="${login}" method="post">
+            <dl>
+                <dt>Username:</dt>
+                <dd><input type="text" name="username" size="30" th:value="${username}"/></dd>
+                <dt>Password:</dt>
+                <dd><input type="password" name="password" size="30" th:value="${password}"/></dd>
+            </dl>
+            <div class="actions">
+                <input type="submit" value="Sign In"/>
+            </div>
+        </form>
+    </div>
+
+    <!--  <div class="footer">-->
+    <!--    MiniTwit &mdash; A Flask Application-->
+    <!--  </div>-->
+</div>
+
+
+</form>
+</body>
+
+</html>

@@ -1,0 +1,18 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: go-gin
+    env_file:
+      - ../.env.local
+    ports:
+      - "5000:5000"
+    networks:
+      - waect-network
+
+networks:
+  waect-network:
+    name: waect-network
+    driver: bridge
+    external: true

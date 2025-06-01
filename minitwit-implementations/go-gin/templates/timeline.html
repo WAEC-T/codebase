@@ -1,0 +1,42 @@
+{{/* layout.html should be structured to define a "main" block where this
+content will be inserted */}} {{template "layout.html" .}} {{define "Title"}}
+{{if eq .Endpoint "public_timeline"}} Public Timeline {{else if eq .Endpoint
+"user_timeline"}} {{.ProfileUserName}}'s Timeline {{else}} My Timeline {{end}}
+{{end}} {{define "TimelineBody"}}
+<h2>{{template "Title" .}}</h2>
+{{if .Error}}
+<div class="error"><strong>Error:</strong> {{ .Error }}</div>
+{{end}} {{if .UserID}} {{if eq .Endpoint "user_timeline"}}
+<div class="followstatus">
+	{{if eq .UserID .ProfileUser}} This is you! {{else if .Followed}} You are
+	currently following this user.
+	<a class="unfollow" href="/{{.ProfileUserName}}/unfollow">Unfollow user</a>.
+	{{else}} You are not yet following this user.
+	<a class="follow" href="/{{.ProfileUserName}}/follow">Follow user</a>. {{end}}
+</div>
+{{else if or (eq .Endpoint "my_timeline") (eq .Endpoint "public_timeline")}}
+<div class="twitbox">
+	<h3>What's on your mind {{.UserName}}?</h3>
+	<form action="/add_message" method="post">
+		<p>
+			<input type="text" name="text" size="60" value="{{ .request.form.text }}" /><!--
+					--><input type="submit" value="Share" />
+		</p>
+	</form>
+</div>
+{{end}} {{end}}
+<ul class="messages">
+	{{range .Messages}}
+	<li>
+		<img src="{{ .Gravatar }}" />
+		<p>
+			<strong><a href="{{.Profile_link}}">{{.Username}}</a></strong>
+			{{.Text}}
+			<small>&mdash; <span class="pub-date"> {{.PubDate}}</span></small>
+		</p>
+	</li>
+	{{else}}
+	<li><em>There's no message so far.</em></li>
+	{{end}}
+</ul>
+{{end}}

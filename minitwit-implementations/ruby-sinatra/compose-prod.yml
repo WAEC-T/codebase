@@ -1,0 +1,9 @@
+services:
+  ruby-sinatra:
+    image: simonharwick97822/ruby-sinatra:latest
+    build: .
+    container_name: ruby-sinatra
+    ports:
+      - "5000:5000"
+    env_file:
+      - ../.env.prod

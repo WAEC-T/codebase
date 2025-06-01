@@ -1,0 +1,44 @@
+@page "/public"
+@using Minitwit.Core.Entities
+@using Minitwit.Web.Helpers
+@using Minitwit.Web.Pages.Shared
+@inject SignInManager<Author> SignInManager
+
+@model Minitwit.Web.Pages.PublicTimelineModel
+
+@{
+ViewData["Title"] = "Public Timeline";
+Layout = "Shared/_Layout";
+}
+
+<h2>Public Timeline</h2>
+
+@if (SignInManager.IsSignedIn(User))
+{
+    <div class="twitbox"> 
+        @await Html.PartialAsync("Shared/_MessageBox", new MessageBoxModel { MessageText = "" })
+    </div>
+}
+
+@if (Model.Messages?.Any() == true)
+{
+<ul class="messages">
+    @foreach (var message in Model.Messages)
+    {
+    <li>
+        <img src="@Gravatar.GetGravatarUrl(message.User.Email)" alt="User Avatar" />
+        <p>
+            <strong>
+                <a href="/user/@message.User.Username">@message.User.Username</a>
+            </strong>
+            @message.Message
+            <small>&mdash; @message.Timestamp.ToString("yyyy-MM-dd @ HH:mm")</small>
+        </p>
+    </li>
+    }
+</ul>
+}
+else
+{
+<em>There's no message so far.</em>
+}

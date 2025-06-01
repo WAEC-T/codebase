@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Welcome MiniTwit</title>
+  <link rel="stylesheet" type="text/css" href="/static/style.css">
+</head>
+
+<body>
+  <div class="page">
+    <h1>MiniTwit</h1>
+    <div class="navigation">
+      {{if .UserID}}
+      <a href="{{url_for "my_timeline" "" }}">my timeline</a> |
+      <a href="{{url_for "public_timeline" "" }}">public timeline</a> |
+      <a href="{{url_for "logout" "" }}">sign out [{{.User}}]</a> 
+      {{else}}
+      <a href="{{url_for "public_timeline" "" }}">public timeline</a> |
+      <a href="{{url_for "register" "" }}">sign up</a> |
+      <a href="{{url_for "login" "" }}">sign in</a> 
+      {{end}}
+    </div>
+
+    {{$user := .User}}
+    {{$following := .Followed}}
+
+    {{if eq .Endpoint "user_timeline"}}
+      <h2>{{.ProfileUser.Username}}'s Timeline</h2>
+      <div class="followstatus">
+          {{if eq .UserID .ProfileUser.UserID}} 
+              This is you! 
+          {{else if .Followed}} 
+              You are currently following this user.
+              <a class="unfollow" href="/{{.ProfileUser.Username}}/unfollow">Unfollow user</a>.
+          {{else}}
+              You are not yet following this user.
+              <a class="follow" href="/{{.ProfileUser.Username}}/follow">Follow user</a>. 
+          {{end}}
+      </div>
+    {{else if eq .Endpoint "public_timeline"}}
+    <h2>Public Timeline</h2>
+    <div class="twitbox">
+      <h3>What's on your mind, {{.User}}?</h3>
+      <form action="{{url_for "add_message" "" }}" method="POST">
+        <p>
+          <input type="text" name="text" size="60">
+          <input type="submit" value="Share">
+        </p>
+      </form>
+    </div>
+    {{else if eq .Endpoint "my_timeline"}}
+    <h2>My Timeline</h2>
+    <div class="twitbox">
+      <h3>What's on your mind, {{.User}}?</h3>
+      <form action="{{url_for "add_message" "" }}" method="POST">
+        <p>
+          <input type="text" name="text" size="60">
+          <input type="submit" value="Share">
+        </p>
+      </form>
+    </div>
+    {{end}}
+
+
+    {{if .FlashMessages}}
+    <div class="flashes">
+      {{range .FlashMessages}}
+      <div>{{.}}</div>
+      {{end}}
+    </div>
+    {{end}}
+    <ul class="messages">
+      {{if .Messages}}
+      {{range $fields := .Messages}}
+      <li>
+        <img src="{{getavatar $fields.Email 48}}" alt="{{$fields.Username}}'s avatar">
+        <strong><a href="{{url_for "user_timeline" (formatUsernameUrl $fields.Username) }}">{{$fields.Username}}</a></strong>
+        {{$fields.Text}}
+        <small>&mdash; {{gettimestamp $fields.PubDate}}</small>
+      </li>
+      {{end}}
+      {{else}}
+      <li><em>There's no message so far.</em></li>
+      {{end}}
+    </ul>
+  <div class="footer">
+    MiniTwit Go-Gorilla Application
+  </div>
+  </div>
+  </div>
+</body>
+
+</html>

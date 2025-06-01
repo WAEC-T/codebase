@@ -1,6 +1,0 @@
-require: 
-  - rubocop-packaging
-  - rubocop-rake
-Metrics/BlockLength:
-  Exclude:
-    - 'src/main.rb'

@@ -1,0 +1,55 @@
+{% extends "layout.html" %}
+{% block title %}
+  {% if request_endpoint == "public_timeline" %}
+    Public Timeline
+  {% else if request_endpoint == "user_timeline" %}
+    {{ profile_user.as_ref().unwrap().username }}'s Timeline
+  {% else %}
+    My Timeline
+  {% endif %}
+{% endblock %}
+{% block body %}
+  <h2>{{ title }}</h2>
+  {% if !error.is_empty() %}<div class=error><strong>Error:</strong> {{ error }}</div>{% endif %}
+  {% if user.is_some()%}
+    {% if request_endpoint == "user_timeline" %}
+      <div class=followstatus>
+      {% if user.as_ref().unwrap().user_id == profile_user.as_ref().unwrap().user_id %}
+        This is you!
+      {% else if followed.as_ref().unwrap() %}
+        You are currently following this user.
+        <a class=unfollow href="/{{profile_user.as_ref().unwrap().username}}/unfollow">Unfollow user</a>.
+      {% else %}
+        You are not yet following this user.
+        <a class=follow href="/{{profile_user.as_ref().unwrap().username}}/follow">Follow user</a>.
+      {% endif %}
+      </div>
+    {% else if request_endpoint == "timeline" %}
+      <div class=twitbox>
+        <h3>What's on your mind {{ user.as_ref().unwrap().username }}?</h3>
+        <form action="/add_message" method=post>
+          <p><input type=text name=text size=60><!--
+          --><input type=submit value="Share">
+        </form>
+      </div>
+    {% else if request_endpoint == "public_timeline" %}
+      <div class=twitbox>
+        <h3>What's on your mind {{ user.as_ref().unwrap().username }}?</h3>
+        <form action="/add_message" method=post>
+          <p><input type=text name=text size=60><!--
+          --><input type=submit value="Share">
+        </form>
+      </div>
+    {% endif %}
+  {% endif %}
+  <ul class=messages>
+  {% for message in messages %}
+    <li><img src="{{ message.gravatar_url }}"><p>
+      <strong><a href="/user/{{ message.username }}">{{ message.username }}</a></strong>
+      {{ message.text }}
+      <small>&mdash; {{ message.pub_date }}</small>
+  {% else %}
+    <li><em>There's no message so far.</em>
+  {% endfor %}
+  </ul>
+{% endblock %}

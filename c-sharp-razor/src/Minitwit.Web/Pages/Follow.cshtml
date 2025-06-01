@@ -1,9 +1,0 @@
-@page "/{author}/follow"
-@model Minitwit.Razor.Pages.UserTimelineModel
-
-@{
-    Layout = null;
-    await Model.OnGetFollow(Model.TimelineAuthor?.UserName ?? "");
-    Response.Redirect($"/user/{Model.TimelineAuthor?.UserName}");
-}
-

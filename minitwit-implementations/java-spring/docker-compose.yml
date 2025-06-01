@@ -1,0 +1,17 @@
+version: '3.7'
+services:
+  web:
+    image: magmose1/minitwitimage:latest
+    deploy:
+      replicas: 3
+      update_config:
+        parallelism: 1
+        delay: 10s
+      restart_policy:
+        condition: any
+    ports:
+      - "5000:8080"
+    networks:
+      - webnet
+networks:
+  webnet:

@@ -1,0 +1,9 @@
+.DS_Store
+.env
+
+# ignore package-lock.json
+*package-lock.json
+*bun.lockb
+
+# Node Project files to ignore
+node_modules/

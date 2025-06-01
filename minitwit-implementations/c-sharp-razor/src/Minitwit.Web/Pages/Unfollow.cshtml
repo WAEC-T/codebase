@@ -1,0 +1,8 @@
+@page "/{author}/unfollow"
+@model Minitwit.Razor.Pages.UserTimelineModel
+
+@{
+    Layout = null;
+    await Model.OnGetUnfollow(Model.TimelineAuthor.UserName ?? "");
+    Response.Redirect($"/user/{Model.TimelineAuthor.UserName}");
+}

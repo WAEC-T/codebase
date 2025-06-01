@@ -1,0 +1,30 @@
+<!doctype html>
+<title>{% block title %}Welcome{% endblock %} | waect-rust</title>
+<link rel=stylesheet type=text/css href="../static/style.css">
+<div class=page>
+  <h1>MiniTwit</h1>
+  <div class=navigation>
+  {% if user.is_some() %}
+    <a href="/">my timeline</a> |
+    <a href="/public">public timeline</a> |
+    <a href="/logout">sign out [{{ user.as_ref().unwrap().username }}]</a>
+  {% else %}
+    <a href="/public">public timeline</a> |
+    <a href="/register">sign up</a> |
+    <a href="/login">sign in</a>
+  {% endif %}
+  </div>
+    {% if !flashes.is_empty() %}
+      <ul class=flashes>
+      {% for message in flashes %}
+        <li>{{ message }}
+      {% endfor %}
+      </ul>
+    {% endif %}
+  <div class=body>
+  {% block body %}{% endblock %}
+  </div>
+  <div class=footer>
+    MiniTwit rust-actix Application 
+  </div>
+</div>
