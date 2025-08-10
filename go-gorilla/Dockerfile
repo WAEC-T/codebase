@@ -1,39 +1,25 @@
-# Step 1: Build the Go binary
-FROM alpine:edge as BUILDER
+FROM golang:1.23.1-bullseye AS builder
 
-# Set the working directory inside the container
 WORKDIR /app
 
-# Install Go
-RUN apk add --no-cache go
-
-# Copy the Go Modules manifests
 COPY go.mod go.sum ./
+RUN go mod download
 
-# Download Go modules
-RUN go mod download && go mod verify
-
-# Copy the source code into the container
 COPY . .
 
-# Build the Go application
 RUN go build -v -o /minitwit/app go-gorilla/src
 
-# Step 2: Run the Go binary
-FROM alpine:edge
+FROM debian:bullseye-slim
 
-# Set the working directory inside the container
 WORKDIR /minitwit
 
-RUN apk add --no-cache ca-certificates
+RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
 
-# Copy the Go binary and required files from the builder stage
-COPY --from=BUILDER /minitwit/app /minitwit/app
+COPY --from=builder /minitwit/app /minitwit/app
 COPY ./templates/ /minitwit/templates/
 COPY ./static/ /minitwit/static/
 
-# Expose the port the web server will run on
-EXPOSE 5000
+EXPOSE 5001
 
-# Run the Go binary
 CMD ["/minitwit/app"]
