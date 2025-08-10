@@ -44,7 +44,7 @@ func main() {
 	*----------------------*/
 	r := mux.NewRouter()
 	routes.SetRouteHandlers(r)
-	err = http.ListenAndServe(":5000", r)
+	err = http.ListenAndServe(":5001", r)
 	if err != nil {
 		log.Fatalf("Failed to start server: %v", err)
 	}
