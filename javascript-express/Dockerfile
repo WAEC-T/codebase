@@ -1,8 +1,8 @@
-FROM alpine:edge
+FROM debian:bullseye-slim
 
-RUN apk add --no-cache curl bash gcc libstdc++ libgcc && curl -fsSL https://bun.sh/install | bash
-
-ENV PATH="/root/.bun/bin:${PATH}"
+RUN apt-get update && apt-get install -y curl 
+RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash -
+RUN apt-get install -y nodejs
 
 WORKDIR /waect-javascript-express
 
@@ -10,10 +10,10 @@ ENV RUN_TYPE=dev
 
 COPY package.json ./
 
-RUN bun install
+RUN npm install
 
 COPY ./src .
 
 EXPOSE 5000
 
-CMD ["bun", "app.js"]
+CMD ["node", "app.js"]
